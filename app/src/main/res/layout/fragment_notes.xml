@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/notes_fragment_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Search bar (non-functional for now) -->
+    <EditText
+        android:id="@+id/search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="26dp"
+        android:backgroundTint="?attr/colorPrimary"
+        android:drawablePadding="8dp"
+        android:hint="@string/search"
+        android:paddingVertical="8dp"
+        android:singleLine="true"
+        android:textColorHint="@android:color/darker_gray" />
+
+
+    <!-- Tags container with plus button on the left -->
+    <LinearLayout
+        android:id="@+id/tags_container_outer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp">
+
+        <ImageButton
+            android:id="@+id/btn_add_tag"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Add Tag"
+            android:src="@android:drawable/ic_input_add"
+            app:tint="?attr/colorPrimary" />
+
+        <HorizontalScrollView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fillViewport="false"
+            android:scrollbars="horizontal">
+
+            <LinearLayout
+                android:id="@+id/tags_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+        </HorizontalScrollView>
+    </LinearLayout>
+
+
+    <!-- RecyclerView for notes -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_notes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Floating action button remains at bottom end -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:contentDescription="Add"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
+    <TextView
+        android:id="@+id/tv_no_matches"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No matching notes found"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:textColor="@android:color/darker_gray"
+        android:padding="16dp" />
+
+
+</LinearLayout>
+

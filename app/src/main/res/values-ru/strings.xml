@@ -1,0 +1,63 @@
+<resources>
+
+    <!-- App Info -->
+    <string name="app_name">Sky Diary</string>
+    <string name="welcome_message">Добро пожаловать!</string>
+    <string name="get_started">Начать</string>
+
+    <!-- Navigation Menu -->
+    <string name="menu_home">Главная</string>
+    <string name="menu_calendar">Календарь</string>
+    <string name="menu_notes">Записи</string>
+    <string name="menu_settings">Настройки</string>
+
+    <!-- Notes -->
+    <string name="add_note">Добавить запись</string>
+    <string name="enter_note_name">Название записи (необязательно)</string>
+    <string name="write_note">Введите свою запись сюда</string>
+    <string name="note_cannot_be_empty">Запись не может быть пустой</string>
+    <string name="note_saved">Запись сохранена</string>
+    <string name="note_from">"Запись от "</string>
+    <string name="note_not_found">Запись не найдена</string>
+    <string name="note_deleted">Запись удалена</string>
+    <string name="add_picture">Добавить фото</string>
+    <string name="search">Поиск</string>
+
+    <!-- Tags -->
+    <string name="add_tag">Добавить тег</string>
+    <string name="edit_tags">Редактировать теги</string>
+    <string name="no_tags_yet">Тегов пока нет</string>
+    <string name="tags_saved">Теги сохранены</string>
+    <string name="manage_tag">Управлять тегом</string>
+    <string name="enter_new_tag">Ввести новый тег</string>
+    <string name="rename_tag">Переименовать тег</string>
+    <string name="delete_tag">Удалить тег</string>
+    <string name="delete_tag_confirmation">Вы уверены что хотите удалить данный тег?</string>
+    <string name="tag_cannot_be_empty">Название тега не может быть пустым</string>
+    <string name="tag_already_exists">Тег уже существует</string>
+
+    <!-- Date and Time -->
+    <string name="change_date">Изменить дату</string>
+    <string name="date_changed">Дата изменена</string>
+    <string name="choose_date_to_see_notes">Выберите дату чтобы увидеть ваши записи</string>
+    <string name="no_notes_added_on_day">В этот день не было добавлено записей</string>
+
+    <!-- Confirmation dialogs -->
+    <string name="confirm_save">Подтвердить сохранение</string>
+    <string name="confirm_save_message">Вы уверены что хотите сохранить изменения?</string>
+    <string name="confirm_delete">Подтвердить удаление</string>
+    <string name="confirm_delete_message">Вы уверены что хотите удалить данную запись? Это действие не может быть отменено.</string>
+
+    <!-- Shared Labels -->
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="save_changes">Сохранить изменения</string>
+    <string name="cancel">Отменить</string>
+    <string name="rename">Переименовать</string>
+    <string name="delete">Удалить</string>
+
+    <!-- Settings -->
+    <string name="light_theme">Светлая тема</string>
+    <string name="dark_theme">Чёрная тема</string>
+
+</resources>

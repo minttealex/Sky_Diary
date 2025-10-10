@@ -115,7 +115,7 @@ public class AddNoteFragment extends Fragment {
 
         if (name.isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-            name = getString(R.string.note_from) + sdf.format(selectedDate.getTime());
+            name = getString(R.string.note_from) + " " + sdf.format(selectedDate.getTime());
         }
 
         Note newNote = new Note(name, text, selectedDate.getTimeInMillis(), new ArrayList<>(selectedTags));
@@ -135,13 +135,11 @@ public class AddNoteFragment extends Fragment {
         fragment.setTagEditListener(tags -> {
             selectedTags.clear();
             selectedTags.addAll(tags);
-            Toast.makeText(requireContext(), getString(R.string.tags_saved), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Tags updated: " + tags.size() + " selected", Toast.LENGTH_SHORT).show();
         });
         fragment.show(getParentFragmentManager(), "TagEditFragment");
     }
 
-
 }
-
 
 

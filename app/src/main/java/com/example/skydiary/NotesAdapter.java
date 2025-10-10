@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,13 +24,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
     public NotesAdapter(List<Note> notes, OnItemClickListener listener) {
-        this.notes = notes;
+        this.notes = notes != null ? notes : new ArrayList<>();
         this.listener = listener;
     }
 
-    // New method to update notes data and refresh the view
     public void updateNotes(List<Note> newNotes) {
-        this.notes = newNotes;
+        this.notes = newNotes != null ? newNotes : new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -46,7 +46,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         Note note = notes.get(position);
         holder.noteName.setText(note.getName());
         holder.noteDate.setText(dateFormat.format(note.getTimestamp()));
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(note));
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(note);
+            }
+        });
     }
 
     @Override
@@ -67,10 +71,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
 
     public void updateList(List<Note> newNotes) {
         this.notes.clear();
-        this.notes.addAll(newNotes);
+        if (newNotes != null) {
+            this.notes.addAll(newNotes);
+        }
         notifyDataSetChanged();
     }
-
 }
-
 

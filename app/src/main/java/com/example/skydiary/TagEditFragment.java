@@ -28,6 +28,11 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
     private TagEditListener listener;
     private List<String> allTags;
     private List<String> selectedTags;
+    private List<CheckBox> checkBoxes = new ArrayList<>();
+    private LinearLayout tagsLayout;
+    private android.widget.TextView noTagsText;
+    private List<String> currentTags;
+    private NoteStorage noteStorage;
 
     public static TagEditFragment newInstance(ArrayList<String> allTags, ArrayList<String> selectedTags) {
         TagEditFragment fragment = new TagEditFragment();
@@ -56,6 +61,7 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         int paddingPx = (int) (16 * getResources().getDisplayMetrics().density);
         container.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
 
+        // Add tag button
         ImageButton btnAddTag = new ImageButton(requireContext());
         btnAddTag.setImageResource(android.R.drawable.ic_input_add);
         btnAddTag.setBackgroundColor(0x00000000); // transparent background
@@ -73,98 +79,28 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         btnAddTag.setLayoutParams(params);
         container.addView(btnAddTag);
 
+        // Scrollable tags container
         ScrollView scrollView = new ScrollView(requireContext());
-        LinearLayout tagsLayout = new LinearLayout(requireContext());
+        tagsLayout = new LinearLayout(requireContext());
         tagsLayout.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(tagsLayout);
         container.addView(scrollView, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 (int) (200 * getResources().getDisplayMetrics().density)));
 
-        android.widget.TextView noTagsText = new android.widget.TextView(requireContext());
+        // No tags message
+        noTagsText = new android.widget.TextView(requireContext());
         noTagsText.setText(getString(R.string.no_tags_yet));
-        noTagsText.setVisibility(allTags.isEmpty() ? View.VISIBLE : View.GONE);
         tagsLayout.addView(noTagsText);
 
-        List<CheckBox> checkBoxes = new ArrayList<>();
+        // Current tags list (we'll work with a copy)
+        currentTags = new ArrayList<>(allTags);
+        noteStorage = NoteStorage.getInstance(requireContext());
 
-        // We'll keep track of all current tags here
-        List<String> currentTags = new ArrayList<>(allTags);
-        NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+        // Initial refresh
+        refreshTags();
 
-        final Runnable[] refreshTags = new Runnable[1];
-
-        refreshTags[0] = () -> {
-            tagsLayout.removeAllViews();
-            if (currentTags.isEmpty()) {
-                noTagsText.setVisibility(View.VISIBLE);
-                tagsLayout.addView(noTagsText);
-            } else {
-                noTagsText.setVisibility(View.GONE);
-                checkBoxes.clear();
-                for (int i = 0; i < currentTags.size(); i++) {
-                    String tag = currentTags.get(i);
-                    CheckBox cb = new CheckBox(requireContext());
-                    cb.setText(tag);
-                    cb.setChecked(selectedTags.contains(tag));
-                    int index = i;
-                    cb.setOnLongClickListener(v -> {
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle(getString(R.string.manage_tag))
-                                .setItems(new CharSequence[]{getString(R.string.rename), getString(R.string.delete)}, (dialog, which) -> {
-                                    if (which == 0) {
-                                        EditText input = new EditText(requireContext());
-                                        input.setInputType(InputType.TYPE_CLASS_TEXT);
-                                        input.setText(tag);
-                                        new AlertDialog.Builder(requireContext())
-                                                .setTitle(getString(R.string.rename_tag))
-                                                .setView(input)
-                                                .setPositiveButton(getString(R.string.rename), (renameDialog, renameWhich) -> {
-                                                    String newName = input.getText().toString().trim();
-                                                    if (newName.isEmpty()) {
-                                                        Toast.makeText(requireContext(), getString(R.string.tag_cannot_be_empty), Toast.LENGTH_SHORT).show();
-                                                        return;
-                                                    }
-                                                    if (currentTags.contains(newName)) {
-                                                        Toast.makeText(requireContext(), getString(R.string.tag_already_exists), Toast.LENGTH_SHORT).show();
-                                                        return;
-                                                    }
-                                                    // Rename globally in NoteStorage
-                                                    noteStorage.renameTag(tag, newName);
-                                                    currentTags.set(index, newName);
-                                                    if (selectedTags.contains(tag)) {
-                                                        selectedTags.remove(tag);
-                                                        selectedTags.add(newName);
-                                                    }
-                                                    refreshTags[0].run();
-                                                })
-                                                .setNegativeButton(getString(R.string.cancel), null)
-                                                .show();
-                                    } else if (which == 1) {
-                                        new AlertDialog.Builder(requireContext())
-                                                .setTitle(getString(R.string.delete_tag))
-                                                .setMessage(getString(R.string.delete_tag_confirmation))
-                                                .setPositiveButton(getString(R.string.delete), (delDialog, delWhich) -> {
-                                                    noteStorage.deleteTag(tag);
-                                                    currentTags.remove(index);
-                                                    selectedTags.remove(tag);
-                                                    refreshTags[0].run();
-                                                })
-                                                .setNegativeButton(getString(R.string.cancel), null)
-                                                .show();
-                                    }
-                                })
-                                .show();
-                        return true;
-                    });
-                    tagsLayout.addView(cb);
-                    checkBoxes.add(cb);
-                }
-            }
-        };
-
-        refreshTags[0].run();
-
+        // Add new tag
         btnAddTag.setOnClickListener(v -> {
             EditText input = new EditText(requireContext());
             input.setHint(getString(R.string.enter_new_tag));
@@ -182,9 +118,8 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
                             return;
                         }
                         currentTags.add(newTag);
-                        selectedTags.add(newTag);
                         noteStorage.addTag(newTag); // Persist globally
-                        refreshTags[0].run();
+                        refreshTags();
                     })
                     .setNegativeButton(getString(R.string.cancel), null)
                     .show();
@@ -193,6 +128,14 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         builder.setView(container);
 
         builder.setPositiveButton(getString(R.string.save_changes), (dialog, which) -> {
+            // Collect all selected tags from checkboxes
+            selectedTags.clear();
+            for (CheckBox cb : checkBoxes) {
+                if (cb.isChecked()) {
+                    selectedTags.add(cb.getText().toString());
+                }
+            }
+
             if (listener != null) {
                 listener.onTagsSelected(new ArrayList<>(selectedTags));
             }
@@ -201,5 +144,81 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         builder.setNegativeButton(getString(R.string.cancel), null);
 
         return builder.create();
+    }
+
+    private void refreshTags() {
+        tagsLayout.removeAllViews();
+        checkBoxes.clear();
+
+        if (currentTags.isEmpty()) {
+            noTagsText.setVisibility(View.VISIBLE);
+            tagsLayout.addView(noTagsText);
+        } else {
+            noTagsText.setVisibility(View.GONE);
+            for (int i = 0; i < currentTags.size(); i++) {
+                String tag = currentTags.get(i);
+                CheckBox cb = new CheckBox(requireContext());
+                cb.setText(tag);
+                cb.setChecked(selectedTags.contains(tag));
+                final int index = i;
+
+                // Store checkbox for later retrieval
+                checkBoxes.add(cb);
+
+                // Long click for tag management
+                cb.setOnLongClickListener(v -> {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.manage_tag))
+                            .setItems(new CharSequence[]{getString(R.string.rename), getString(R.string.delete)}, (dialog, which) -> {
+                                if (which == 0) {
+                                    // Rename tag
+                                    EditText input = new EditText(requireContext());
+                                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+                                    input.setText(tag);
+                                    new AlertDialog.Builder(requireContext())
+                                            .setTitle(getString(R.string.rename_tag))
+                                            .setView(input)
+                                            .setPositiveButton(getString(R.string.rename), (renameDialog, renameWhich) -> {
+                                                String newName = input.getText().toString().trim();
+                                                if (newName.isEmpty()) {
+                                                    Toast.makeText(requireContext(), getString(R.string.tag_cannot_be_empty), Toast.LENGTH_SHORT).show();
+                                                    return;
+                                                }
+                                                if (currentTags.contains(newName)) {
+                                                    Toast.makeText(requireContext(), getString(R.string.tag_already_exists), Toast.LENGTH_SHORT).show();
+                                                    return;
+                                                }
+                                                // Rename globally in NoteStorage
+                                                noteStorage.renameTag(tag, newName);
+                                                currentTags.set(index, newName);
+                                                if (selectedTags.contains(tag)) {
+                                                    selectedTags.remove(tag);
+                                                    selectedTags.add(newName);
+                                                }
+                                                refreshTags();
+                                            })
+                                            .setNegativeButton(getString(R.string.cancel), null)
+                                            .show();
+                                } else if (which == 1) {
+                                    // Delete tag
+                                    new AlertDialog.Builder(requireContext())
+                                            .setTitle(getString(R.string.delete_tag))
+                                            .setMessage(getString(R.string.delete_tag_confirmation))
+                                            .setPositiveButton(getString(R.string.delete), (delDialog, delWhich) -> {
+                                                noteStorage.deleteTag(tag);
+                                                currentTags.remove(index);
+                                                selectedTags.remove(tag);
+                                                refreshTags();
+                                            })
+                                            .setNegativeButton(getString(R.string.cancel), null)
+                                            .show();
+                                }
+                            })
+                            .show();
+                    return true;
+                });
+                tagsLayout.addView(cb);
+            }
+        }
     }
 }

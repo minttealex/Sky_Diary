@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -12,20 +13,22 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class NoteStorage {
     private static final String PREFS_NAME = "notes_prefs";
     private static final String NOTES_KEY = "notes";
+    private static final String MIGRATION_KEY = "migration_done";
 
     private static NoteStorage instance;
     private SharedPreferences prefs;
     private Gson gson;
     private static final String TAGS_KEY = "tags";
 
-
     private NoteStorage(Context context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        gson = new Gson();
+        gson = new GsonBuilder().create();
+        ensureMigration();
     }
 
     public static synchronized NoteStorage getInstance(Context context) {
@@ -35,10 +38,47 @@ public class NoteStorage {
         return instance;
     }
 
+    private void ensureMigration() {
+        boolean migrationDone = prefs.getBoolean(MIGRATION_KEY, false);
+        if (!migrationDone) {
+            migrateNotes();
+            prefs.edit().putBoolean(MIGRATION_KEY, true).apply();
+        }
+    }
+
+    private void migrateNotes() {
+        String json = prefs.getString(NOTES_KEY, "[]");
+        Type listType = new TypeToken<List<OldNote>>() {}.getType();
+        List<OldNote> oldNotes = gson.fromJson(json, listType);
+
+        if (oldNotes != null && !oldNotes.isEmpty()) {
+            List<Note> newNotes = new ArrayList<>();
+            for (OldNote oldNote : oldNotes) {
+                Note newNote = new Note();
+                newNote.setId(UUID.randomUUID().toString());
+                newNote.setName(oldNote.name);
+                newNote.setText(oldNote.text);
+                newNote.setTimestamp(oldNote.timestamp);
+                newNote.setTags(oldNote.tags != null ? oldNote.tags : new ArrayList<>());
+                newNotes.add(newNote);
+            }
+            saveNotes(newNotes);
+        }
+    }
+
+    // Helper class to deserialize old note format
+    private static class OldNote {
+        private String name;
+        private String text;
+        private long timestamp;
+        private List<String> tags;
+    }
+
     public List<Note> getNotes() {
         String json = prefs.getString(NOTES_KEY, "[]");
         Type listType = new TypeToken<List<Note>>() {}.getType();
-        return gson.fromJson(json, listType);
+        List<Note> notes = gson.fromJson(json, listType);
+        return notes != null ? notes : new ArrayList<>();
     }
 
     public void addNote(Note note) {
@@ -51,7 +91,6 @@ public class NoteStorage {
         String json = gson.toJson(notes);
         prefs.edit().putString(NOTES_KEY, json).apply();
     }
-
 
     public List<Note> getNotesByDate(long dateStartMs, long dateEndMs) {
         List<Note> filtered = new ArrayList<>();
@@ -69,7 +108,6 @@ public class NoteStorage {
         Calendar calendar = Calendar.getInstance();
         for (Note note : getNotes()) {
             calendar.setTimeInMillis(note.getTimestamp());
-            // Normalize date (clear time fields)
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
@@ -82,13 +120,12 @@ public class NoteStorage {
     public void updateNote(Note currentNote) {
         List<Note> notes = getNotes();
         for (int i = 0; i < notes.size(); i++) {
-            if (notes.get(i).getTimestamp() == currentNote.getTimestamp()) {
+            if (notes.get(i).getId().equals(currentNote.getId())) {
                 notes.set(i, currentNote);
                 saveNotes(notes);
                 return;
             }
         }
-        // If note not found, add it
         addNote(currentNote);
     }
 
@@ -101,7 +138,6 @@ public class NoteStorage {
             }
         }
 
-        // Load saved tags from prefs (union with tags from notes)
         Set<String> savedTags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
         if (savedTags != null) {
             tags.addAll(savedTags);
@@ -109,48 +145,84 @@ public class NoteStorage {
         return tags;
     }
 
-    // Add a new tag globally and persist
     public void addTag(String newTag) {
         if (newTag == null || newTag.trim().isEmpty()) return;
         Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
-        if (tags == null) tags = new HashSet<>();
-        if (tags.add(newTag)) {
-            prefs.edit().putStringSet(TAGS_KEY, tags).apply();
+        Set<String> newTags = new HashSet<>(tags); // Create a copy to modify
+        if (newTags.add(newTag.trim())) {
+            prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
         }
     }
 
-    // Delete tag
+    // Delete tag from both global tags and from all notes
     public void deleteTag(String tag) {
         if (tag == null) return;
-        Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
-        if (tags != null && tags.remove(tag.trim())) {
-            prefs.edit().putStringSet(TAGS_KEY, tags).apply();
-        }
-    }
 
-    // Rename tag
-    public void renameTag(String oldTag, String newTag) {
-        if (oldTag == null || newTag == null || newTag.trim().isEmpty()) return;
+        // Remove from global tags
         Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
-        if (tags != null) {
-            boolean changed = false;
-            if (tags.remove(oldTag.trim())) changed = true;
-            if (tags.add(newTag.trim())) changed = true;
-            if (changed) {
-                prefs.edit().putStringSet(TAGS_KEY, tags).apply();
+        Set<String> newTags = new HashSet<>(tags); // Create a copy to modify
+        if (newTags.remove(tag.trim())) {
+            prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
+        }
+
+        // Remove from all notes
+        List<Note> notes = getNotes();
+        boolean notesUpdated = false;
+        for (Note note : notes) {
+            if (note.getTags() != null && note.getTags().contains(tag)) {
+                note.getTags().remove(tag);
+                notesUpdated = true;
             }
         }
+        if (notesUpdated) {
+            saveNotes(notes);
+        }
     }
 
+    public void renameTag(String oldTag, String newTag) {
+        if (oldTag == null || newTag == null || newTag.trim().isEmpty()) return;
+
+        // Update global tags
+        Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
+        Set<String> newTags = new HashSet<>(tags); // Create a copy to modify
+        if (newTags.remove(oldTag.trim())) {
+            newTags.add(newTag.trim());
+            prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
+        }
+
+        // Update all notes
+        List<Note> notes = getNotes();
+        boolean notesUpdated = false;
+        for (Note note : notes) {
+            if (note.getTags() != null && note.getTags().contains(oldTag)) {
+                note.getTags().remove(oldTag);
+                note.getTags().add(newTag);
+                notesUpdated = true;
+            }
+        }
+        if (notesUpdated) {
+            saveNotes(notes);
+        }
+    }
 
     public void deleteNote(Note note) {
         if (note == null) return;
         List<Note> notes = getNotes();
-        boolean removed = notes.removeIf(n -> n.getTimestamp() == note.getTimestamp());
+        boolean removed = notes.removeIf(n -> n.getId().equals(note.getId()));
         if (removed) {
             saveNotes(notes);
         }
     }
 
+    public Note getNoteById(String noteId) {
+        if (noteId == null) return null;
+        List<Note> notes = getNotes();
+        for (Note note : notes) {
+            if (noteId.equals(note.getId())) {
+                return note;
+            }
+        }
+        return null;
+    }
 }
 

@@ -29,7 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class NoteDetailFragment extends Fragment {
 
-    private static final String ARG_NOTE_TIMESTAMP = "note_timestamp";
+    private static final String ARG_NOTE_ID = "note_id";
 
     private EditText editNoteName;
     private EditText editNoteText;
@@ -38,11 +38,12 @@ public class NoteDetailFragment extends Fragment {
 
     private Note currentNote;
     private final Calendar selectedDate = Calendar.getInstance();
+    private final List<String> selectedTags = new ArrayList<>();
 
-    public static NoteDetailFragment newInstance(long timestamp) {
+    public static NoteDetailFragment newInstance(String noteId) {
         NoteDetailFragment fragment = new NoteDetailFragment();
         Bundle args = new Bundle();
-        args.putLong(ARG_NOTE_TIMESTAMP, timestamp);
+        args.putString(ARG_NOTE_ID, noteId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,19 +67,16 @@ public class NoteDetailFragment extends Fragment {
         btnBack = view.findViewById(R.id.button_back);
         btnMenu = view.findViewById(R.id.button_menu);
 
-        long timestamp;
+        String noteId;
         if (getArguments() != null) {
-            timestamp = getArguments().getLong(ARG_NOTE_TIMESTAMP);
+            noteId = getArguments().getString(ARG_NOTE_ID);
         } else {
-            timestamp = 0;
+            noteId = null;
         }
 
-        currentNote = NoteStorage.getInstance(requireContext())
-                .getNotes()
-                .stream()
-                .filter(note -> note.getTimestamp() == timestamp)
-                .findFirst()
-                .orElse(null);
+        if (noteId != null) {
+            currentNote = NoteStorage.getInstance(requireContext()).getNoteById(noteId);
+        }
 
         if (currentNote == null) {
             Toast.makeText(requireContext(), getString(R.string.note_not_found), Toast.LENGTH_SHORT).show();
@@ -89,6 +87,12 @@ public class NoteDetailFragment extends Fragment {
         editNoteName.setText(currentNote.getName());
         editNoteText.setText(currentNote.getText());
         selectedDate.setTimeInMillis(currentNote.getTimestamp());
+
+        // Initialize selected tags from current note
+        selectedTags.clear();
+        if (currentNote.getTags() != null) {
+            selectedTags.addAll(currentNote.getTags());
+        }
 
         btnSave.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
@@ -134,7 +138,6 @@ public class NoteDetailFragment extends Fragment {
         DatePickerDialog dialog = new DatePickerDialog(requireContext(),
                 (dp, year, month, day) -> {
                     selectedDate.set(year, month, day);
-                    currentNote.setTimestamp(selectedDate.getTimeInMillis());
                     Toast.makeText(requireContext(), getString(R.string.date_changed), Toast.LENGTH_SHORT).show();
                 },
                 selectedDate.get(Calendar.YEAR),
@@ -170,35 +173,40 @@ public class NoteDetailFragment extends Fragment {
             name = getString(R.string.note_from) + android.text.format.DateFormat.format("dd MMM yyyy", currentNote.getTimestamp());
         }
 
+        // Update current note with new data
         currentNote.setName(name);
         currentNote.setText(text);
         currentNote.setTimestamp(selectedDate.getTimeInMillis());
-        if (currentNote.getTags() == null) currentNote.setTags(new ArrayList<>());
+        currentNote.setTags(new ArrayList<>(selectedTags));
 
         NoteStorage.getInstance(requireContext()).updateNote(currentNote);
 
         Toast.makeText(requireContext(), getString(R.string.note_saved), Toast.LENGTH_SHORT).show();
 
-        // Notify notes fragment to reload on resume
+        // Go back to previous fragment
         requireActivity().getSupportFragmentManager().popBackStack();
     }
 
     private void showEditTagsDialog() {
         NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
         ArrayList<String> allTagsList = new ArrayList<>(noteStorage.getAllTags());
-        ArrayList<String> selectedTags = currentNote.getTags() != null ?
-                new ArrayList<>(currentNote.getTags()) : new ArrayList<>();
+        ArrayList<String> currentSelectedTags = new ArrayList<>(selectedTags);
 
-        TagEditFragment fragment = TagEditFragment.newInstance(allTagsList, selectedTags);
+        TagEditFragment fragment = TagEditFragment.newInstance(allTagsList, currentSelectedTags);
         fragment.setTagEditListener(tags -> {
-            currentNote.setTags(new ArrayList<>(tags));
+            // Update the selected tags immediately
+            selectedTags.clear();
+            selectedTags.addAll(tags);
+
+            // Update the note with new tags immediately (don't wait for save)
+            currentNote.setTags(new ArrayList<>(selectedTags));
             NoteStorage.getInstance(requireContext()).updateNote(currentNote);
-            Toast.makeText(requireContext(), getString(R.string.tags_saved), Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(requireContext(), "Tags updated: " + tags.size() + " selected", Toast.LENGTH_SHORT).show();
         });
         fragment.show(getParentFragmentManager(), "TagEditFragment");
     }
 
 }
-
 
 

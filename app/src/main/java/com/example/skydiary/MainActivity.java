@@ -19,7 +19,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Locale;
 
-
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new WelcomeFragment())
                     .commit();
-
         }
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
@@ -84,7 +82,4 @@ public class MainActivity extends AppCompatActivity {
         config.setLocale(locale);
         return context.createConfigurationContext(config);
     }
-
-
-
 }

@@ -4,7 +4,6 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CalendarView;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +19,7 @@ import android.view.ViewGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -28,11 +28,11 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
 
     private CalendarView calendarView;
     private TextView textMonthYear;
-    private ImageButton buttonChangeDate;
     private RecyclerView recyclerNotes;
     private TextView emptyMessage;
 
     private NotesAdapter adapter;
+    private Calendar currentSelectedDate = Calendar.getInstance();
 
     @Nullable
     @Override
@@ -54,6 +54,11 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
 
         FloatingActionButton fabChangeDate = view.findViewById(R.id.fab_change_date);
 
+        // Initialize adapter early to avoid "No adapter attached" errors
+        adapter = new NotesAdapter(new ArrayList<>(), this);
+        recyclerNotes.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerNotes.setAdapter(adapter);
+
         fabChangeDate.setOnClickListener(v -> {
             Calendar current = Calendar.getInstance();
             current.setTimeInMillis(calendarView.getDate());
@@ -61,32 +66,47 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
                 Calendar chosen = Calendar.getInstance();
                 chosen.set(year, month, day);
                 calendarView.setDate(chosen.getTimeInMillis());
+                currentSelectedDate = chosen;
                 updateMonthYearText(chosen);
                 loadNotesForDate(year, month, day);
             }, current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH));
             picker.show();
         });
 
-        recyclerNotes.setLayoutManager(new LinearLayoutManager(requireContext()));
-
         Calendar today = Calendar.getInstance();
         today.setTimeInMillis(calendarView.getDate());
+        currentSelectedDate = today;
         updateMonthYearText(today);
 
-        // When calendar date changes update list and month/year text display
         calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
             Log.d("CalendarNotesFragment", "Date selected: " + year + "-" + (month + 1) + "-" + dayOfMonth);
             Calendar selected = Calendar.getInstance();
             selected.set(year, month, dayOfMonth);
+            currentSelectedDate = selected;
             updateMonthYearText(selected);
             loadNotesForDate(year, month, dayOfMonth);
         });
 
+        // Load initial data
+        loadNotesForDate(
+                currentSelectedDate.get(Calendar.YEAR),
+                currentSelectedDate.get(Calendar.MONTH),
+                currentSelectedDate.get(Calendar.DAY_OF_MONTH)
+        );
+    }
 
-        // Initial UI state
-        emptyMessage.setText(getString(R.string.choose_date_to_see_notes));
-        emptyMessage.setVisibility(View.VISIBLE);
-        recyclerNotes.setVisibility(View.GONE);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh the notes list when returning to this fragment
+        if (currentSelectedDate != null) {
+            Log.d("CalendarNotesFragment", "Refreshing calendar notes on resume");
+            loadNotesForDate(
+                    currentSelectedDate.get(Calendar.YEAR),
+                    currentSelectedDate.get(Calendar.MONTH),
+                    currentSelectedDate.get(Calendar.DAY_OF_MONTH)
+            );
+        }
     }
 
     private void updateMonthYearText(Calendar cal) {
@@ -106,6 +126,8 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
         List<Note> notesForDay = NoteStorage.getInstance(requireContext())
                 .getNotesByDate(startCal.getTimeInMillis(), endCal.getTimeInMillis());
 
+        Log.d("CalendarNotesFragment", "Found " + notesForDay.size() + " notes for date " + year + "-" + (month + 1) + "-" + dayOfMonth);
+
         if (notesForDay.isEmpty()) {
             emptyMessage.setText(getString(R.string.no_notes_added_on_day));
             emptyMessage.setVisibility(View.VISIBLE);
@@ -113,25 +135,21 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
         } else {
             emptyMessage.setVisibility(View.GONE);
             recyclerNotes.setVisibility(View.VISIBLE);
-
-            if (adapter == null) {
-                adapter = new NotesAdapter(notesForDay, this);
-                recyclerNotes.setAdapter(adapter);
-            } else {
-                adapter.updateNotes(notesForDay);
-            }
+            adapter.updateNotes(notesForDay);
         }
     }
 
     @Override
     public void onItemClick(Note note) {
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, NoteDetailFragment.newInstance(note.getTimestamp()))
-                .addToBackStack(null)
-                .commit();
+        if (note != null && note.getId() != null) {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, NoteDetailFragment.newInstance(note.getId()))
+                    .addToBackStack("calendar_to_detail")
+                    .commit();
+        } else {
+            Log.e("CalendarNotesFragment", "Note or note ID is null");
+        }
     }
 }
-
-
 

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +34,10 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     private RecyclerView recyclerView;
     private NotesAdapter notesAdapter;
     private FloatingActionButton fabAdd;
-    private List<Note> allNotes;                  // full list from storage
-    private List<String> selectedTags = new ArrayList<>();    // selected tags for filtering
-    private LinearLayout tagsContainer;           // container holding tags
-    private TextView tvNoMatches;                  // shown if no notes found
+    private List<Note> allNotes;
+    private List<String> selectedTags = new ArrayList<>();
+    private LinearLayout tagsContainer;
+    private TextView tvNoMatches;
 
     @Nullable
     @Override
@@ -60,7 +61,10 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         tagsContainer = view.findViewById(R.id.tags_container);
         tvNoMatches = view.findViewById(R.id.tv_no_matches);
 
+        // Initialize adapter early to avoid "No adapter attached" errors
+        notesAdapter = new NotesAdapter(new ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(notesAdapter);
 
         btnAddTag.setOnClickListener(v -> {
             NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
@@ -73,11 +77,10 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
                 selectedTags.addAll(tags);
                 loadTags();
                 filterNotes();
-                Toast.makeText(requireContext(), getString(R.string.tags_saved), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Filtering by " + tags.size() + " tags", Toast.LENGTH_SHORT).show();
             });
             fragment.show(getParentFragmentManager(), "TagEditFragment");
         });
-
 
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -95,7 +98,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.fragment_container, new AddNoteFragment())
-                            .addToBackStack(null)
+                            .addToBackStack("notes_to_add")
                             .commit();
                     return true;
                 } else if (item.getItemId() == R.id.action_add_picture) {
@@ -107,21 +110,40 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             popupMenu.show();
         });
 
+        // Load initial data
+        refreshAllData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh data when returning to this fragment
+        Log.d("NotesFragment", "Refreshing notes on resume");
+        refreshAllData();
+    }
+
+    private void refreshAllData() {
         loadNotes();
+        loadTags();
+        filterNotes();
     }
 
     @Override
     public void onItemClick(Note note) {
-        requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, NoteDetailFragment.newInstance(note.getTimestamp()))
-                .addToBackStack(null)
-                .commit();
+        if (note != null && note.getId() != null) {
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, NoteDetailFragment.newInstance(note.getId()))
+                    .addToBackStack("notes_to_detail")
+                    .commit();
+        } else {
+            Log.e("NotesFragment", "Note or note ID is null");
+            Toast.makeText(requireContext(), "Error: Could not open note", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadNotes() {
         allNotes = NoteStorage.getInstance(requireContext()).getNotes();
-        loadTags();
-        filterNotes();
+        Log.d("NotesFragment", "Loaded " + allNotes.size() + " notes");
     }
 
     private void loadTags() {
@@ -132,7 +154,11 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             TextView tagView = new TextView(requireContext());
             tagView.setText(tag);
             tagView.setPadding(20, 10, 20, 10);
-            tagView.setBackgroundResource(R.drawable.tag_background); // unselected drawable
+            if (selectedTags.contains(tag)) {
+                tagView.setBackgroundResource(R.drawable.tag_selected_background);
+            } else {
+                tagView.setBackgroundResource(R.drawable.tag_background);
+            }
             tagView.setTextColor(getResources().getColor(android.R.color.black));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -156,6 +182,10 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     }
 
     private void filterNotes() {
+        if (allNotes == null) {
+            allNotes = new ArrayList<>();
+        }
+
         String searchText = searchBar.getText().toString().toLowerCase().trim();
         String[] keywords = searchText.isEmpty() ? new String[0] : searchText.split("\\s+");
         List<Note> filteredNotes = new ArrayList<>();
@@ -164,36 +194,44 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             String name = note.getName() != null ? note.getName().toLowerCase() : "";
             String text = note.getText() != null ? note.getText().toLowerCase() : "";
 
+            // Search filter
             boolean matchesSearch = true;
-            for (String kw : keywords) {
-                if (!name.contains(kw) && !text.contains(kw)) {
-                    matchesSearch = false;
-                    break;
+            if (keywords.length > 0) {
+                for (String kw : keywords) {
+                    if (!name.contains(kw) && !text.contains(kw)) {
+                        matchesSearch = false;
+                        break;
+                    }
                 }
             }
             if (!matchesSearch) continue;
 
+            // Tag filter - show notes that have ALL selected tags
             if (!selectedTags.isEmpty()) {
-                if (note.getTags() == null || !new HashSet<>(note.getTags()).containsAll(selectedTags)) {
+                if (note.getTags() == null || note.getTags().isEmpty()) {
+                    continue;
+                }
+                boolean hasAllTags = true;
+                for (String selectedTag : selectedTags) {
+                    if (!note.getTags().contains(selectedTag)) {
+                        hasAllTags = false;
+                        break;
+                    }
+                }
+                if (!hasAllTags) {
                     continue;
                 }
             }
             filteredNotes.add(note);
         }
 
-        if (notesAdapter == null) {
-            notesAdapter = new NotesAdapter(filteredNotes, this);
-            recyclerView.setAdapter(notesAdapter);
-        } else {
-            notesAdapter.updateList(filteredNotes);
-        }
-
+        notesAdapter.updateList(filteredNotes);
         showNoMatchesMessage(filteredNotes.isEmpty());
-    }
 
+        Log.d("NotesFragment", "Filtered to " + filteredNotes.size() + " notes");
+    }
 
     private void showNoMatchesMessage(boolean show) {
         tvNoMatches.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }
-

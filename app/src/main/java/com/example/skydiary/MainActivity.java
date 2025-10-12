@@ -2,17 +2,15 @@ package com.example.skydiary;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -20,6 +18,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int CAMERA_PERMISSION_REQUEST = 1001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Load saved theme early
@@ -41,22 +42,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        // In MainActivity.java, replace the switch statement with if-else:
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
-            switch (item.getItemId()) {
-                case R.id.nav_home:
-                    selectedFragment = new MainFragment();
-                    break;
-                case R.id.nav_calendar:
-                    selectedFragment = new CalendarNotesFragment();
-                    break;
-                case R.id.nav_notes:
-                    selectedFragment = new NotesFragment();
-                    break;
-                case R.id.nav_settings:
-                    selectedFragment = new SettingsFragment();
-                    break;
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                selectedFragment = new MainFragment();
+            } else if (itemId == R.id.nav_calendar) {
+                selectedFragment = new CalendarNotesFragment();
+            } else if (itemId == R.id.nav_notes) {
+                selectedFragment = new NotesFragment();
+            } else if (itemId == R.id.nav_settings) {
+                selectedFragment = new SettingsFragment();
             }
+
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
@@ -65,6 +65,30 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    // Add permission checking method
+    public boolean checkCameraPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, you can retry the camera operation
+                Toast.makeText(this, "Camera permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

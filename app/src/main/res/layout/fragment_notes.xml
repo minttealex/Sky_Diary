@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notes_fragment_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Search bar (non-functional for now) -->
+    <!-- Search bar -->
     <EditText
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
@@ -20,7 +21,6 @@
         android:paddingVertical="8dp"
         android:singleLine="true"
         android:textColorHint="@android:color/darker_gray" />
-
 
     <!-- Tags container with plus button on the left -->
     <LinearLayout
@@ -59,7 +59,6 @@
         </HorizontalScrollView>
     </LinearLayout>
 
-
     <!-- RecyclerView for notes -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_notes"
@@ -86,7 +85,6 @@
         android:visibility="gone"
         android:textColor="@android:color/darker_gray"
         android:padding="16dp" />
-
 
 </LinearLayout>
 

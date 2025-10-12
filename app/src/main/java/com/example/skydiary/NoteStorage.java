@@ -2,6 +2,9 @@ package com.example.skydiary;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
+
+import androidx.core.content.FileProvider;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,6 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class NoteStorage {
     private static final String PREFS_NAME = "notes_prefs";
@@ -221,6 +229,79 @@ public class NoteStorage {
             if (noteId.equals(note.getId())) {
                 return note;
             }
+        }
+        return null;
+    }
+
+    public void cleanupOrphanedImages(Context context, List<Note> currentNotes) {
+        // Get all image paths currently in use
+        Set<String> usedImagePaths = new HashSet<>();
+        for (Note note : currentNotes) {
+            if (note.getImages() != null) {
+                for (NoteImage noteImage : note.getImages()) {
+                    usedImagePaths.add(noteImage.getImagePath());
+                }
+            }
+        }
+
+        // Delete unused images
+        File imagesDir = new File(context.getFilesDir(), "note_images");
+        if (imagesDir.exists() && imagesDir.isDirectory()) {
+            File[] imageFiles = imagesDir.listFiles();
+            if (imageFiles != null) {
+                for (File imageFile : imageFiles) {
+                    if (!usedImagePaths.contains(imageFile.getAbsolutePath())) {
+                        imageFile.delete();
+                    }
+                }
+            }
+        }
+    }
+
+    public String saveImageToInternalStorage(Context context, Uri imageUri) {
+        try {
+            // Create images directory if it doesn't exist
+            File imagesDir = new File(context.getFilesDir(), "note_images");
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs();
+            }
+
+            // Generate unique filename
+            String filename = "image_" + System.currentTimeMillis() + ".jpg";
+            File imageFile = new File(imagesDir, filename);
+
+            // Copy the image
+            InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
+            OutputStream outputStream = new FileOutputStream(imageFile);
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            inputStream.close();
+            outputStream.close();
+
+            // Return the file path that can be used with FileProvider
+            return imageFile.getAbsolutePath();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Uri getImageUri(Context context, String internalPath) {
+        if (internalPath == null) return null;
+
+        File imageFile = new File(internalPath);
+        if (imageFile.exists()) {
+            return FileProvider.getUriForFile(
+                    context,
+                    context.getPackageName() + ".fileprovider",
+                    imageFile
+            );
         }
         return null;
     }

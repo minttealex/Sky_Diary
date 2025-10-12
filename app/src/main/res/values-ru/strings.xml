@@ -13,14 +13,15 @@
 
     <!-- Notes -->
     <string name="add_note">Добавить запись</string>
+    <string name="note_name">Note Name</string>
+    <string name="date">Date</string>
     <string name="enter_note_name">Название записи (необязательно)</string>
     <string name="write_note">Введите свою запись сюда</string>
     <string name="note_cannot_be_empty">Запись не может быть пустой</string>
     <string name="note_saved">Запись сохранена</string>
-    <string name="note_from">"Запись от "</string>
+    <string name="note_from_format">Note from %s</string>
     <string name="note_not_found">Запись не найдена</string>
     <string name="note_deleted">Запись удалена</string>
-    <string name="add_picture">Добавить фото</string>
     <string name="search">Поиск</string>
 
     <!-- Tags -->
@@ -35,6 +36,40 @@
     <string name="delete_tag_confirmation">Вы уверены что хотите удалить данный тег?</string>
     <string name="tag_cannot_be_empty">Название тега не может быть пустым</string>
     <string name="tag_already_exists">Тег уже существует</string>
+    <string name="tags_updated_format">Tags updated: %d selected</string>
+
+    <!-- Pictures -->
+    <string name="add_picture">Add Picture</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="choose_from_gallery">Choose from Gallery</string>
+    <string name="choose_multiple_from_gallery">Choose Multiple from Gallery</string>
+    <string name="remove_image">Remove Image</string>
+    <string name="remove_image_confirmation">Are you sure you want to remove this image?</string>
+    <string name="image_added">Image added</string>
+    <string name="image_removed">Image removed</string>
+    <string name="image_reordered">Image reordered</string>
+    <string name="image_resized">Image resized</string>
+    <string name="image_moved_up">Image moved up</string>
+    <string name="image_moved_down">Image moved down</string>
+    <string name="image_at_top">Image is already at the top</string>
+    <string name="image_at_bottom">Image is already at the bottom</string>
+    <string name="toggle_resize_mode">Toggle Resize Mode</string>
+    <string name="image_content_description">Note image</string>
+    <string name="image_options">Image Options</string>
+    <string name="resize">Resize</string>
+    <string name="move_up">Move Up</string>
+    <string name="move_down">Move Down</string>
+    <string name="image_too_large">Image is too large. Maximum size is %1$dMB</string>
+    <string name="error_loading_image">Error loading image</string>
+    <string name="select_picture">select_picture</string>
+    <string name="error_loading_image_file">error_loading_image_file</string>
+    <string name="error_displaying_image">Error displaying image</string>
+    <string name="error_creating_image_file">error_creating_image_file</string>
+
+    <!-- Resize dialog strings -->
+    <string name="width_label">Width: %dpx</string>
+    <string name="height_label">Height: %dpx</string>
+    <string name="resize_instructions">Adjust the sliders to resize the image (50% = original size)</string>
 
     <!-- Date and Time -->
     <string name="change_date">Изменить дату</string>
@@ -55,9 +90,25 @@
     <string name="cancel">Отменить</string>
     <string name="rename">Переименовать</string>
     <string name="delete">Удалить</string>
+    <string name="apply">Apply</string>
+    <string name="remove">remove</string>
 
     <!-- Settings -->
     <string name="light_theme">Светлая тема</string>
     <string name="dark_theme">Чёрная тема</string>
+    <string name="english">English</string>
+    <string name="russian">Русский</string>
 
+    <!-- Accessibility -->
+    <string name="back_button">Back</string>
+    <string name="menu_button">Menu</string>
+    <string name="add_tag_button">Add Tag</string>
+    <string name="add_button">Add</string>
+    <string name="no_matching_notes">No matching notes found</string>
+
+    <!-- Add these to your existing strings.xml -->
+    <string name="note_with_images">Note with images</string>
+    <string name="image_note_created_single">Image note created</string>
+    <string name="image_note_created_multiple">Note created with %d images</string>
+    <string name="filtering_by_tags_format">Filtering by %d tags</string>
 </resources>

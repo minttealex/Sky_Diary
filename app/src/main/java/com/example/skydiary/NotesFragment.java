@@ -1,12 +1,9 @@
 package com.example.skydiary;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,24 +17,39 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickListener {
 
     private EditText searchBar;
-    private ImageButton btnAddTag;
-    private RecyclerView recyclerView;
     private NotesAdapter notesAdapter;
     private FloatingActionButton fabAdd;
     private List<Note> allNotes;
-    private List<String> selectedTags = new ArrayList<>();
+    private final List<String> selectedTags = new ArrayList<>();
     private LinearLayout tagsContainer;
     private TextView tvNoMatches;
+
+    // Modern Activity Result API for image picking
+    private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_OK && result.getData() != null) {
+                    handleImagePickerResult(result.getData());
+                }
+            }
+    );
 
     @Nullable
     @Override
@@ -55,8 +67,8 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         selectedTags.clear();
 
         searchBar = view.findViewById(R.id.search_bar);
-        btnAddTag = view.findViewById(R.id.btn_add_tag);
-        recyclerView = view.findViewById(R.id.recycler_notes);
+        ImageButton btnAddTag = view.findViewById(R.id.btn_add_tag);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_notes);
         fabAdd = view.findViewById(R.id.fab_add);
         tagsContainer = view.findViewById(R.id.tags_container);
         tvNoMatches = view.findViewById(R.id.tv_no_matches);
@@ -77,7 +89,8 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
                 selectedTags.addAll(tags);
                 loadTags();
                 filterNotes();
-                Toast.makeText(requireContext(), "Filtering by " + tags.size() + " tags", Toast.LENGTH_SHORT).show();
+                String message = getString(R.string.filtering_by_tags_format, tags.size());
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
             });
             fragment.show(getParentFragmentManager(), "TagEditFragment");
         });
@@ -94,15 +107,16 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             PopupMenu popupMenu = new PopupMenu(requireContext(), fabAdd);
             popupMenu.inflate(R.menu.menu_fab_add);
             popupMenu.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.action_add_note) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.action_add_note) {
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, new AddNoteFragment())
+                            .replace(R.id.fragment_container, NoteEditorFragment.newInstance())
                             .addToBackStack("notes_to_add")
                             .commit();
                     return true;
-                } else if (item.getItemId() == R.id.action_add_picture) {
-                    Toast.makeText(requireContext(), "Add Picture pressed (not implemented)", Toast.LENGTH_SHORT).show();
+                } else if (itemId == R.id.action_add_picture) {
+                    showImageSourceDialog();
                     return true;
                 }
                 return false;
@@ -111,6 +125,104 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         });
 
         // Load initial data
+        refreshAllData();
+    }
+
+    private void showImageSourceDialog() {
+        String[] options = {
+                getString(R.string.take_photo),
+                getString(R.string.choose_from_gallery),
+                getString(R.string.choose_multiple_from_gallery),
+                getString(R.string.cancel)
+        };
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
+        builder.setTitle(getString(R.string.add_picture));
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0: // Take Photo
+                    dispatchTakePictureIntent();
+                    break;
+                case 1: // Choose from Gallery
+                    dispatchPickPictureIntent(false);
+                    break;
+                case 2: // Choose Multiple
+                    dispatchPickPictureIntent(true);
+                    break;
+            }
+        });
+        builder.show();
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            imagePickerLauncher.launch(takePictureIntent);
+        } else {
+            Toast.makeText(requireContext(), "No camera app available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void dispatchPickPictureIntent(boolean multiple) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        if (multiple) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
+
+        Intent chooser = Intent.createChooser(intent, getString(R.string.select_picture));
+        imagePickerLauncher.launch(chooser);
+    }
+
+    private void handleImagePickerResult(Intent data) {
+        List<Uri> imageUris = new ArrayList<>();
+
+        if (data.getClipData() != null) {
+            // Multiple images selected
+            for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                imageUris.add(imageUri);
+            }
+        } else if (data.getData() != null) {
+            // Single image selected
+            Uri imageUri = data.getData();
+            imageUris.add(imageUri);
+        }
+
+        if (!imageUris.isEmpty()) {
+            // Create a new note with the selected images
+            createNoteWithImages(imageUris);
+        }
+    }
+
+    private void createNoteWithImages(List<Uri> imageUris) {
+        // Create a new note with the selected images
+        List<NoteImage> noteImages = new ArrayList<>();
+        for (int i = 0; i < imageUris.size(); i++) {
+            noteImages.add(new NoteImage(imageUris.get(i).toString(), i));
+        }
+
+        // Create a note with just images (empty text)
+        Note newNote = new Note(
+                getString(R.string.note_with_images),
+                "",
+                System.currentTimeMillis(),
+                new ArrayList<>(),
+                noteImages
+        );
+
+        // Save the note
+        NoteStorage.getInstance(requireContext()).addNote(newNote);
+
+        // Show success message
+        if (imageUris.size() == 1) {
+            Toast.makeText(requireContext(), getString(R.string.image_note_created_single), Toast.LENGTH_SHORT).show();
+        } else {
+            String message = getString(R.string.image_note_created_multiple, imageUris.size());
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        }
+
+        // Refresh the notes list
         refreshAllData();
     }
 
@@ -132,7 +244,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     public void onItemClick(Note note) {
         if (note != null && note.getId() != null) {
             requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, NoteDetailFragment.newInstance(note.getId()))
+                    .replace(R.id.fragment_container, NoteEditorFragment.newInstance(note.getId()))
                     .addToBackStack("notes_to_detail")
                     .commit();
         } else {
@@ -159,7 +271,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             } else {
                 tagView.setBackgroundResource(R.drawable.tag_background);
             }
-            tagView.setTextColor(getResources().getColor(android.R.color.black));
+            tagView.setTextColor(getResources().getColor(android.R.color.black, requireContext().getTheme()));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -196,12 +308,10 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
 
             // Search filter
             boolean matchesSearch = true;
-            if (keywords.length > 0) {
-                for (String kw : keywords) {
-                    if (!name.contains(kw) && !text.contains(kw)) {
-                        matchesSearch = false;
-                        break;
-                    }
+            for (String kw : keywords) {
+                if (!name.contains(kw) && !text.contains(kw)) {
+                    matchesSearch = false;
+                    break;
                 }
             }
             if (!matchesSearch) continue;

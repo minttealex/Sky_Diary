@@ -3,6 +3,7 @@ package com.example.skydiary;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     }
 
     public void updateNotes(List<Note> newNotes) {
-        this.notes = newNotes != null ? newNotes : new ArrayList<>();
+        // Use DiffUtil for better performance (simplified version)
+        List<Note> oldNotes = this.notes;
+        this.notes = newNotes != null ? new ArrayList<>(newNotes) : new ArrayList<>();
+
+        // For now, use notifyDataSetChanged but in production consider DiffUtil
         notifyDataSetChanged();
     }
 
@@ -46,6 +51,15 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         Note note = notes.get(position);
         holder.noteName.setText(note.getName());
         holder.noteDate.setText(dateFormat.format(note.getTimestamp()));
+
+        // Show image indicator if note has images
+        if (note.getImages() != null && !note.getImages().isEmpty()) {
+            holder.imageIndicator.setVisibility(View.VISIBLE);
+            holder.imageCount.setText(String.valueOf(note.getImages().size()));
+        } else {
+            holder.imageIndicator.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onItemClick(note);
@@ -61,11 +75,15 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     static class NoteViewHolder extends RecyclerView.ViewHolder {
         TextView noteName;
         TextView noteDate;
+        LinearLayout imageIndicator;
+        TextView imageCount;
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
             noteName = itemView.findViewById(R.id.text_note_name);
             noteDate = itemView.findViewById(R.id.text_note_date);
+            imageIndicator = itemView.findViewById(R.id.image_indicator);
+            imageCount = itemView.findViewById(R.id.text_image_count);
         }
     }
 

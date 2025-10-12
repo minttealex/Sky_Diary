@@ -144,7 +144,7 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
         if (note != null && note.getId() != null) {
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, NoteDetailFragment.newInstance(note.getId()))
+                    .replace(R.id.fragment_container, NoteEditorFragment.newInstance(note.getId()))
                     .addToBackStack("calendar_to_detail")
                     .commit();
         } else {

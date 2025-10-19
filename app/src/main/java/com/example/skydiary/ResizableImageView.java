@@ -193,10 +193,11 @@ public class ResizableImageView extends AppCompatImageView {
         return HandleType.NONE;
     }
 
+    // In the resizeImage method of ResizableImageView, update the switch cases:
+
     private void resizeImage(float deltaX, float deltaY) {
         ViewGroup.LayoutParams params = getLayoutParams();
         if (params == null) {
-            // Create layout params if they don't exist
             params = new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -213,7 +214,7 @@ public class ResizableImageView extends AppCompatImageView {
 
         // Ensure we have valid dimensions
         if (currentWidth <= 0 || currentHeight <= 0) {
-            currentWidth = 300; // Default fallback
+            currentWidth = 300;
             currentHeight = 300;
         }
 
@@ -224,18 +225,35 @@ public class ResizableImageView extends AppCompatImageView {
             case TOP_LEFT:
                 newWidth = Math.max(100, (int) (currentWidth - deltaX));
                 newHeight = Math.max(100, (int) (currentHeight - deltaY));
+                // Maintain aspect ratio for corner drag
+                if (isAspectRatioLocked) {
+                    float aspectRatio = (float) originalWidth / originalHeight;
+                    newHeight = (int) (newWidth / aspectRatio);
+                }
                 break;
             case TOP_RIGHT:
                 newWidth = Math.max(100, (int) (currentWidth + deltaX));
                 newHeight = Math.max(100, (int) (currentHeight - deltaY));
+                if (isAspectRatioLocked) {
+                    float aspectRatio = (float) originalWidth / originalHeight;
+                    newHeight = (int) (newWidth / aspectRatio);
+                }
                 break;
             case BOTTOM_LEFT:
                 newWidth = Math.max(100, (int) (currentWidth - deltaX));
                 newHeight = Math.max(100, (int) (currentHeight + deltaY));
+                if (isAspectRatioLocked) {
+                    float aspectRatio = (float) originalWidth / originalHeight;
+                    newHeight = (int) (newWidth / aspectRatio);
+                }
                 break;
             case BOTTOM_RIGHT:
                 newWidth = Math.max(100, (int) (currentWidth + deltaX));
                 newHeight = Math.max(100, (int) (currentHeight + deltaY));
+                if (isAspectRatioLocked) {
+                    float aspectRatio = (float) originalWidth / originalHeight;
+                    newHeight = (int) (newWidth / aspectRatio);
+                }
                 break;
             case TOP:
                 newHeight = Math.max(100, (int) (currentHeight - deltaY));
@@ -253,29 +271,34 @@ public class ResizableImageView extends AppCompatImageView {
                 break;
         }
 
-        // Apply constraints
+        // Apply size constraints
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        int maxSize = (int) (500 * metrics.density); // Larger max size
-        int minSize = (int) (80 * metrics.density);  // Smaller min size
+        int maxSize = (int) (500 * metrics.density);
+        int minSize = (int) (80 * metrics.density);
 
         newWidth = Math.min(maxSize, Math.max(minSize, newWidth));
         newHeight = Math.min(maxSize, Math.max(minSize, newHeight));
 
-        // Set new dimensions
         params.width = newWidth;
         params.height = newHeight;
         setLayoutParams(params);
 
-        // Force layout
         requestLayout();
-
-        // Update handles
         updateBorderAndHandles();
 
-        // Notify listener
         if (resizeListener != null) {
             resizeListener.onResize(newWidth, newHeight);
         }
+    }
+
+    // Add these fields to the class
+    private boolean isAspectRatioLocked = true;
+    private int originalWidth, originalHeight;
+
+    // Add method to set original dimensions
+    public void setOriginalDimensions(int width, int height) {
+        this.originalWidth = width;
+        this.originalHeight = height;
     }
 
     public void setResizeListener(OnResizeListener listener) {

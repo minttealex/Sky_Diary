@@ -83,10 +83,10 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, you can retry the camera operation
-                Toast.makeText(this, "Camera permission granted", Toast.LENGTH_SHORT).show();
+                // Permission granted
+                Toast.makeText(this, getString(R.string.camera_permission_granted), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.camera_permission_denied), Toast.LENGTH_SHORT).show();
             }
         }
     }

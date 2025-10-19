@@ -14,19 +14,49 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainFragment extends Fragment {
+
+    private Uri currentCameraUri;
 
     // Modern Activity Result API for image picking
     private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_OK && result.getData() != null) {
-                    handleImagePickerResult(result.getData());
+                if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_OK) {
+                    Intent data = result.getData();
+
+                    if (currentCameraUri != null) {
+                        // Handle camera image
+                        handleCameraImageFromFile();
+                        currentCameraUri = null;
+                    } else if (data != null) {
+                        // Handle gallery images
+                        handleImagePickerResult(data);
+                    }
+                } else if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_CANCELED) {
+                    // Camera was cancelled, clean up
+                    if (currentCameraUri != null) {
+                        try {
+                            File cameraFile = new File(currentCameraUri.getPath());
+                            if (cameraFile.exists()) {
+                                cameraFile.delete();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        currentCameraUri = null;
+                    }
                 }
             }
     );
@@ -67,7 +97,9 @@ public class MainFragment extends Fragment {
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0: // Take Photo
-                    dispatchTakePictureIntent();
+                    if (((MainActivity) requireActivity()).checkCameraPermission()) {
+                        dispatchTakePictureIntent();
+                    }
                     break;
                 case 1: // Choose from Gallery
                     dispatchPickPictureIntent(false);
@@ -81,12 +113,52 @@ public class MainFragment extends Fragment {
     }
 
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            imagePickerLauncher.launch(takePictureIntent);
-        } else {
-            Toast.makeText(requireContext(), "No camera app available", Toast.LENGTH_SHORT).show();
+        try {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            File photoFile = createImageFile();
+            if (photoFile != null) {
+                currentCameraUri = FileProvider.getUriForFile(requireContext(),
+                        requireContext().getPackageName() + ".fileprovider",
+                        photoFile);
+
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
+
+                // Grant permissions
+                List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
+                        .getPackageManager().queryIntentActivities(takePictureIntent,
+                                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+
+                for (android.content.pm.ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+                    requireContext().grantUriPermission(
+                            resolvedIntentInfo.activityInfo.packageName,
+                            currentCameraUri,
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+                }
+
+                imagePickerLauncher.launch(takePictureIntent);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), getString(R.string.error_starting_camera), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+
+        File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+        if (!storageDir.exists()) {
+            storageDir.mkdirs();
+        }
+
+        return File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
     }
 
     private void dispatchPickPictureIntent(boolean multiple) {
@@ -121,6 +193,31 @@ public class MainFragment extends Fragment {
         }
     }
 
+    private void handleCameraImageFromFile() {
+        try {
+            if (currentCameraUri != null) {
+                NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+                String internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), currentCameraUri);
+
+                if (internalImagePath != null) {
+                    List<Uri> imageUris = new ArrayList<>();
+                    imageUris.add(Uri.parse(internalImagePath));
+                    createNoteWithImages(imageUris);
+
+                    // Scan the file so it appears in gallery
+                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    mediaScanIntent.setData(currentCameraUri);
+                    requireContext().sendBroadcast(mediaScanIntent);
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.error_loading_image), Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), getString(R.string.error_processing_camera_image), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void createNoteWithImages(List<Uri> imageUris) {
         // Create a new note with the selected images
         List<NoteImage> noteImages = new ArrayList<>();
@@ -128,9 +225,14 @@ public class MainFragment extends Fragment {
             noteImages.add(new NoteImage(imageUris.get(i).toString(), i));
         }
 
+        // Create note name with date
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault());
+        String dateString = sdf.format(new Date());
+        String noteName = getString(R.string.note_with_images_from_format, dateString);
+
         // Create a note with just images (empty text)
         Note newNote = new Note(
-                getString(R.string.note_with_images),
+                noteName,
                 "",
                 System.currentTimeMillis(),
                 new ArrayList<>(),

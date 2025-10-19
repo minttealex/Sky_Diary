@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ScrollView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -257,7 +256,9 @@ public abstract class BaseNoteFragment extends Fragment {
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0: // Take Photo
-                    dispatchTakePictureIntent();
+                    if (((MainActivity) requireActivity()).checkCameraPermission()) {
+                        dispatchTakePictureIntent();
+                    }
                     break;
                 case 1: // Choose from Gallery
                     dispatchPickPictureIntent(false);
@@ -283,7 +284,8 @@ public abstract class BaseNoteFragment extends Fragment {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
 
                 List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
-                        .getPackageManager().queryIntentActivities(takePictureIntent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+                        .getPackageManager().queryIntentActivities(takePictureIntent,
+                                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
 
                 for (android.content.pm.ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
                     requireContext().grantUriPermission(
@@ -297,7 +299,7 @@ public abstract class BaseNoteFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), "Error starting camera", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_starting_camera), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -361,7 +363,7 @@ public abstract class BaseNoteFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), "Error processing camera image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_processing_camera_image), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -394,7 +396,7 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected ImageView createImageView(NoteImage noteImage) {
-        ImageView imageView = new ImageView(requireContext());
+        ResizableImageView imageView = new ResizableImageView(requireContext());
         imageView.setTag(noteImage);
         imageView.setContentDescription(getString(R.string.image_content_description));
 
@@ -421,6 +423,9 @@ public abstract class BaseNoteFragment extends Fragment {
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
                 if (bitmap != null) {
+                    // Store original dimensions for aspect ratio preservation
+                    imageView.setOriginalDimensions(bitmap.getWidth(), bitmap.getHeight());
+
                     if (noteImage.getWidth() <= 0 || noteImage.getHeight() <= 0) {
                         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
                         float screenWidth = displayMetrics.widthPixels - 100;
@@ -434,6 +439,11 @@ public abstract class BaseNoteFragment extends Fragment {
 
                         noteImage.setWidth(width);
                         noteImage.setHeight(height);
+
+                        // Update layout params
+                        params.width = width;
+                        params.height = height;
+                        imageView.setLayoutParams(params);
                     } else {
                         Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) noteImage.getWidth(), (int) noteImage.getHeight(), true);
                         imageView.setImageBitmap(scaledBitmap);
@@ -449,6 +459,12 @@ public abstract class BaseNoteFragment extends Fragment {
             Toast.makeText(requireContext(), getString(R.string.error_displaying_image), Toast.LENGTH_SHORT).show();
             return imageView;
         }
+
+        // Set up resize listener
+        imageView.setResizeListener((newWidth, newHeight) -> {
+            noteImage.setWidth(newWidth);
+            noteImage.setHeight(newHeight);
+        });
 
         setupImageInteractions(imageView);
         return imageView;
@@ -542,8 +558,8 @@ public abstract class BaseNoteFragment extends Fragment {
                 .setTitle(getString(R.string.image_options))
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
-                        case 0: // Resize
-                            showResizeDialog(imageView);
+                        case 0: // Resize - Toggle resize mode
+                            toggleResizeMode(imageView);
                             break;
                         case 1: // Move Up
                             moveImageUp(imageView);
@@ -556,83 +572,84 @@ public abstract class BaseNoteFragment extends Fragment {
                 .show();
     }
 
-    protected void showResizeDialog(ImageView imageView) {
-        NoteImage noteImage = (NoteImage) imageView.getTag();
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_resize_image, null);
-        SeekBar seekbarWidth = dialogView.findViewById(R.id.seekbar_width);
-        SeekBar seekbarHeight = dialogView.findViewById(R.id.seekbar_height);
-        TextView textWidth = dialogView.findViewById(R.id.text_width);
-        TextView textHeight = dialogView.findViewById(R.id.text_height);
+    protected void toggleResizeMode(ImageView imageView) {
+        if (imageView instanceof ResizableImageView) {
+            ResizableImageView resizableImageView = (ResizableImageView) imageView;
+            boolean newResizingState = !resizableImageView.isResizing();
+            resizableImageView.setResizingMode(newResizingState);
 
-        int currentWidth = (int) noteImage.getWidth();
-        int currentHeight = (int) noteImage.getHeight();
+            if (newResizingState) {
+                Toast.makeText(requireContext(), "Resize mode enabled - Drag corners to resize", Toast.LENGTH_SHORT).show();
+            } else {
+                // Save the new dimensions when exiting resize mode
+                NoteImage noteImage = (NoteImage) imageView.getTag();
+                ViewGroup.LayoutParams params = imageView.getLayoutParams();
+                noteImage.setWidth(params.width);
+                noteImage.setHeight(params.height);
 
-        int originalWidth = getOriginalImageWidth(noteImage);
-        int originalHeight = getOriginalImageHeight(noteImage);
-
-        int widthProgress = currentWidth > 0 ? (int) ((currentWidth / (float) originalWidth) * 50) : 50;
-        int heightProgress = currentHeight > 0 ? (int) ((currentHeight / (float) originalHeight) * 50) : 50;
-
-        seekbarWidth.setProgress(widthProgress);
-        seekbarHeight.setProgress(heightProgress);
-
-        textWidth.setText(getString(R.string.width_label, currentWidth));
-        textHeight.setText(getString(R.string.height_label, currentHeight));
-
-        seekbarWidth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    int newWidth = (int) (originalWidth * (progress / 50.0f));
-                    textWidth.setText(getString(R.string.width_label, newWidth));
+                if (currentNote != null) {
+                    saveNoteSilently();
                 }
+                Toast.makeText(requireContext(), getString(R.string.image_resized), Toast.LENGTH_SHORT).show();
             }
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        seekbarHeight.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    int newHeight = (int) (originalHeight * (progress / 50.0f));
-                    textHeight.setText(getString(R.string.height_label, newHeight));
-                }
-            }
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle(getString(R.string.resize))
-                .setView(dialogView)
-                .setPositiveButton(getString(R.string.apply), (dialog, which) -> applyImageSize(imageView, noteImage, seekbarWidth.getProgress(), seekbarHeight.getProgress()))
-                .setNegativeButton(getString(R.string.cancel), null)
-                .show();
-    }
-
-    protected int getOriginalImageWidth(NoteImage noteImage) {
-        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(Uri.parse(noteImage.getImagePath()))) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(inputStream, null, options);
-            return options.outWidth;
-        } catch (Exception e) {
-            return (int) noteImage.getWidth();
+        } else {
+            // Convert to ResizableImageView if not already
+            convertToResizableImageView(imageView);
+            toggleResizeMode(imageView);
         }
     }
 
-    protected int getOriginalImageHeight(NoteImage noteImage) {
-        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(Uri.parse(noteImage.getImagePath()))) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(inputStream, null, options);
-            return options.outHeight;
+    protected void convertToResizableImageView(ImageView standardImageView) {
+        NoteImage noteImage = (NoteImage) standardImageView.getTag();
+        int index = imagesContainer.indexOfChild(standardImageView);
+
+        // Create new ResizableImageView
+        ResizableImageView resizableImageView = new ResizableImageView(requireContext());
+        resizableImageView.setTag(noteImage);
+        resizableImageView.setContentDescription(getString(R.string.image_content_description));
+
+        // Copy layout parameters
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                standardImageView.getLayoutParams().width,
+                standardImageView.getLayoutParams().height
+        );
+        params.setMargins(0, 16, 0, 16);
+        params.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        resizableImageView.setLayoutParams(params);
+
+        // Copy image
+        resizableImageView.setImageDrawable(standardImageView.getDrawable());
+
+        // Set original dimensions for aspect ratio
+        try {
+            NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+            Uri imageUri = noteStorage.getImageUri(requireContext(), noteImage.getImagePath());
+            if (imageUri != null) {
+                InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(inputStream, null, options);
+                resizableImageView.setOriginalDimensions(options.outWidth, options.outHeight);
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
         } catch (Exception e) {
-            return (int) noteImage.getHeight();
+            e.printStackTrace();
         }
+
+        // Set up resize listener
+        resizableImageView.setResizeListener((newWidth, newHeight) -> {
+            noteImage.setWidth(newWidth);
+            noteImage.setHeight(newHeight);
+        });
+
+        // Set up interactions
+        setupImageInteractions(resizableImageView);
+
+        // Replace the old ImageView with the new ResizableImageView
+        imagesContainer.removeViewAt(index);
+        imagesContainer.addView(resizableImageView, index);
     }
 
     protected void moveImageUp(ImageView imageView) {
@@ -708,35 +725,6 @@ public abstract class BaseNoteFragment extends Fragment {
                 noteImage.setPosition(i);
             }
         }
-    }
-
-    protected void applyImageSize(ImageView imageView, NoteImage noteImage, int widthProgress, int heightProgress) {
-        float scaleWidth = widthProgress / 50.0f;
-        float scaleHeight = heightProgress / 50.0f;
-
-        int originalWidth = getOriginalImageWidth(noteImage);
-        int originalHeight = getOriginalImageHeight(noteImage);
-
-        int newWidth = (int) (originalWidth * scaleWidth);
-        int newHeight = (int) (originalHeight * scaleHeight);
-
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        int minSize = (int) (MIN_IMAGE_SIZE_DP * metrics.density);
-        int maxSize = (int) (MAX_IMAGE_SIZE_DP * metrics.density);
-
-        newWidth = Math.max(minSize, Math.min(maxSize, newWidth));
-        newHeight = Math.max(minSize, Math.min(maxSize, newHeight));
-
-        ViewGroup.LayoutParams params = imageView.getLayoutParams();
-        params.width = newWidth;
-        params.height = newHeight;
-        imageView.setLayoutParams(params);
-        imageView.requestLayout();
-
-        noteImage.setWidth(newWidth);
-        noteImage.setHeight(newHeight);
-
-        Toast.makeText(requireContext(), getString(R.string.image_resized), Toast.LENGTH_SHORT).show();
     }
 
     protected void saveNoteSilently() {

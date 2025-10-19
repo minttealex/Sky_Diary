@@ -111,4 +111,13 @@
     <string name="image_note_created_single">Image note created</string>
     <string name="image_note_created_multiple">Note created with %d images</string>
     <string name="filtering_by_tags_format">Filtering by %d tags</string>
+
+    <!-- New strings for translation -->
+    <string name="error_starting_camera">Error starting camera</string>
+    <string name="error_processing_camera_image">Error processing camera image</string>
+    <string name="camera_permission_granted">Camera permission granted</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="no_camera_app_available">No camera app available</string>
+    <string name="error_could_not_open_note">Error: Could not open note</string>
+    <string name="note_with_images_from_format">Note with images from %s</string>
 </resources>

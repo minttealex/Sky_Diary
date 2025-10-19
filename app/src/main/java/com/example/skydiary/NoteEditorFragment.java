@@ -39,7 +39,7 @@ public class NoteEditorFragment extends BaseNoteFragment {
 
     @Override
     protected int getLayoutResource() {
-        return R.layout.fragment_note_detail; // Use the same layout for both
+        return R.layout.fragment_note_detail;
     }
 
     @Override
@@ -81,6 +81,7 @@ public class NoteEditorFragment extends BaseNoteFragment {
     @Override
     protected void saveNoteImplementation() {
         String name = editNoteName.getText().toString().trim();
+        String location = editNoteLocation.getText().toString().trim();
         String text = editNoteText.getText().toString().trim();
 
         if (TextUtils.isEmpty(text) && noteImages.isEmpty()) {
@@ -97,6 +98,7 @@ public class NoteEditorFragment extends BaseNoteFragment {
         if (currentNote != null) {
             // Update existing note
             currentNote.setName(name);
+            currentNote.setLocation(location);
             currentNote.setText(text);
             currentNote.setTimestamp(System.currentTimeMillis());
             currentNote.setTags(new ArrayList<>(selectedTags));
@@ -104,7 +106,7 @@ public class NoteEditorFragment extends BaseNoteFragment {
             NoteStorage.getInstance(requireContext()).updateNote(currentNote);
         } else {
             // Create new note
-            Note newNote = new Note(name, text, selectedDate.getTimeInMillis(),
+            Note newNote = new Note(name, location, text, selectedDate.getTimeInMillis(),
                     new ArrayList<>(selectedTags), new ArrayList<>(noteImages));
             NoteStorage.getInstance(requireContext()).addNote(newNote);
         }

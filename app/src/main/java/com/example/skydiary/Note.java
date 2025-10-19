@@ -10,10 +10,11 @@ import java.util.UUID;
 public class Note {
     private String id;
     private String name;
+    private String location;
     private String text;
     private long timestamp;
     private List<String> tags;
-    private List<NoteImage> images; // New field for images
+    private List<NoteImage> images;
 
     // Default constructor for Gson
     public Note() {
@@ -49,7 +50,36 @@ public class Note {
         this.images = images != null ? images : new ArrayList<>();
     }
 
-    // Add getter and setter for images
+    // Add location constructor
+    public Note(String name, String location, String text, long timestamp, List<String> tags, List<NoteImage> images) {
+        this.id = UUID.randomUUID().toString();
+        this.name = name;
+        this.location = location;
+        this.text = text;
+        this.timestamp = timestamp;
+        this.tags = tags != null ? tags : new ArrayList<>();
+        this.images = images != null ? images : new ArrayList<>();
+    }
+
+    // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
+
+    public long getTimestamp() { return timestamp; }
+    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public List<String> getTags() { return tags == null ? new ArrayList<>() : tags; }
+    public void setTags(List<String> tags) { this.tags = tags != null ? tags : new ArrayList<>(); }
+
     public List<NoteImage> getImages() {
         return images == null ? new ArrayList<>() : images;
     }
@@ -58,24 +88,13 @@ public class Note {
         this.images = images != null ? images : new ArrayList<>();
     }
 
-    // Rest of your existing methods remain the same...
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
-    public List<String> getTags() { return tags == null ? new ArrayList<>() : tags; }
-    public void setTags(List<String> tags) { this.tags = tags != null ? tags : new ArrayList<>(); }
-
     @NonNull
     @Override
     public String toString() {
         return "Note{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", location='" + location + '\'' +
                 ", text='" + text + '\'' +
                 ", timestamp=" + timestamp +
                 ", tags=" + tags +

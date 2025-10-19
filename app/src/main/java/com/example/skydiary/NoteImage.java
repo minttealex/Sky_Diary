@@ -6,27 +6,33 @@ public class NoteImage {
     private String id;
     private String imagePath;
     private int position; // Position in the note
-    private float width; // Custom width (0 = auto)
-    private float height; // Custom height (0 = auto)
+    private float rotation; // Rotation in degrees
+    private int originalWidth; // Original width for rotation calculations
+    private int originalHeight; // Original height for rotation calculations
 
     public NoteImage() {
         this.id = java.util.UUID.randomUUID().toString();
+        this.rotation = 0f;
+        this.originalWidth = 0;
+        this.originalHeight = 0;
     }
 
     public NoteImage(String imagePath) {
         this.id = java.util.UUID.randomUUID().toString();
         this.imagePath = imagePath;
         this.position = 0;
-        this.width = 0;
-        this.height = 0;
+        this.rotation = 0f;
+        this.originalWidth = 0;
+        this.originalHeight = 0;
     }
 
     public NoteImage(String imagePath, int position) {
         this.id = java.util.UUID.randomUUID().toString();
         this.imagePath = imagePath;
         this.position = position;
-        this.width = 0;
-        this.height = 0;
+        this.rotation = 0f;
+        this.originalWidth = 0;
+        this.originalHeight = 0;
     }
 
     // Getters and setters
@@ -39,11 +45,14 @@ public class NoteImage {
     public int getPosition() { return position; }
     public void setPosition(int position) { this.position = position; }
 
-    public float getWidth() { return width; }
-    public void setWidth(float width) { this.width = width; }
+    public float getRotation() { return rotation; }
+    public void setRotation(float rotation) { this.rotation = rotation; }
 
-    public float getHeight() { return height; }
-    public void setHeight(float height) { this.height = height; }
+    public int getOriginalWidth() { return originalWidth; }
+    public void setOriginalWidth(int originalWidth) { this.originalWidth = originalWidth; }
+
+    public int getOriginalHeight() { return originalHeight; }
+    public void setOriginalHeight(int originalHeight) { this.originalHeight = originalHeight; }
 
     @Override
     public boolean equals(Object o) {

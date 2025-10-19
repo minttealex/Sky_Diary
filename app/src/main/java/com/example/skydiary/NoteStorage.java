@@ -65,6 +65,7 @@ public class NoteStorage {
                 Note newNote = new Note();
                 newNote.setId(UUID.randomUUID().toString());
                 newNote.setName(oldNote.name);
+                newNote.setLocation(oldNote.location);
                 newNote.setText(oldNote.text);
                 newNote.setTimestamp(oldNote.timestamp);
                 newNote.setTags(oldNote.tags != null ? oldNote.tags : new ArrayList<>());
@@ -77,6 +78,7 @@ public class NoteStorage {
     // Helper class to deserialize old note format
     private static class OldNote {
         private String name;
+        private String location;
         private String text;
         private long timestamp;
         private List<String> tags;
@@ -156,7 +158,7 @@ public class NoteStorage {
     public void addTag(String newTag) {
         if (newTag == null || newTag.trim().isEmpty()) return;
         Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
-        Set<String> newTags = new HashSet<>(tags); // Create a copy to modify
+        Set<String> newTags = new HashSet<>(tags);
         if (newTags.add(newTag.trim())) {
             prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
         }
@@ -168,7 +170,7 @@ public class NoteStorage {
 
         // Remove from global tags
         Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
-        Set<String> newTags = new HashSet<>(tags); // Create a copy to modify
+        Set<String> newTags = new HashSet<>(tags);
         if (newTags.remove(tag.trim())) {
             prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
         }
@@ -192,7 +194,7 @@ public class NoteStorage {
 
         // Update global tags
         Set<String> tags = prefs.getStringSet(TAGS_KEY, new HashSet<>());
-        Set<String> newTags = new HashSet<>(tags); // Create a copy to modify
+        Set<String> newTags = new HashSet<>(tags);
         if (newTags.remove(oldTag.trim())) {
             newTags.add(newTag.trim());
             prefs.edit().putStringSet(TAGS_KEY, newTags).apply();

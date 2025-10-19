@@ -23,6 +23,19 @@
     <string name="note_deleted">Note deleted</string>
     <string name="add_picture">Add a picture</string>
     <string name="search">Search</string>
+    <string name="note_with_images">Note with images</string>
+
+    <!-- Location -->
+    <string name="location_hint">Add location (coordinates or name)</string>
+    <string name="get_current_location">Get current location</string>
+    <string name="location_permission_required">Location permission is required to get current location</string>
+    <string name="location_permission_denied">Location permission denied</string>
+    <string name="getting_location">Getting your location…</string>
+    <string name="location_retrieved">Location retrieved</string>
+    <string name="location_error">Error getting location</string>
+    <string name="enable_gps">Please enable GPS to get location</string>
+    <string name="invalid_coordinates">Invalid coordinates format</string>
+    <string name="coordinates_format_hint">Format: 40.7128, -74.0060 or place name</string>
 
     <!-- Pictures -->
     <string name="take_photo">Take Photo</string>
@@ -34,27 +47,25 @@
     <string name="image_added">Image added</string>
     <string name="image_removed">Image removed</string>
     <string name="image_reordered">Image reordered</string>
-    <string name="image_resized">Image resized</string>
     <string name="image_moved_up">Image moved up</string>
     <string name="image_moved_down">Image moved down</string>
     <string name="image_at_top">Image is already at the top</string>
     <string name="image_at_bottom">Image is already at the bottom</string>
-    <string name="toggle_resize_mode">Toggle Resize Mode</string>
     <string name="image_content_description">Note image</string>
     <string name="image_options">Image Options</string>
-    <string name="resize">Resize</string>
+    <string name="rotate">Rotate</string>
     <string name="move_up">Move Up</string>
     <string name="move_down">Move Down</string>
+    <string name="delete_picture">Delete Picture</string>
+    <string name="delete_picture_confirmation">Are you sure you want to delete this picture?</string>
     <string name="image_too_large">Image is too large. Maximum size is %dMB</string>
     <string name="error_loading_image">Error loading image</string>
     <string name="error_displaying_image">Error displaying image</string>
     <string name="error_creating_image_file">Error creating image file</string>
     <string name="error_loading_image_file">Error loading image file</string>
-
-    <!-- Resize dialog strings -->
-    <string name="width_label">Width: %dpx</string>
-    <string name="height_label">Height: %dpx</string>
-    <string name="resize_instructions">Adjust the sliders to resize the image (50% = original size)</string>
+    <string name="error_starting_camera">Error starting camera</string>
+    <string name="error_processing_camera_image">Error processing camera image</string>
+    <string name="image_rotated">Image rotated %d°</string>
 
     <!-- Tags -->
     <string name="add_tag">Add tag</string>
@@ -96,7 +107,7 @@
     <string name="light_theme">Light theme</string>
     <string name="dark_theme">Dark theme</string>
     <string name="english">English</string>
-    <string name="russian">Русский</string>
+    <string name="russian">Russian</string>
 
     <!-- Accessibility -->
     <string name="back_button">Back</string>
@@ -105,18 +116,9 @@
     <string name="add_button">Add</string>
     <string name="no_matching_notes">No matching notes found</string>
 
-    <!-- Add these to your existing strings.xml -->
-    <string name="note_with_images">Note with images</string>
+    <!-- Image notes -->
     <string name="image_note_created_single">Image note created</string>
     <string name="image_note_created_multiple">Note created with %d images</string>
     <string name="filtering_by_tags_format">Filtering by %d tags</string>
-
-    <!-- New strings for translation -->
-    <string name="error_starting_camera">Error starting camera</string>
-    <string name="error_processing_camera_image">Error processing camera image</string>
-    <string name="camera_permission_granted">Camera permission granted</string>
-    <string name="camera_permission_denied">Camera permission denied</string>
-    <string name="no_camera_app_available">No camera app available</string>
-    <string name="error_could_not_open_note">Error: Could not open note</string>
-    <string name="note_with_images_from_format">Note with images from %s</string>
+    <string name="error_could_not_open_note">Error: could not open note</string>
 </resources>

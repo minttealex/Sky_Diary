@@ -62,6 +62,36 @@
                 android:maxLength="30"
                 android:inputType="textCapSentences" />
 
+            <!-- Location field with get location button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/edit_note_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/location_hint"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:drawableStart="@android:drawable/ic_menu_mylocation"
+                    android:drawablePadding="8dp" />
+
+                <ImageButton
+                    android:id="@+id/button_get_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_mylocation"
+                    android:contentDescription="@string/get_current_location"
+                    android:layout_marginStart="8dp" />
+
+            </LinearLayout>
+
             <EditText
                 android:id="@+id/edit_note_text"
                 android:layout_width="match_parent"
@@ -71,7 +101,8 @@
                 android:hint="@string/write_note"
                 android:inputType="textMultiLine|textCapSentences"
                 android:padding="10dp"
-                android:scrollbars="vertical" />
+                android:scrollbars="vertical"
+                android:layout_marginTop="8dp" />
 
             <!-- Images container - will be populated dynamically -->
             <LinearLayout

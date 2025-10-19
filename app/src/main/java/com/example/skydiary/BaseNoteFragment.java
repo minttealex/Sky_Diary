@@ -3,16 +3,22 @@ package com.example.skydiary;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -28,6 +34,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -45,8 +53,10 @@ import java.util.Locale;
 public abstract class BaseNoteFragment extends Fragment {
 
     protected EditText editNoteName;
+    protected EditText editNoteLocation;
     protected EditText editNoteText;
     protected ImageButton btnMenu;
+    protected ImageButton btnGetLocation;
     protected LinearLayout imagesContainer;
     protected ScrollView scrollView;
 
@@ -55,10 +65,9 @@ public abstract class BaseNoteFragment extends Fragment {
     protected final List<NoteImage> noteImages = new ArrayList<>();
     protected Note currentNote;
 
-    protected static final float MIN_IMAGE_SIZE_DP = 100f;
-    protected static final float MAX_IMAGE_SIZE_DP = 300f;
-
     protected Uri currentCameraUri;
+    private File currentCameraFile;
+    private static final int LOCATION_PERMISSION_REQUEST = 2001;
 
     // Modern Activity Result API
     protected final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
@@ -77,22 +86,14 @@ public abstract class BaseNoteFragment extends Fragment {
                     }
                 } else if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_CANCELED) {
                     // Camera was cancelled, clean up
-                    if (currentCameraUri != null) {
-                        try {
-                            File cameraFile = new File(currentCameraUri.getPath());
-                            if (cameraFile.exists()) {
-                                cameraFile.delete();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        currentCameraUri = null;
-                    }
+                    cleanupCameraFiles();
                 }
 
+                // Always clean up permissions
                 if (currentCameraUri != null) {
                     requireContext().revokeUriPermission(currentCameraUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
             }
     );
@@ -113,9 +114,11 @@ public abstract class BaseNoteFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         editNoteName = view.findViewById(R.id.edit_note_name);
+        editNoteLocation = view.findViewById(R.id.edit_note_location);
         editNoteText = view.findViewById(R.id.edit_note_text);
         ImageButton btnBack = view.findViewById(R.id.button_back);
         btnMenu = view.findViewById(R.id.button_menu);
+        btnGetLocation = view.findViewById(R.id.button_get_location);
         scrollView = view.findViewById(R.id.scroll_view);
 
         // Initialize images container
@@ -125,6 +128,11 @@ public abstract class BaseNoteFragment extends Fragment {
 
         btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
         btnMenu.setOnClickListener(v -> showPopupMenu());
+
+        // Setup location functionality
+        if (btnGetLocation != null) {
+            btnGetLocation.setOnClickListener(v -> requestCurrentLocation());
+        }
 
         setupSpecificViews(view);
 
@@ -138,6 +146,11 @@ public abstract class BaseNoteFragment extends Fragment {
         editNoteName.setText(currentNote.getName());
         editNoteText.setText(currentNote.getText());
         selectedDate.setTimeInMillis(currentNote.getTimestamp());
+
+        // Load location if exists
+        if (currentNote.getLocation() != null) {
+            editNoteLocation.setText(currentNote.getLocation());
+        }
 
         // Initialize selected tags from current note
         selectedTags.clear();
@@ -256,9 +269,7 @@ public abstract class BaseNoteFragment extends Fragment {
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0: // Take Photo
-                    if (((MainActivity) requireActivity()).checkCameraPermission()) {
-                        dispatchTakePictureIntent();
-                    }
+                    dispatchTakePictureIntent();
                     break;
                 case 1: // Choose from Gallery
                     dispatchPickPictureIntent(false);
@@ -273,16 +284,23 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected void dispatchTakePictureIntent() {
         try {
+            // Check camera permission first
+            if (!((MainActivity) requireActivity()).checkCameraPermission()) {
+                return;
+            }
+
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-            File photoFile = createImageFile();
-            if (photoFile != null) {
+            currentCameraFile = createImageFile();
+            if (currentCameraFile != null) {
                 currentCameraUri = FileProvider.getUriForFile(requireContext(),
                         requireContext().getPackageName() + ".fileprovider",
-                        photoFile);
+                        currentCameraFile);
 
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
+                takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
+                // Grant temporary read permission to the camera app
                 List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
                         .getPackageManager().queryIntentActivities(takePictureIntent,
                                 android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
@@ -299,7 +317,7 @@ public abstract class BaseNoteFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), getString(R.string.error_starting_camera), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Error starting camera: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -346,16 +364,27 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected void handleCameraImageFromFile() {
         try {
-            if (currentCameraUri != null) {
-                NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
-                String internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), currentCameraUri);
+            if (currentCameraFile != null && currentCameraFile.exists()) {
+                // Add the image directly using the file path
+                String internalImagePath = currentCameraFile.getAbsolutePath();
 
                 if (internalImagePath != null) {
-                    addImageToNote(Uri.parse(internalImagePath));
+                    NoteImage noteImage = new NoteImage(internalImagePath, noteImages.size());
+                    noteImages.add(noteImage);
+
+                    ImageView imageView = createImageView(noteImage);
+                    imagesContainer.addView(imageView);
+
+                    // Auto-save if editing existing note
+                    if (currentNote != null) {
+                        saveNoteSilently();
+                    }
+
+                    Toast.makeText(requireContext(), getString(R.string.image_added), Toast.LENGTH_SHORT).show();
 
                     // Scan the file so it appears in gallery
                     Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    mediaScanIntent.setData(currentCameraUri);
+                    mediaScanIntent.setData(Uri.fromFile(currentCameraFile));
                     requireContext().sendBroadcast(mediaScanIntent);
                 } else {
                     Toast.makeText(requireContext(), getString(R.string.error_loading_image), Toast.LENGTH_SHORT).show();
@@ -363,15 +392,37 @@ public abstract class BaseNoteFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), getString(R.string.error_processing_camera_image), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Error processing camera image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } finally {
+            cleanupCameraFiles();
         }
+    }
+
+    private void cleanupCameraFiles() {
+        if (currentCameraFile != null) {
+            try {
+                // Don't delete the file immediately as we're using it
+                // It will be managed by the app's storage system
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            currentCameraFile = null;
+        }
+        currentCameraUri = null;
     }
 
     protected void addImageToNote(Uri imageUri) {
         try {
-            // Save image to internal storage
-            NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
-            String internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), imageUri);
+            // For camera images, we already have the file path, so no need to save again
+            String internalImagePath;
+
+            if (currentCameraFile != null && imageUri.toString().contains(currentCameraFile.getAbsolutePath())) {
+                internalImagePath = currentCameraFile.getAbsolutePath();
+            } else {
+                // Save gallery images to internal storage
+                NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+                internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), imageUri);
+            }
 
             if (internalImagePath != null) {
                 NoteImage noteImage = new NoteImage(internalImagePath, noteImages.size());
@@ -396,143 +447,248 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected ImageView createImageView(NoteImage noteImage) {
-        ResizableImageView imageView = new ResizableImageView(requireContext());
+        ImageView imageView = new ImageView(requireContext());
         imageView.setTag(noteImage);
         imageView.setContentDescription(getString(R.string.image_content_description));
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(0, 16, 0, 16);
         params.gravity = android.view.Gravity.CENTER_HORIZONTAL;
 
-        if (noteImage.getWidth() > 0 && noteImage.getHeight() > 0) {
-            params.width = (int) noteImage.getWidth();
-            params.height = (int) noteImage.getHeight();
-        }
-
         imageView.setLayoutParams(params);
 
         try {
-            NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
-            Uri imageUri = noteStorage.getImageUri(requireContext(), noteImage.getImagePath());
+            // Load and display the image with EXIF orientation correction
+            Bitmap bitmap = loadAndScaleImage(noteImage.getImagePath());
+            if (bitmap != null) {
+                // Apply EXIF orientation correction
+                bitmap = correctImageOrientation(bitmap, noteImage.getImagePath());
 
-            if (imageUri != null) {
-                InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                imageView.setImageBitmap(bitmap);
 
-                if (bitmap != null) {
-                    // Store original dimensions for aspect ratio preservation
-                    imageView.setOriginalDimensions(bitmap.getWidth(), bitmap.getHeight());
+                // Set the image dimensions based on the scaled bitmap
+                ViewGroup.LayoutParams currentParams = imageView.getLayoutParams();
+                currentParams.width = bitmap.getWidth();
+                currentParams.height = bitmap.getHeight();
+                imageView.setLayoutParams(currentParams);
 
-                    if (noteImage.getWidth() <= 0 || noteImage.getHeight() <= 0) {
-                        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-                        float screenWidth = displayMetrics.widthPixels - 100;
-                        float scaleFactor = Math.min(1.0f, screenWidth / bitmap.getWidth());
+                // Apply saved rotation
+                imageView.setRotation(noteImage.getRotation());
 
-                        int width = (int) (bitmap.getWidth() * scaleFactor);
-                        int height = (int) (bitmap.getHeight() * scaleFactor);
-
-                        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
-                        imageView.setImageBitmap(scaledBitmap);
-
-                        noteImage.setWidth(width);
-                        noteImage.setHeight(height);
-
-                        // Update layout params
-                        params.width = width;
-                        params.height = height;
-                        imageView.setLayoutParams(params);
-                    } else {
-                        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) noteImage.getWidth(), (int) noteImage.getHeight(), true);
-                        imageView.setImageBitmap(scaledBitmap);
-                    }
-
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                }
+                // Store the original dimensions for rotation
+                noteImage.setOriginalWidth(bitmap.getWidth());
+                noteImage.setOriginalHeight(bitmap.getHeight());
             }
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(requireContext(), getString(R.string.error_displaying_image), Toast.LENGTH_SHORT).show();
-            return imageView;
         }
-
-        // Set up resize listener
-        imageView.setResizeListener((newWidth, newHeight) -> {
-            noteImage.setWidth(newWidth);
-            noteImage.setHeight(newHeight);
-        });
 
         setupImageInteractions(imageView);
         return imageView;
     }
 
-    protected void setupImageInteractions(ImageView imageView) {
-        imageView.setOnClickListener(v -> showImageOptionsDialog(imageView));
+    private Bitmap loadAndScaleImage(String imagePath) {
+        try {
+            File imageFile = new File(imagePath);
+            if (!imageFile.exists()) {
+                return null;
+            }
 
-        imageView.setOnLongClickListener(v -> {
-            new AlertDialog.Builder(requireContext())
-                    .setTitle(getString(R.string.remove_image))
-                    .setMessage(getString(R.string.remove_image_confirmation))
-                    .setPositiveButton(getString(R.string.remove), (dialog, which) -> removeImage(imageView))
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
-            return true;
-        });
+            // First, get the image dimensions without loading the full bitmap
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(imagePath, options);
 
-        setupDragListener(imageView);
+            int imageWidth = options.outWidth;
+            int imageHeight = options.outHeight;
+
+            // Calculate the display size - use full screen width with some padding
+            DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+            int maxWidth = displayMetrics.widthPixels - 100; // 50dp padding on each side
+            int maxHeight = (int) (displayMetrics.heightPixels * 0.7); // Max 70% of screen height
+
+            // Calculate scaling factor
+            float scale = Math.min((float) maxWidth / imageWidth, (float) maxHeight / imageHeight);
+            scale = Math.min(scale, 1.0f); // Don't scale up
+
+            int scaledWidth = (int) (imageWidth * scale);
+            int scaledHeight = (int) (imageHeight * scale);
+
+            // Load the bitmap with the calculated dimensions
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = calculateInSampleSize(options, scaledWidth, scaledHeight);
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+            Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
+            if (bitmap != null) {
+                // Scale to exact dimensions if needed
+                if (bitmap.getWidth() != scaledWidth || bitmap.getHeight() != scaledHeight) {
+                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
+                    bitmap.recycle();
+                    return scaledBitmap;
+                }
+            }
+            return bitmap;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    protected void setupDragListener(ImageView imageView) {
-        final float[] startY = new float[1];
-        final int[] originalIndex = new int[1];
-        final boolean[] isDragging = new boolean[1];
+    private Bitmap correctImageOrientation(Bitmap bitmap, String imagePath) {
+        try {
+            ExifInterface exif = new ExifInterface(imagePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-        imageView.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    startY[0] = event.getRawY();
-                    originalIndex[0] = imagesContainer.indexOfChild(imageView);
-                    v.setAlpha(0.7f);
-                    return true;
-
-                case MotionEvent.ACTION_MOVE:
-                    float currentY = event.getRawY();
-                    float deltaY = currentY - startY[0];
-
-                    if (Math.abs(deltaY) > 20) {
-                        isDragging[0] = true;
-                        v.setTranslationY(deltaY);
-
-                        int newIndex = findNewIndex(v, deltaY);
-                        if (newIndex != originalIndex[0]) {
-                            swapImages(originalIndex[0], newIndex);
-                            originalIndex[0] = newIndex;
-                        }
-                    }
-                    return true;
-
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    v.setAlpha(1.0f);
-                    v.setTranslationY(0);
-                    if (isDragging[0]) {
-                        isDragging[0] = false;
-                        if (currentNote != null) {
-                            saveNoteSilently();
-                        }
-                        v.announceForAccessibility(getString(R.string.image_reordered));
-                        return true;
-                    } else {
-                        v.performClick();
-                    }
+            Matrix matrix = new Matrix();
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    matrix.postRotate(90);
                     break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    matrix.postRotate(180);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    matrix.postRotate(270);
+                    break;
+                case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                    matrix.postScale(-1, 1);
+                    break;
+                case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                    matrix.postScale(1, -1);
+                    break;
+                case ExifInterface.ORIENTATION_TRANSPOSE:
+                    matrix.postRotate(90);
+                    matrix.postScale(-1, 1);
+                    break;
+                case ExifInterface.ORIENTATION_TRANSVERSE:
+                    matrix.postRotate(270);
+                    matrix.postScale(-1, 1);
+                    break;
+                default:
+                    return bitmap;
             }
-            return false;
+
+            Bitmap correctedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            bitmap.recycle();
+            return correctedBitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return bitmap;
+        }
+    }
+
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+    protected void setupImageInteractions(ImageView imageView) {
+        // Show menu on click
+        imageView.setOnClickListener(v -> {
+            showImageOptionsDialog(imageView);
         });
+    }
+
+    protected void rotateImage(ImageView imageView) {
+        NoteImage noteImage = (NoteImage) imageView.getTag();
+
+        // Get current rotation and add 90 degrees
+        float currentRotation = noteImage.getRotation();
+        float newRotation = (currentRotation + 90) % 360;
+        noteImage.setRotation(newRotation);
+
+        // Apply rotation with animation
+        imageView.animate()
+                .rotation(newRotation)
+                .setDuration(200)
+                .start();
+
+        // Update image dimensions after rotation to prevent overlapping
+        updateImageDimensionsAfterRotation(imageView, noteImage, newRotation);
+
+        // Show rotation feedback
+        String rotationText = getString(R.string.image_rotated, (int) newRotation);
+        Toast.makeText(requireContext(), rotationText, Toast.LENGTH_SHORT).show();
+
+        // Auto-save if editing existing note
+        if (currentNote != null) {
+            saveNoteSilently();
+        }
+    }
+
+    protected void updateImageDimensionsAfterRotation(ImageView imageView, NoteImage noteImage, float newRotation) {
+        // When rotating by 90 or 270 degrees, swap width and height to maintain aspect ratio
+        if (newRotation % 180 == 90) {
+            // Swap width and height for 90/270 degree rotations
+            ViewGroup.LayoutParams params = imageView.getLayoutParams();
+            int temp = params.width;
+            params.width = params.height;
+            params.height = temp;
+            imageView.setLayoutParams(params);
+
+            // Also update the stored dimensions
+            if (noteImage.getOriginalWidth() > 0 && noteImage.getOriginalHeight() > 0) {
+                int tempOriginal = noteImage.getOriginalWidth();
+                noteImage.setOriginalWidth(noteImage.getOriginalHeight());
+                noteImage.setOriginalHeight(tempOriginal);
+            }
+        }
+    }
+
+    protected void showImageOptionsDialog(ImageView imageView) {
+        String[] options = {
+                getString(R.string.rotate),
+                getString(R.string.move_up),
+                getString(R.string.move_down),
+                getString(R.string.delete_picture),
+                getString(R.string.cancel)
+        };
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.image_options))
+                .setItems(options, (dialog, which) -> {
+                    switch (which) {
+                        case 0: // Rotate
+                            rotateImage(imageView);
+                            break;
+                        case 1: // Move Up
+                            moveImageUp(imageView);
+                            break;
+                        case 2: // Move Down
+                            moveImageDown(imageView);
+                            break;
+                        case 3: // Delete Picture
+                            confirmDeleteImage(imageView);
+                            break;
+                    }
+                })
+                .show();
+    }
+
+    protected void confirmDeleteImage(ImageView imageView) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.delete_picture))
+                .setMessage(getString(R.string.delete_picture_confirmation))
+                .setPositiveButton(getString(R.string.delete), (dialog, which) -> removeImage(imageView))
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show();
     }
 
     protected void removeImage(ImageView imageView) {
@@ -544,112 +700,6 @@ public abstract class BaseNoteFragment extends Fragment {
             saveNoteSilently();
         }
         Toast.makeText(requireContext(), getString(R.string.image_removed), Toast.LENGTH_SHORT).show();
-    }
-
-    protected void showImageOptionsDialog(ImageView imageView) {
-        String[] options = {
-                getString(R.string.resize),
-                getString(R.string.move_up),
-                getString(R.string.move_down),
-                getString(R.string.cancel)
-        };
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle(getString(R.string.image_options))
-                .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0: // Resize - Toggle resize mode
-                            toggleResizeMode(imageView);
-                            break;
-                        case 1: // Move Up
-                            moveImageUp(imageView);
-                            break;
-                        case 2: // Move Down
-                            moveImageDown(imageView);
-                            break;
-                    }
-                })
-                .show();
-    }
-
-    protected void toggleResizeMode(ImageView imageView) {
-        if (imageView instanceof ResizableImageView) {
-            ResizableImageView resizableImageView = (ResizableImageView) imageView;
-            boolean newResizingState = !resizableImageView.isResizing();
-            resizableImageView.setResizingMode(newResizingState);
-
-            if (newResizingState) {
-                Toast.makeText(requireContext(), "Resize mode enabled - Drag corners to resize", Toast.LENGTH_SHORT).show();
-            } else {
-                // Save the new dimensions when exiting resize mode
-                NoteImage noteImage = (NoteImage) imageView.getTag();
-                ViewGroup.LayoutParams params = imageView.getLayoutParams();
-                noteImage.setWidth(params.width);
-                noteImage.setHeight(params.height);
-
-                if (currentNote != null) {
-                    saveNoteSilently();
-                }
-                Toast.makeText(requireContext(), getString(R.string.image_resized), Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            // Convert to ResizableImageView if not already
-            convertToResizableImageView(imageView);
-            toggleResizeMode(imageView);
-        }
-    }
-
-    protected void convertToResizableImageView(ImageView standardImageView) {
-        NoteImage noteImage = (NoteImage) standardImageView.getTag();
-        int index = imagesContainer.indexOfChild(standardImageView);
-
-        // Create new ResizableImageView
-        ResizableImageView resizableImageView = new ResizableImageView(requireContext());
-        resizableImageView.setTag(noteImage);
-        resizableImageView.setContentDescription(getString(R.string.image_content_description));
-
-        // Copy layout parameters
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                standardImageView.getLayoutParams().width,
-                standardImageView.getLayoutParams().height
-        );
-        params.setMargins(0, 16, 0, 16);
-        params.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-        resizableImageView.setLayoutParams(params);
-
-        // Copy image
-        resizableImageView.setImageDrawable(standardImageView.getDrawable());
-
-        // Set original dimensions for aspect ratio
-        try {
-            NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
-            Uri imageUri = noteStorage.getImageUri(requireContext(), noteImage.getImagePath());
-            if (imageUri != null) {
-                InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeStream(inputStream, null, options);
-                resizableImageView.setOriginalDimensions(options.outWidth, options.outHeight);
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Set up resize listener
-        resizableImageView.setResizeListener((newWidth, newHeight) -> {
-            noteImage.setWidth(newWidth);
-            noteImage.setHeight(newHeight);
-        });
-
-        // Set up interactions
-        setupImageInteractions(resizableImageView);
-
-        // Replace the old ImageView with the new ResizableImageView
-        imagesContainer.removeViewAt(index);
-        imagesContainer.addView(resizableImageView, index);
     }
 
     protected void moveImageUp(ImageView imageView) {
@@ -682,41 +732,6 @@ public abstract class BaseNoteFragment extends Fragment {
         }
     }
 
-    protected int findNewIndex(View draggedView, float deltaY) {
-        int currentIndex = imagesContainer.indexOfChild(draggedView);
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        float threshold = 50 * metrics.density;
-
-        if (deltaY < -threshold && currentIndex > 0) {
-            return currentIndex - 1;
-        } else if (deltaY > threshold && currentIndex < imagesContainer.getChildCount() - 1) {
-            return currentIndex + 1;
-        }
-        return currentIndex;
-    }
-
-    protected void swapImages(int fromIndex, int toIndex) {
-        View fromView = imagesContainer.getChildAt(fromIndex);
-        View toView = imagesContainer.getChildAt(toIndex);
-
-        imagesContainer.removeViewAt(fromIndex);
-        if (toIndex > fromIndex) {
-            imagesContainer.removeViewAt(toIndex - 1);
-        } else {
-            imagesContainer.removeViewAt(toIndex);
-        }
-
-        if (toIndex > fromIndex) {
-            imagesContainer.addView(fromView, toIndex);
-            imagesContainer.addView(toView, fromIndex);
-        } else {
-            imagesContainer.addView(toView, fromIndex);
-            imagesContainer.addView(fromView, toIndex);
-        }
-
-        updateImagePositions();
-    }
-
     protected void updateImagePositions() {
         for (int i = 0; i < imagesContainer.getChildCount(); i++) {
             View child = imagesContainer.getChildAt(i);
@@ -729,6 +744,7 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected void saveNoteSilently() {
         String name = editNoteName.getText().toString().trim();
+        String location = editNoteLocation.getText().toString().trim();
         String text = editNoteText.getText().toString().trim();
 
         if (TextUtils.isEmpty(name)) {
@@ -737,6 +753,7 @@ public abstract class BaseNoteFragment extends Fragment {
         }
 
         currentNote.setName(name);
+        currentNote.setLocation(location);
         currentNote.setText(text);
         currentNote.setTimestamp(System.currentTimeMillis());
         currentNote.setTags(new ArrayList<>(selectedTags));
@@ -764,5 +781,87 @@ public abstract class BaseNoteFragment extends Fragment {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
         });
         fragment.show(getParentFragmentManager(), "TagEditFragment");
+    }
+
+    // Location Methods
+    protected void requestCurrentLocation() {
+        if (!LocationHelper.hasLocationPermission(requireContext())) {
+            LocationHelper.requestLocationPermission(requireActivity(), LOCATION_PERMISSION_REQUEST);
+            Toast.makeText(requireContext(), getString(R.string.location_permission_required), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!LocationHelper.isGpsEnabled(requireContext())) {
+            Toast.makeText(requireContext(), getString(R.string.enable_gps), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        getCurrentLocation();
+    }
+
+    protected void getCurrentLocation() {
+        Toast.makeText(requireContext(), getString(R.string.getting_location), Toast.LENGTH_SHORT).show();
+
+        try {
+            LocationManager locationManager = (LocationManager) requireContext().getSystemService(android.content.Context.LOCATION_SERVICE);
+            if (locationManager != null && LocationHelper.hasLocationPermission(requireContext())) {
+                // Try to get fresh location with a location listener
+                android.location.LocationListener locationListener = new android.location.LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        if (location != null) {
+                            String formattedLocation = LocationHelper.formatCoordinates(
+                                    location.getLatitude(), location.getLongitude());
+                            editNoteLocation.setText(formattedLocation);
+                            Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
+
+                            // Remove this listener after getting the location
+                            locationManager.removeUpdates(this);
+                        }
+                    }
+
+                    @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
+                    @Override public void onProviderEnabled(String provider) {}
+                    @Override public void onProviderDisabled(String provider) {}
+                };
+
+                // Request location updates
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, null);
+                } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
+                } else {
+                    // Fallback to last known location
+                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (location == null) {
+                        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    }
+
+                    if (location != null) {
+                        String formattedLocation = LocationHelper.formatCoordinates(
+                                location.getLatitude(), location.getLongitude());
+                        editNoteLocation.setText(formattedLocation);
+                        Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.location_error), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        } catch (SecurityException e) {
+            Toast.makeText(requireContext(), getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), getString(R.string.location_error), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Handle permission results
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation();
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

@@ -228,7 +228,7 @@ public class MainFragment extends Fragment {
         // Create note name with date
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault());
         String dateString = sdf.format(new Date());
-        String noteName = getString(R.string.note_with_images_from_format, dateString);
+        String noteName = getString(R.string.note_from_format, dateString);
 
         // Create a note with just images (empty text)
         Note newNote = new Note(

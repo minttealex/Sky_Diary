@@ -18,16 +18,13 @@ import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnItemClickListener {
 
     private CalendarView calendarView;
-    private TextView textMonthYear;
     private RecyclerView recyclerNotes;
     private TextView emptyMessage;
 
@@ -48,7 +45,6 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
         super.onViewCreated(view, savedInstanceState);
 
         calendarView = view.findViewById(R.id.calendar_view);
-        textMonthYear = view.findViewById(R.id.text_month_year);
         recyclerNotes = view.findViewById(R.id.recycler_notes_by_date);
         emptyMessage = view.findViewById(R.id.empty_message);
 
@@ -67,7 +63,6 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
                 chosen.set(year, month, day);
                 calendarView.setDate(chosen.getTimeInMillis());
                 currentSelectedDate = chosen;
-                updateMonthYearText(chosen);
                 loadNotesForDate(year, month, day);
             }, current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH));
             picker.show();
@@ -76,14 +71,12 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
         Calendar today = Calendar.getInstance();
         today.setTimeInMillis(calendarView.getDate());
         currentSelectedDate = today;
-        updateMonthYearText(today);
 
         calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
             Log.d("CalendarNotesFragment", "Date selected: " + year + "-" + (month + 1) + "-" + dayOfMonth);
             Calendar selected = Calendar.getInstance();
             selected.set(year, month, dayOfMonth);
             currentSelectedDate = selected;
-            updateMonthYearText(selected);
             loadNotesForDate(year, month, dayOfMonth);
         });
 
@@ -107,11 +100,6 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
                     currentSelectedDate.get(Calendar.DAY_OF_MONTH)
             );
         }
-    }
-
-    private void updateMonthYearText(Calendar cal) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
-        textMonthYear.setText(sdf.format(cal.getTime()));
     }
 
     private void loadNotesForDate(int year, int month, int dayOfMonth) {
@@ -152,4 +140,3 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
         }
     }
 }
-

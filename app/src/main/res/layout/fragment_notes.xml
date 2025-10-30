@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notes_fragment_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <!-- Search bar -->
     <EditText
@@ -19,14 +18,16 @@
         android:drawablePadding="8dp"
         android:hint="@string/search"
         android:paddingVertical="8dp"
+        android:paddingTop="8dp"
         android:singleLine="true"
         android:textColorHint="@android:color/darker_gray" />
 
-    <!-- Tags container with plus button on the left -->
+    <!-- Tags container with plus button -->
     <LinearLayout
         android:id="@+id/tags_container_outer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/search_bar"
         android:orientation="horizontal"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
@@ -59,32 +60,36 @@
         </HorizontalScrollView>
     </LinearLayout>
 
-    <!-- RecyclerView for notes -->
+    <!-- RecyclerView for notes - takes all available space -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_notes"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/tags_container_outer"
+        android:layout_above="@+id/tv_no_matches" />
 
-    <!-- Floating action button remains at bottom end -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        android:contentDescription="Add"
-        app:srcCompat="@android:drawable/ic_input_add" />
-
+    <!-- No matches message -->
     <TextView
         android:id="@+id/tv_no_matches"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:text="No matching notes found"
         android:textAlignment="center"
         android:visibility="gone"
         android:textColor="@android:color/darker_gray"
         android:padding="16dp" />
 
-</LinearLayout>
+    <!-- Floating action button - floats above the content -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:contentDescription="Add"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
+</RelativeLayout>
 

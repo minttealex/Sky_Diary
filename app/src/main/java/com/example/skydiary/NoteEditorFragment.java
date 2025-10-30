@@ -100,7 +100,7 @@ public class NoteEditorFragment extends BaseNoteFragment {
             currentNote.setName(name);
             currentNote.setLocation(location);
             currentNote.setText(text);
-            currentNote.setTimestamp(System.currentTimeMillis());
+            // Keep original timestamp unless explicitly changed via date picker
             currentNote.setTags(new ArrayList<>(selectedTags));
             currentNote.setImages(new ArrayList<>(noteImages));
             NoteStorage.getInstance(requireContext()).updateNote(currentNote);

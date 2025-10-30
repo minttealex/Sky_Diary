@@ -8,7 +8,7 @@
     <!-- Top bar container -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="66dp"
         android:background="?attr/colorPrimary"
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
@@ -44,7 +44,7 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="66dp"
         android:padding="16dp"
         android:fillViewport="true">
 

@@ -66,6 +66,9 @@
     <string name="error_starting_camera">Error starting camera</string>
     <string name="error_processing_camera_image">Error processing camera image</string>
     <string name="image_rotated">Image rotated %d°</string>
+    <string name="save_to_gallery">Save to Gallery</string>
+    <string name="image_saved_to_gallery">Image saved to gallery</string>
+    <string name="error_saving_image">Error saving image</string>
 
     <!-- Tags -->
     <string name="add_tag">Add tag</string>

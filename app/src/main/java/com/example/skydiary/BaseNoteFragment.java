@@ -8,10 +8,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.media.MediaScannerConnection;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -42,11 +44,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -231,7 +236,8 @@ public abstract class BaseNoteFragment extends Fragment {
                 (dp, year, month, day) -> {
                     selectedDate.set(year, month, day);
                     if (currentNote != null) {
-                        currentNote.setTimestamp(System.currentTimeMillis());
+                        // Update the note's timestamp to the selected date
+                        currentNote.setTimestamp(selectedDate.getTimeInMillis());
                         Toast.makeText(requireContext(), getString(R.string.date_changed), Toast.LENGTH_SHORT).show();
                     }
                 },
@@ -309,7 +315,8 @@ public abstract class BaseNoteFragment extends Fragment {
                     requireContext().grantUriPermission(
                             resolvedIntentInfo.activityInfo.packageName,
                             currentCameraUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
                     );
                 }
 
@@ -325,7 +332,7 @@ public abstract class BaseNoteFragment extends Fragment {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new java.util.Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
 
-        File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+        File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         if (!storageDir.exists()) {
             storageDir.mkdirs();
         }
@@ -447,6 +454,7 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected ImageView createImageView(NoteImage noteImage) {
+        // Use regular ImageView (no zooming)
         ImageView imageView = new ImageView(requireContext());
         imageView.setTag(noteImage);
         imageView.setContentDescription(getString(R.string.image_content_description));
@@ -600,10 +608,8 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected void setupImageInteractions(ImageView imageView) {
-        // Show menu on click
-        imageView.setOnClickListener(v -> {
-            showImageOptionsDialog(imageView);
-        });
+        // Simple click listener to show image options
+        imageView.setOnClickListener(v -> showImageOptionsDialog(imageView));
     }
 
     protected void rotateImage(ImageView imageView) {
@@ -657,6 +663,7 @@ public abstract class BaseNoteFragment extends Fragment {
                 getString(R.string.rotate),
                 getString(R.string.move_up),
                 getString(R.string.move_down),
+                getString(R.string.save_to_gallery), // NEW OPTION
                 getString(R.string.delete_picture),
                 getString(R.string.cancel)
         };
@@ -674,7 +681,10 @@ public abstract class BaseNoteFragment extends Fragment {
                         case 2: // Move Down
                             moveImageDown(imageView);
                             break;
-                        case 3: // Delete Picture
+                        case 3: // Save to Gallery - NEW CASE
+                            saveImageToGallery(imageView);
+                            break;
+                        case 4: // Delete Picture
                             confirmDeleteImage(imageView);
                             break;
                     }
@@ -755,7 +765,9 @@ public abstract class BaseNoteFragment extends Fragment {
         currentNote.setName(name);
         currentNote.setLocation(location);
         currentNote.setText(text);
-        currentNote.setTimestamp(System.currentTimeMillis());
+        // REMOVED: Don't update timestamp on silent save
+        // currentNote.setTimestamp(System.currentTimeMillis());
+
         currentNote.setTags(new ArrayList<>(selectedTags));
         currentNote.setImages(new ArrayList<>(noteImages));
 
@@ -781,6 +793,55 @@ public abstract class BaseNoteFragment extends Fragment {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
         });
         fragment.show(getParentFragmentManager(), "TagEditFragment");
+    }
+
+    // NEW METHOD: Save image to gallery
+    protected void saveImageToGallery(ImageView imageView) {
+        NoteImage noteImage = (NoteImage) imageView.getTag();
+
+        try {
+            File imageFile = new File(noteImage.getImagePath());
+            if (imageFile.exists()) {
+                // Save to public Pictures directory
+                File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                File appDir = new File(picturesDir, "SkyDiary");
+                if (!appDir.exists()) {
+                    appDir.mkdirs();
+                }
+
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+                String fileName = "SkyDiary_" + timeStamp + ".jpg";
+                File destFile = new File(appDir, fileName);
+
+                // Copy the file
+                FileInputStream in = new FileInputStream(imageFile);
+                FileOutputStream out = new FileOutputStream(destFile);
+
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+                in.close();
+                out.flush();
+                out.close();
+
+                // Notify media scanner
+                MediaScannerConnection.scanFile(
+                        requireContext(),
+                        new String[]{destFile.getAbsolutePath()},
+                        new String[]{"image/jpeg"},
+                        null
+                );
+
+                Toast.makeText(requireContext(), getString(R.string.image_saved_to_gallery), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.error_saving_image), Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), getString(R.string.error_saving_image), Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Location Methods

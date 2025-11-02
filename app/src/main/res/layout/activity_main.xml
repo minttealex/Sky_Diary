@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@drawable/starry_background">
+    tools:context=".MainActivity">
+
+    <!-- Кастомный фон со звездами -->
+    <com.example.skydiary.StarryBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:startColor="@color/start_color"
+        app:endColor="@color/end_color" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -32,4 +38,4 @@
             app:menu="@menu/bottom_nav_menu" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

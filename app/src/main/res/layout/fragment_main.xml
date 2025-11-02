@@ -1,61 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/starry_background"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="32dp">
+    android:layout_height="match_parent">
 
-    <!-- App Name with better font -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sky Diary"
-        android:textColor="@color/text_primary"
-        android:textSize="62sp"
-        android:fontFamily="cursive"
-        android:textStyle="italic"
-        android:layout_marginBottom="80dp"
-        android:shadowColor="#80000000"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="6" />
+    <!-- Кастомный фон со звездами -->
+    <com.example.skydiary.StarryBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:startColor="@color/start_color"
+        app:endColor="@color/end_color" />
 
-    <!-- Constellations Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_constellations"
-        android:layout_width="220dp"
-        android:layout_height="60dp"
-        android:text="@string/constellations"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:cornerRadius="20dp"
-        android:layout_marginBottom="24dp"
-        style="@style/Widget.Material3.Button" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
 
-    <!-- New Note Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_new_note"
-        android:layout_width="220dp"
-        android:layout_height="60dp"
-        android:text="@string/new_note"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:cornerRadius="20dp"
-        android:layout_marginBottom="24dp"
-        style="@style/Widget.Material3.Button" />
+        <!-- App Name with better font -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sky Diary"
+            android:textColor="@color/text_primary"
+            android:textSize="62sp"
+            android:fontFamily="cursive"
+            android:textStyle="italic"
+            android:layout_marginBottom="80dp"
+            android:shadowColor="#80000000"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="6" />
 
-    <!-- New Picture Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_new_picture"
-        android:layout_width="220dp"
-        android:layout_height="60dp"
-        android:text="@string/new_picture"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        app:cornerRadius="20dp"
-        style="@style/Widget.Material3.Button" />
+        <!-- Constellations Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_constellations"
+            android:layout_width="220dp"
+            android:layout_height="60dp"
+            android:text="@string/constellations"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            app:cornerRadius="20dp"
+            android:layout_marginBottom="24dp"
+            style="@style/Widget.Material3.Button" />
 
-</LinearLayout>
+        <!-- New Note Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_new_note"
+            android:layout_width="220dp"
+            android:layout_height="60dp"
+            android:text="@string/new_note"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            app:cornerRadius="20dp"
+            android:layout_marginBottom="24dp"
+            style="@style/Widget.Material3.Button" />
+
+        <!-- New Picture Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_new_picture"
+            android:layout_width="220dp"
+            android:layout_height="60dp"
+            android:text="@string/new_picture"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            app:cornerRadius="20dp"
+            style="@style/Widget.Material3.Button" />
+
+    </LinearLayout>
+
+</FrameLayout>

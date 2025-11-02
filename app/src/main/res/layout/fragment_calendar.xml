@@ -5,6 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Кастомный фон со звездами -->
+    <com.example.skydiary.StarryBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:startColor="@color/start_color"
+        app:endColor="@color/end_color" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -37,6 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"/>
+
         </FrameLayout>
     </LinearLayout>
 

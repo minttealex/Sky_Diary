@@ -15,9 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -29,24 +27,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,8 +65,6 @@ public abstract class BaseNoteFragment extends Fragment {
     protected Uri currentCameraUri;
     private File currentCameraFile;
     private static final int LOCATION_PERMISSION_REQUEST = 2001;
-
-    // Modern Activity Result API
     protected final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -82,19 +72,15 @@ public abstract class BaseNoteFragment extends Fragment {
                     Intent data = result.getData();
 
                     if (currentCameraUri != null) {
-                        // Handle camera image (saved to file)
                         handleCameraImageFromFile();
                         currentCameraUri = null;
                     } else if (data != null) {
-                        // Handle gallery images
                         handleImagePickerResult(data);
                     }
                 } else if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_CANCELED) {
-                    // Camera was cancelled, clean up
                     cleanupCameraFiles();
                 }
 
-                // Always clean up permissions
                 if (currentCameraUri != null) {
                     requireContext().revokeUriPermission(currentCameraUri,
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
@@ -126,7 +112,6 @@ public abstract class BaseNoteFragment extends Fragment {
         btnGetLocation = view.findViewById(R.id.button_get_location);
         scrollView = view.findViewById(R.id.scroll_view);
 
-        // Initialize images container
         setupImagesContainer();
 
         selectedDate = Calendar.getInstance();
@@ -134,14 +119,12 @@ public abstract class BaseNoteFragment extends Fragment {
         btnBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
         btnMenu.setOnClickListener(v -> showPopupMenu());
 
-        // Setup location functionality
         if (btnGetLocation != null) {
             btnGetLocation.setOnClickListener(v -> requestCurrentLocation());
         }
 
         setupSpecificViews(view);
 
-        // Load existing data if editing
         if (currentNote != null) {
             loadExistingNoteData();
         }
@@ -152,18 +135,15 @@ public abstract class BaseNoteFragment extends Fragment {
         editNoteText.setText(currentNote.getText());
         selectedDate.setTimeInMillis(currentNote.getTimestamp());
 
-        // Load location if exists
         if (currentNote.getLocation() != null) {
             editNoteLocation.setText(currentNote.getLocation());
         }
 
-        // Initialize selected tags from current note
         selectedTags.clear();
         if (currentNote.getTags() != null) {
             selectedTags.addAll(currentNote.getTags());
         }
 
-        // Load images from current note
         noteImages.clear();
         if (currentNote.getImages() != null) {
             noteImages.addAll(currentNote.getImages());
@@ -176,7 +156,6 @@ public abstract class BaseNoteFragment extends Fragment {
         if (scrollChild instanceof LinearLayout) {
             LinearLayout mainLayout = (LinearLayout) scrollChild;
 
-            // Create images container
             imagesContainer = new LinearLayout(requireContext());
             imagesContainer.setOrientation(LinearLayout.VERTICAL);
             imagesContainer.setLayoutParams(new LinearLayout.LayoutParams(
@@ -185,7 +164,6 @@ public abstract class BaseNoteFragment extends Fragment {
             ));
             imagesContainer.setPadding(0, 16, 0, 16);
 
-            // Add images container after the text fields
             mainLayout.addView(imagesContainer);
         }
     }
@@ -193,7 +171,6 @@ public abstract class BaseNoteFragment extends Fragment {
     protected void displayExistingImages() {
         imagesContainer.removeAllViews();
 
-        // Sort images by position using Comparator
         List<NoteImage> sortedImages = new ArrayList<>(noteImages);
         sortedImages.sort(Comparator.comparingInt(NoteImage::getPosition));
 
@@ -236,7 +213,6 @@ public abstract class BaseNoteFragment extends Fragment {
                 (dp, year, month, day) -> {
                     selectedDate.set(year, month, day);
                     if (currentNote != null) {
-                        // Update the note's timestamp to the selected date
                         currentNote.setTimestamp(selectedDate.getTimeInMillis());
                         Toast.makeText(requireContext(), getString(R.string.date_changed), Toast.LENGTH_SHORT).show();
                     }
@@ -290,7 +266,6 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected void dispatchTakePictureIntent() {
         try {
-            // Check camera permission first
             if (!((MainActivity) requireActivity()).checkCameraPermission()) {
                 return;
             }
@@ -306,7 +281,6 @@ public abstract class BaseNoteFragment extends Fragment {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
                 takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-                // Grant temporary read permission to the camera app
                 List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
                         .getPackageManager().queryIntentActivities(takePictureIntent,
                                 android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
@@ -333,6 +307,7 @@ public abstract class BaseNoteFragment extends Fragment {
         String imageFileName = "JPEG_" + timeStamp + "_";
 
         File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        assert storageDir != null;
         if (!storageDir.exists()) {
             storageDir.mkdirs();
         }
@@ -357,13 +332,11 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected void handleImagePickerResult(Intent data) {
         if (data.getClipData() != null) {
-            // Multiple images selected
             for (int i = 0; i < data.getClipData().getItemCount(); i++) {
                 Uri imageUri = data.getClipData().getItemAt(i).getUri();
                 addImageToNote(imageUri);
             }
         } else if (data.getData() != null) {
-            // Single image selected
             Uri imageUri = data.getData();
             addImageToNote(imageUri);
         }
@@ -372,30 +345,23 @@ public abstract class BaseNoteFragment extends Fragment {
     protected void handleCameraImageFromFile() {
         try {
             if (currentCameraFile != null && currentCameraFile.exists()) {
-                // Add the image directly using the file path
                 String internalImagePath = currentCameraFile.getAbsolutePath();
 
-                if (internalImagePath != null) {
-                    NoteImage noteImage = new NoteImage(internalImagePath, noteImages.size());
-                    noteImages.add(noteImage);
+                NoteImage noteImage = new NoteImage(internalImagePath, noteImages.size());
+                noteImages.add(noteImage);
 
-                    ImageView imageView = createImageView(noteImage);
-                    imagesContainer.addView(imageView);
+                ImageView imageView = createImageView(noteImage);
+                imagesContainer.addView(imageView);
 
-                    // Auto-save if editing existing note
-                    if (currentNote != null) {
-                        saveNoteSilently();
-                    }
-
-                    Toast.makeText(requireContext(), getString(R.string.image_added), Toast.LENGTH_SHORT).show();
-
-                    // Scan the file so it appears in gallery
-                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    mediaScanIntent.setData(Uri.fromFile(currentCameraFile));
-                    requireContext().sendBroadcast(mediaScanIntent);
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.error_loading_image), Toast.LENGTH_SHORT).show();
+                if (currentNote != null) {
+                    saveNoteSilently();
                 }
+
+                Toast.makeText(requireContext(), getString(R.string.image_added), Toast.LENGTH_SHORT).show();
+
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                mediaScanIntent.setData(Uri.fromFile(currentCameraFile));
+                requireContext().sendBroadcast(mediaScanIntent);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -408,8 +374,6 @@ public abstract class BaseNoteFragment extends Fragment {
     private void cleanupCameraFiles() {
         if (currentCameraFile != null) {
             try {
-                // Don't delete the file immediately as we're using it
-                // It will be managed by the app's storage system
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -420,13 +384,11 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected void addImageToNote(Uri imageUri) {
         try {
-            // For camera images, we already have the file path, so no need to save again
             String internalImagePath;
 
             if (currentCameraFile != null && imageUri.toString().contains(currentCameraFile.getAbsolutePath())) {
                 internalImagePath = currentCameraFile.getAbsolutePath();
             } else {
-                // Save gallery images to internal storage
                 NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
                 internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), imageUri);
             }
@@ -438,7 +400,6 @@ public abstract class BaseNoteFragment extends Fragment {
                 ImageView imageView = createImageView(noteImage);
                 imagesContainer.addView(imageView);
 
-                // Auto-save if editing existing note
                 if (currentNote != null) {
                     saveNoteSilently();
                 }
@@ -454,7 +415,6 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected ImageView createImageView(NoteImage noteImage) {
-        // Use regular ImageView (no zooming)
         ImageView imageView = new ImageView(requireContext());
         imageView.setTag(noteImage);
         imageView.setContentDescription(getString(R.string.image_content_description));
@@ -469,24 +429,19 @@ public abstract class BaseNoteFragment extends Fragment {
         imageView.setLayoutParams(params);
 
         try {
-            // Load and display the image with EXIF orientation correction
             Bitmap bitmap = loadAndScaleImage(noteImage.getImagePath());
             if (bitmap != null) {
-                // Apply EXIF orientation correction
                 bitmap = correctImageOrientation(bitmap, noteImage.getImagePath());
 
                 imageView.setImageBitmap(bitmap);
 
-                // Set the image dimensions based on the scaled bitmap
                 ViewGroup.LayoutParams currentParams = imageView.getLayoutParams();
                 currentParams.width = bitmap.getWidth();
                 currentParams.height = bitmap.getHeight();
                 imageView.setLayoutParams(currentParams);
 
-                // Apply saved rotation
                 imageView.setRotation(noteImage.getRotation());
 
-                // Store the original dimensions for rotation
                 noteImage.setOriginalWidth(bitmap.getWidth());
                 noteImage.setOriginalHeight(bitmap.getHeight());
             }
@@ -506,7 +461,6 @@ public abstract class BaseNoteFragment extends Fragment {
                 return null;
             }
 
-            // First, get the image dimensions without loading the full bitmap
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(imagePath, options);
@@ -514,26 +468,22 @@ public abstract class BaseNoteFragment extends Fragment {
             int imageWidth = options.outWidth;
             int imageHeight = options.outHeight;
 
-            // Calculate the display size - use full screen width with some padding
             DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            int maxWidth = displayMetrics.widthPixels - 100; // 50dp padding on each side
-            int maxHeight = (int) (displayMetrics.heightPixels * 0.7); // Max 70% of screen height
+            int maxWidth = displayMetrics.widthPixels - 100;
+            int maxHeight = (int) (displayMetrics.heightPixels * 0.7);
 
-            // Calculate scaling factor
             float scale = Math.min((float) maxWidth / imageWidth, (float) maxHeight / imageHeight);
-            scale = Math.min(scale, 1.0f); // Don't scale up
+            scale = Math.min(scale, 1.0f);
 
             int scaledWidth = (int) (imageWidth * scale);
             int scaledHeight = (int) (imageHeight * scale);
 
-            // Load the bitmap with the calculated dimensions
             options.inJustDecodeBounds = false;
             options.inSampleSize = calculateInSampleSize(options, scaledWidth, scaledHeight);
             options.inPreferredConfig = Bitmap.Config.RGB_565;
 
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
             if (bitmap != null) {
-                // Scale to exact dimensions if needed
                 if (bitmap.getWidth() != scaledWidth || bitmap.getHeight() != scaledHeight) {
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
                     bitmap.recycle();
@@ -608,48 +558,39 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected void setupImageInteractions(ImageView imageView) {
-        // Simple click listener to show image options
         imageView.setOnClickListener(v -> showImageOptionsDialog(imageView));
     }
 
     protected void rotateImage(ImageView imageView) {
         NoteImage noteImage = (NoteImage) imageView.getTag();
 
-        // Get current rotation and add 90 degrees
         float currentRotation = noteImage.getRotation();
         float newRotation = (currentRotation + 90) % 360;
         noteImage.setRotation(newRotation);
 
-        // Apply rotation with animation
         imageView.animate()
                 .rotation(newRotation)
                 .setDuration(200)
                 .start();
 
-        // Update image dimensions after rotation to prevent overlapping
         updateImageDimensionsAfterRotation(imageView, noteImage, newRotation);
 
-        // Show rotation feedback
         String rotationText = getString(R.string.image_rotated, (int) newRotation);
         Toast.makeText(requireContext(), rotationText, Toast.LENGTH_SHORT).show();
 
-        // Auto-save if editing existing note
         if (currentNote != null) {
             saveNoteSilently();
         }
     }
 
     protected void updateImageDimensionsAfterRotation(ImageView imageView, NoteImage noteImage, float newRotation) {
-        // When rotating by 90 or 270 degrees, swap width and height to maintain aspect ratio
         if (newRotation % 180 == 90) {
-            // Swap width and height for 90/270 degree rotations
             ViewGroup.LayoutParams params = imageView.getLayoutParams();
             int temp = params.width;
             params.width = params.height;
             params.height = temp;
             imageView.setLayoutParams(params);
 
-            // Also update the stored dimensions
             if (noteImage.getOriginalWidth() > 0 && noteImage.getOriginalHeight() > 0) {
                 int tempOriginal = noteImage.getOriginalWidth();
                 noteImage.setOriginalWidth(noteImage.getOriginalHeight());
@@ -663,7 +604,7 @@ public abstract class BaseNoteFragment extends Fragment {
                 getString(R.string.rotate),
                 getString(R.string.move_up),
                 getString(R.string.move_down),
-                getString(R.string.save_to_gallery), // NEW OPTION
+                getString(R.string.save_to_gallery),
                 getString(R.string.delete_picture),
                 getString(R.string.cancel)
         };
@@ -765,8 +706,6 @@ public abstract class BaseNoteFragment extends Fragment {
         currentNote.setName(name);
         currentNote.setLocation(location);
         currentNote.setText(text);
-        // REMOVED: Don't update timestamp on silent save
-        // currentNote.setTimestamp(System.currentTimeMillis());
 
         currentNote.setTags(new ArrayList<>(selectedTags));
         currentNote.setImages(new ArrayList<>(noteImages));
@@ -795,14 +734,12 @@ public abstract class BaseNoteFragment extends Fragment {
         fragment.show(getParentFragmentManager(), "TagEditFragment");
     }
 
-    // NEW METHOD: Save image to gallery
     protected void saveImageToGallery(ImageView imageView) {
         NoteImage noteImage = (NoteImage) imageView.getTag();
 
         try {
             File imageFile = new File(noteImage.getImagePath());
             if (imageFile.exists()) {
-                // Save to public Pictures directory
                 File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                 File appDir = new File(picturesDir, "SkyDiary");
                 if (!appDir.exists()) {
@@ -826,7 +763,6 @@ public abstract class BaseNoteFragment extends Fragment {
                 out.flush();
                 out.close();
 
-                // Notify media scanner
                 MediaScannerConnection.scanFile(
                         requireContext(),
                         new String[]{destFile.getAbsolutePath()},
@@ -844,7 +780,6 @@ public abstract class BaseNoteFragment extends Fragment {
         }
     }
 
-    // Location Methods
     protected void requestCurrentLocation() {
         if (!LocationHelper.hasLocationPermission(requireContext())) {
             LocationHelper.requestLocationPermission(requireActivity(), LOCATION_PERMISSION_REQUEST);
@@ -866,7 +801,6 @@ public abstract class BaseNoteFragment extends Fragment {
         try {
             LocationManager locationManager = (LocationManager) requireContext().getSystemService(android.content.Context.LOCATION_SERVICE);
             if (locationManager != null && LocationHelper.hasLocationPermission(requireContext())) {
-                // Try to get fresh location with a location listener
                 android.location.LocationListener locationListener = new android.location.LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
@@ -876,7 +810,6 @@ public abstract class BaseNoteFragment extends Fragment {
                             editNoteLocation.setText(formattedLocation);
                             Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
 
-                            // Remove this listener after getting the location
                             locationManager.removeUpdates(this);
                         }
                     }
@@ -886,13 +819,11 @@ public abstract class BaseNoteFragment extends Fragment {
                     @Override public void onProviderDisabled(String provider) {}
                 };
 
-                // Request location updates
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, null);
                 } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                     locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
                 } else {
-                    // Fallback to last known location
                     Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (location == null) {
                         location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -916,7 +847,7 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     // Handle permission results
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getCurrentLocation();

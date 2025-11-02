@@ -1,5 +1,6 @@
 package com.example.skydiary;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,7 +8,6 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.button.MaterialButton;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -24,38 +26,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainFragment extends Fragment {
 
     private Uri currentCameraUri;
 
-    // Modern Activity Result API for image picking
     private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_OK) {
+                requireActivity();
+                if (result.getResultCode() == Activity.RESULT_OK) {
                     Intent data = result.getData();
 
                     if (currentCameraUri != null) {
-                        // Handle camera image
                         handleCameraImageFromFile();
                         currentCameraUri = null;
                     } else if (data != null) {
-                        // Handle gallery images
                         handleImagePickerResult(data);
                     }
-                } else if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_CANCELED) {
-                    // Camera was cancelled, clean up
-                    if (currentCameraUri != null) {
-                        try {
-                            File cameraFile = new File(currentCameraUri.getPath());
-                            if (cameraFile.exists()) {
-                                cameraFile.delete();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        currentCameraUri = null;
+                } else {
+                    requireActivity();
+                    if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                        cleanupCameraFiles();
                     }
                 }
             }
@@ -72,16 +65,23 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Button addNoteButton = view.findViewById(R.id.add_note_button);
-        Button addPictureButton = view.findViewById(R.id.add_picture_button);
+        MaterialButton btnConstellations = view.findViewById(R.id.btn_constellations);
+        MaterialButton btnNewNote = view.findViewById(R.id.btn_new_note);
+        MaterialButton btnNewPicture = view.findViewById(R.id.btn_new_picture);
 
-        addNoteButton.setOnClickListener(v ->
+        btnConstellations.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, NoteEditorFragment.newInstance())
-                        .addToBackStack(null)
+                        .replace(R.id.fragment_container, new ConstellationsFragment())
+                        .addToBackStack("main_to_constellations")
                         .commit());
 
-        addPictureButton.setOnClickListener(v -> showImageSourceDialog());
+        btnNewNote.setOnClickListener(v ->
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, NoteEditorFragment.newInstance())
+                        .addToBackStack("main_to_note_editor")
+                        .commit());
+
+        btnNewPicture.setOnClickListener(v -> showImageSourceDialog());
     }
 
     private void showImageSourceDialog() {
@@ -107,6 +107,9 @@ public class MainFragment extends Fragment {
                 case 2: // Choose Multiple
                     dispatchPickPictureIntent(true);
                     break;
+                case 3: // Cancel
+                    dialog.dismiss();
+                    break;
             }
         });
         builder.show();
@@ -117,31 +120,31 @@ public class MainFragment extends Fragment {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             File photoFile = createImageFile();
-            if (photoFile != null) {
-                currentCameraUri = FileProvider.getUriForFile(requireContext(),
-                        requireContext().getPackageName() + ".fileprovider",
-                        photoFile);
+            currentCameraUri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    photoFile);
 
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
 
-                // Grant permissions
-                List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
-                        .getPackageManager().queryIntentActivities(takePictureIntent,
-                                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+            List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
+                    .getPackageManager().queryIntentActivities(takePictureIntent,
+                            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
 
-                for (android.content.pm.ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
-                    requireContext().grantUriPermission(
-                            resolvedIntentInfo.activityInfo.packageName,
-                            currentCameraUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    );
-                }
-
-                imagePickerLauncher.launch(takePictureIntent);
+            for (android.content.pm.ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+                requireContext().grantUriPermission(
+                        resolvedIntentInfo.activityInfo.packageName,
+                        currentCameraUri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
             }
+
+            imagePickerLauncher.launch(takePictureIntent);
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), getString(R.string.error_starting_camera), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(),
+                    getString(R.string.error_starting_camera),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -176,19 +179,16 @@ public class MainFragment extends Fragment {
         List<Uri> imageUris = new ArrayList<>();
 
         if (data.getClipData() != null) {
-            // Multiple images selected
             for (int i = 0; i < data.getClipData().getItemCount(); i++) {
                 Uri imageUri = data.getClipData().getItemAt(i).getUri();
                 imageUris.add(imageUri);
             }
         } else if (data.getData() != null) {
-            // Single image selected
             Uri imageUri = data.getData();
             imageUris.add(imageUri);
         }
 
         if (!imageUris.isEmpty()) {
-            // Create a new note with the selected images
             createNoteWithImages(imageUris);
         }
     }
@@ -204,33 +204,35 @@ public class MainFragment extends Fragment {
                     imageUris.add(Uri.parse(internalImagePath));
                     createNoteWithImages(imageUris);
 
-                    // Scan the file so it appears in gallery
                     Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                     mediaScanIntent.setData(currentCameraUri);
                     requireContext().sendBroadcast(mediaScanIntent);
                 } else {
-                    Toast.makeText(requireContext(), getString(R.string.error_loading_image), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(),
+                            getString(R.string.error_loading_image),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), getString(R.string.error_processing_camera_image), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(),
+                    getString(R.string.error_processing_camera_image),
+                    Toast.LENGTH_SHORT).show();
+        } finally {
+            cleanupCameraFiles();
         }
     }
 
     private void createNoteWithImages(List<Uri> imageUris) {
-        // Create a new note with the selected images
         List<NoteImage> noteImages = new ArrayList<>();
         for (int i = 0; i < imageUris.size(); i++) {
             noteImages.add(new NoteImage(imageUris.get(i).toString(), i));
         }
 
-        // Create note name with date
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault());
         String dateString = sdf.format(new Date());
         String noteName = getString(R.string.note_from_format, dateString);
 
-        // Create a note with just images (empty text)
         Note newNote = new Note(
                 noteName,
                 "",
@@ -239,21 +241,33 @@ public class MainFragment extends Fragment {
                 noteImages
         );
 
-        // Save the note
         NoteStorage.getInstance(requireContext()).addNote(newNote);
 
-        // Show success message
         if (imageUris.size() == 1) {
-            Toast.makeText(requireContext(), getString(R.string.image_note_created_single), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(),
+                    getString(R.string.image_note_created_single),
+                    Toast.LENGTH_SHORT).show();
         } else {
             String message = getString(R.string.image_note_created_multiple, imageUris.size());
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
         }
 
-        // Navigate to notes list to show the new note
         requireActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new NotesFragment())
                 .commit();
     }
-}
 
+    private void cleanupCameraFiles() {
+        if (currentCameraUri != null) {
+            try {
+                File cameraFile = new File(Objects.requireNonNull(currentCameraUri.getPath()));
+                if (cameraFile.exists()) {
+                    cameraFile.delete();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            currentCameraUri = null;
+        }
+    }
+}

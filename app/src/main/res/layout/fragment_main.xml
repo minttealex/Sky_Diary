@@ -1,27 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/starry_background"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
 
-    <Button
-        android:id="@+id/add_note_button"
-        android:layout_width="0dp"
+    <!-- App Name with better font -->
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_note"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="16dp" />
+        android:text="Sky Diary"
+        android:textColor="@color/text_primary"
+        android:textSize="62sp"
+        android:fontFamily="cursive"
+        android:textStyle="italic"
+        android:layout_marginBottom="80dp"
+        android:shadowColor="#80000000"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="6" />
 
-    <Button
-        android:id="@+id/add_picture_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/add_picture"
-        app:layout_constraintTop_toBottomOf="@id/add_note_button"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_margin="16dp" />
+    <!-- Constellations Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_constellations"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
+        android:text="@string/constellations"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        app:cornerRadius="20dp"
+        android:layout_marginBottom="24dp"
+        style="@style/Widget.Material3.Button" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- New Note Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_new_note"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
+        android:text="@string/new_note"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        app:cornerRadius="20dp"
+        android:layout_marginBottom="24dp"
+        style="@style/Widget.Material3.Button" />
+
+    <!-- New Picture Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_new_picture"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
+        android:text="@string/new_picture"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        app:cornerRadius="20dp"
+        style="@style/Widget.Material3.Button" />
+
+</LinearLayout>

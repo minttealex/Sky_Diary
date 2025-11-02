@@ -12,6 +12,7 @@
 
     <!-- Notes -->
     <string name="add_note">Добавить запись</string>
+    <string name="new_note">Новая запись</string>
     <string name="note_name">Название записи</string>
     <string name="date">Дата</string>
     <string name="enter_note_name">Название записи (необязательно)</string>
@@ -21,23 +22,12 @@
     <string name="note_from_format">Запись от %s</string>
     <string name="note_not_found">Запись не найдена</string>
     <string name="note_deleted">Запись удалена</string>
-    <string name="search">Поиск</string>
     <string name="note_with_images">Запись с изображениями</string>
-
-    <!-- Location -->
-    <string name="location_hint">Добавить местоположение (координаты или название)</string>
-    <string name="get_current_location">Получить текущее местоположение</string>
-    <string name="location_permission_required">Для получения местоположения требуется разрешение</string>
-    <string name="location_permission_denied">Разрешение на местоположение отклонено</string>
-    <string name="getting_location">Получение вашего местоположения…</string>
-    <string name="location_retrieved">Местоположение получено</string>
-    <string name="location_error">Ошибка получения местоположения</string>
-    <string name="enable_gps">Пожалуйста, включите GPS для получения местоположения</string>
-    <string name="invalid_coordinates">Неверный формат координат</string>
-    <string name="coordinates_format_hint">Формат: 40.7128, -74.0060 или название места</string>
+    <string name="search">Поиск</string>
 
     <!-- Pictures -->
     <string name="add_picture">Добавить изображение</string>
+    <string name="new_picture">Новое изображение</string>
     <string name="take_photo">Сделать фото</string>
     <string name="choose_from_gallery">Выбрать из галереи</string>
     <string name="choose_multiple_from_gallery">Выбрать несколько из галереи</string>
@@ -58,6 +48,9 @@
     <string name="move_down">Переместить вниз</string>
     <string name="delete_picture">Удалить изображение</string>
     <string name="delete_picture_confirmation">Are you sure you want to delete this picture?</string>
+    <string name="save_to_gallery">Сохранить в галерею</string>
+    <string name="image_saved_to_gallery">Изображение сохранено в галерею</string>
+    <string name="image_rotated">Изображение повёрнуто на %d°</string>
     <string name="image_too_large">Изображение слишком большое. Максимальный размер %d МБ</string>
     <string name="error_loading_image">Ошибка загрузки изображения</string>
     <string name="error_displaying_image">Ошибка отображения изображения</string>
@@ -65,10 +58,19 @@
     <string name="error_loading_image_file">Ошибка загрузки файла изображения</string>
     <string name="error_starting_camera">Ошибка запуска камеры</string>
     <string name="error_processing_camera_image">Ошибка обработки изображения с камеры</string>
-    <string name="image_rotated">Изображение повёрнуто на %d°</string>
-    <string name="save_to_gallery">Сохранить в галерею</string>
-    <string name="image_saved_to_gallery">Изображение сохранено в галерею</string>
     <string name="error_saving_image">Ошибка сохранения изображения</string>
+
+    <!-- Location -->
+    <string name="location_hint">Добавить местоположение (координаты или название)</string>
+    <string name="get_current_location">Получить текущее местоположение</string>
+    <string name="location_permission_required">Для получения местоположения требуется разрешение</string>
+    <string name="location_permission_denied">Разрешение на местоположение отклонено</string>
+    <string name="getting_location">Получение вашего местоположения…</string>
+    <string name="location_retrieved">Местоположение получено</string>
+    <string name="location_error">Ошибка получения местоположения</string>
+    <string name="enable_gps">Пожалуйста, включите GPS для получения местоположения</string>
+    <string name="invalid_coordinates">Неверный формат координат</string>
+    <string name="coordinates_format_hint">Формат: 40.7128, -74.0060 или название места</string>
 
     <!-- Tags -->
     <string name="add_tag">Добавить тег</string>
@@ -90,6 +92,33 @@
     <string name="choose_date_to_see_notes">Выберите дату, чтобы увидеть ваши записи</string>
     <string name="no_notes_added_on_day">В этот день не было добавлено записей</string>
 
+    <!-- Settings -->
+    <string name="settings">Настройки</string>
+    <string name="theme">Тема</string>
+    <string name="light_theme">Светлая тема</string>
+    <string name="dark_theme">Тёмная тема</string>
+    <string name="language">Язык</string>
+    <string name="english">Английский</string>
+    <string name="russian">Русский</string>
+
+    <!-- Constellations -->
+    <string name="constellations">Созвездия</string>
+    <string name="search_constellations">Искать созвездия…</string>
+    <string name="favorites">Избранное</string>
+    <string name="no_favorites">Избранные созвездия отсутствуют</string>
+    <string name="all_constellations">Все созвездия</string>
+    <string name="constellation_name">Название созвездия</string>
+    <string name="constellation_image">Изображение созвездия</string>
+    <string name="toggle_favorite">Добавить в избранное</string>
+    <string name="stars">звёзды</string>
+    <string name="star_count">0 звёзд</string>
+    <string name="star_count_format">%d звёзд</string>
+
+    <!-- Image notes -->
+    <string name="image_note_created_single">Запись с изображением создана</string>
+    <string name="image_note_created_multiple">Запись создана с %d изображениями</string>
+    <string name="filtering_by_tags_format">Фильтрация по %d тегам</string>
+
     <!-- Confirmation dialogs -->
     <string name="confirm_save">Подтвердить сохранение</string>
     <string name="confirm_save_message">Вы уверены, что хотите сохранить изменения?</string>
@@ -106,22 +135,12 @@
     <string name="apply">Применить</string>
     <string name="remove">Удалить</string>
 
-    <!-- Settings -->
-    <string name="light_theme">Светлая тема</string>
-    <string name="dark_theme">Тёмная тема</string>
-    <string name="english">Английский</string>
-    <string name="russian">Русский</string>
-
     <!-- Accessibility -->
     <string name="back_button">Назад</string>
+    <string name="back">Назад</string>
     <string name="menu_button">Меню</string>
     <string name="add_tag_button">Добавить тег</string>
     <string name="add_button">Добавить</string>
     <string name="no_matching_notes">Соответствующие записи не найдены</string>
-
-    <!-- Image notes -->
-    <string name="image_note_created_single">Запись с изображением создана</string>
-    <string name="image_note_created_multiple">Запись создана с %d изображениями</string>
-    <string name="filtering_by_tags_format">Фильтрация по %d тегам</string>
     <string name="error_could_not_open_note">Ошибка: не удалось открыть запись</string>
 </resources>

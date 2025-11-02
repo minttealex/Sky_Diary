@@ -3,7 +3,9 @@ package com.example.skydiary;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.Locale;
 
@@ -23,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Load saved theme early
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
         String theme = prefs.getString("app_theme", "dark");
         if ("dark".equals(theme)) {
@@ -42,6 +44,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+        bottomNav.setBackgroundResource(R.drawable.bottom_nav_background);
+        bottomNav.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_UNLABELED);
+        bottomNav.setElevation(8f);
+
+        int[][] states = new int[][]{
+                new int[]{android.R.attr.state_checked},
+                new int[]{-android.R.attr.state_checked}
+        };
+
+        int[] colors = new int[]{
+                Color.WHITE,
+                Color.parseColor("#80FFFFFF")
+        };
+
+        ColorStateList iconColorStateList = new ColorStateList(states, colors);
+        bottomNav.setItemIconTintList(iconColorStateList);
+        bottomNav.setItemTextColor(iconColorStateList);
+
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
@@ -66,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Add permission checking method
     public boolean checkCameraPermission() {
         if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{android.Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
@@ -80,14 +100,12 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, you can retry the camera operation
                 Toast.makeText(this, "Camera permission granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == LOCATION_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Location permission granted
                 Toast.makeText(this, "Location permission granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();

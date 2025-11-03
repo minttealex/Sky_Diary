@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/constellation_name"
-        android:textColor="@color/text_primary"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="12sp"
         android:maxLines="1"
         android:ellipsize="end" />

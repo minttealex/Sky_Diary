@@ -5,15 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Top bar container -->
+    <com.example.skydiary.StarryBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:startColor="@color/start_color_light"
+        app:endColor="@color/end_color_light" />
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="66dp"
         android:background="?attr/colorPrimary"
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
 
-        <!-- Back arrow button -->
         <ImageButton
             android:id="@+id/button_back"
             android:layout_width="wrap_content"
@@ -25,7 +29,6 @@
             android:layout_alignParentStart="true"
             app:tint="@android:color/white" />
 
-        <!-- Three dots menu button -->
         <ImageButton
             android:id="@+id/button_menu"
             android:layout_width="wrap_content"
@@ -36,13 +39,14 @@
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             app:tint="@android:color/white" />
+
     </RelativeLayout>
 
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="66dp"
         android:padding="16dp"
         android:fillViewport="true">
 
@@ -58,7 +62,45 @@
                 android:hint="@string/enter_note_name"
                 android:maxLines="1"
                 android:maxLength="30"
-                android:inputType="textCapSentences" />
+                android:inputType="textCapSentences"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:background="@drawable/search_background"
+                android:padding="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/edit_note_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/location_hint"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:drawableStart="@android:drawable/ic_menu_mylocation"
+                    android:drawablePadding="8dp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_hint"
+                    android:background="@drawable/search_background"
+                    android:padding="12dp" />
+
+                <ImageButton
+                    android:id="@+id/button_get_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_mylocation"
+                    android:contentDescription="@string/get_current_location"
+                    android:layout_marginStart="8dp"
+                    app:tint="@color/text_primary" />
+
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/edit_note_text"
@@ -68,10 +110,13 @@
                 android:gravity="top"
                 android:hint="@string/write_note"
                 android:inputType="textMultiLine|textCapSentences"
-                android:padding="10dp"
-                android:scrollbars="vertical" />
+                android:padding="12dp"
+                android:scrollbars="vertical"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:background="@drawable/search_background" />
 
-            <!-- Images container - will be populated dynamically -->
             <LinearLayout
                 android:id="@+id/images_container"
                 android:layout_width="match_parent"
@@ -90,7 +135,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/save_changes"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        app:tint="@android:color/white"
+        app:backgroundTint="?attr/colorPrimary" />
 
 </FrameLayout>
-

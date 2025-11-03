@@ -2,11 +2,32 @@
 <resources>
     <color name="background_light">#FFFFFF</color>
     <color name="background_dark">#121212</color>
+
     <color name="button_color_light">#BB86FD</color>
-    <color name="button_color_dark">#BB86FC</color>
-    <color name="start_color">#0A0E2A</color>
-    <color name="end_color">#1A1F4B</color>
-    <color name="card_background">#CC1E2A4B</color>
+    <color name="button_color_dark">#7C46BD</color>
+
+    <color name="start_color_light">#0A0E2A</color>
+    <color name="start_color_dark">#040618</color>
+    <color name="end_color_light">#1A1F4B</color>
+    <color name="end_color_dark">#0F133A</color>
+
+    <color name="card_background_light">#CC1E2A4B</color>
+    <color name="card_background_dark">#CC0E162C</color>
+
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#CCCCCC</color>
+    <color name="text_hint">#80FFFFFF</color>
+
+    <color name="bottom_nav_icon_tint_light_checked">#FFFFFF</color>
+    <color name="bottom_nav_icon_tint_light_unchecked">#80FFFFFF</color>
+    <color name="bottom_nav_icon_tint_dark_checked">#FFFFFF</color>
+    <color name="bottom_nav_icon_tint_dark_unchecked">#80FFFFFF</color>
+
+    <color name="stroke_light_constellation">#80FFFFFF</color>
+    <color name="stroke_dark_constellation">#33FFFFFF</color>
+    <color name="stroke_light_search">#80FFFFFF</color>
+    <color name="stroke_dark_search">#33FFFFFF</color>
+
+    <color name="tag_background_light">#DDDDDD</color>
+    <color name="tag_background_dark">#444444</color>
 </resources>

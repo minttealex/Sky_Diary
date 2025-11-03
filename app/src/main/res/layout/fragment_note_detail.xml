@@ -5,7 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Top bar container -->
+    <com.example.skydiary.StarryBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:startColor="@color/start_color_light"
+        app:endColor="@color/end_color_light" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="66dp"
@@ -13,7 +18,6 @@
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
 
-        <!-- Back arrow button -->
         <ImageButton
             android:id="@+id/button_back"
             android:layout_width="wrap_content"
@@ -25,7 +29,6 @@
             android:layout_alignParentStart="true"
             app:tint="@android:color/white" />
 
-        <!-- Three dots menu button -->
         <ImageButton
             android:id="@+id/button_menu"
             android:layout_width="wrap_content"
@@ -39,7 +42,6 @@
 
     </RelativeLayout>
 
-    <!-- Content ScrollView below the top bar -->
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
@@ -60,9 +62,12 @@
                 android:hint="@string/enter_note_name"
                 android:maxLines="1"
                 android:maxLength="30"
-                android:inputType="textCapSentences" />
+                android:inputType="textCapSentences"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:background="@drawable/search_background"
+                android:padding="12dp" />
 
-            <!-- Location field with get location button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,7 +84,11 @@
                     android:maxLines="1"
                     android:inputType="text"
                     android:drawableStart="@android:drawable/ic_menu_mylocation"
-                    android:drawablePadding="8dp" />
+                    android:drawablePadding="8dp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_hint"
+                    android:background="@drawable/search_background"
+                    android:padding="12dp" />
 
                 <ImageButton
                     android:id="@+id/button_get_location"
@@ -88,7 +97,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_mylocation"
                     android:contentDescription="@string/get_current_location"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="8dp"
+                    app:tint="@color/text_primary" />
 
             </LinearLayout>
 
@@ -100,11 +110,13 @@
                 android:gravity="top"
                 android:hint="@string/write_note"
                 android:inputType="textMultiLine|textCapSentences"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:scrollbars="vertical"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:background="@drawable/search_background" />
 
-            <!-- Images container - will be populated dynamically -->
             <LinearLayout
                 android:id="@+id/images_container"
                 android:layout_width="match_parent"
@@ -116,7 +128,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Save FloatingActionButton bottom right -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/button_save_note"
         android:layout_width="wrap_content"
@@ -124,7 +135,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/save_changes"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:srcCompat="@android:drawable/ic_menu_save"
+        app:tint="@android:color/white"
+        app:backgroundTint="?attr/colorPrimary" />
 
 </FrameLayout>
-

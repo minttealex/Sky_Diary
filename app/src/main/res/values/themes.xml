@@ -2,18 +2,18 @@
     <style name="Theme.SkyDiary" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/button_color_light</item>
         <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorOnBackground">@android:color/black</item>
         <item name="android:windowBackground">@color/background_light</item>
         <item name="colorSecondary">@color/button_color_light</item>
         <item name="colorOnSecondary">@android:color/white</item>
 
-        <item name="bottomNavigationStyle">@style/Widget.SkyDiary.BottomNavigationView</item>
+        <item name="bottomNavigationStyle">@style/Widget.SkyDiary.BottomNavigationView.Light</item>
     </style>
 
-    <style name="Widget.SkyDiary.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+    <style name="Widget.SkyDiary.BottomNavigationView.Light" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="backgroundTint">@android:color/transparent</item>
         <item name="itemBackground">@android:color/transparent</item>
         <item name="itemIconTint">@color/bottom_nav_icon_tint</item>
+        <item name="itemTextColor">@color/bottom_nav_icon_tint</item>
         <item name="labelVisibilityMode">unlabeled</item>
         <item name="elevation">0dp</item>
     </style>

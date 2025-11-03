@@ -8,12 +8,11 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Кастомный фон со звездами -->
     <com.example.skydiary.StarryBackgroundView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:startColor="@color/start_color"
-        app:endColor="@color/end_color" />
+        app:startColor="@color/start_color_light"
+        app:endColor="@color/end_color_light" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -32,8 +31,6 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bottom_nav_background"
             android:elevation="8dp"
-            app:itemIconTint="@color/bottom_nav_icon_tint"
-            app:itemTextColor="@color/bottom_nav_icon_tint"
             app:labelVisibilityMode="unlabeled"
             app:menu="@menu/bottom_nav_menu" />
     </LinearLayout>

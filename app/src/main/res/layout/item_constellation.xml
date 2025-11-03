@@ -8,7 +8,6 @@
     android:orientation="horizontal"
     android:padding="12dp">
 
-    <!-- Constellation Image with fixed size and scaling -->
     <ImageView
         android:id="@+id/iv_constellation"
         android:layout_width="56dp"
@@ -17,7 +16,6 @@
         android:adjustViewBounds="true"
         android:contentDescription="@string/constellation_image" />
 
-    <!-- Text Info -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -40,12 +38,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="7 stars"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:alpha="0.7" />
 
     </LinearLayout>
 
-    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -60,13 +58,14 @@
 
         <ImageButton
             android:id="@+id/btn_favorite"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_marginStart="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/btn_star"
             android:contentDescription="@string/toggle_favorite"
-            app:tint="@color/text_secondary" />
+            app:tint="@color/text_primary"
+            android:alpha="0.7" />
 
     </LinearLayout>
 

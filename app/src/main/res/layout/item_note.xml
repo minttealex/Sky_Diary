@@ -22,7 +22,8 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:maxLines="1"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+            android:textColor="@color/text_primary"/>
 
         <TextView
             android:id="@+id/text_note_date"
@@ -30,10 +31,9 @@
             android:layout_height="wrap_content"
             android:text="@string/date"
             android:textSize="14sp"
-            android:textColor="#666"
+            android:textColor="@color/text_secondary"
             android:maxLines="1" />
 
-        <!-- Image indicator -->
         <LinearLayout
             android:id="@+id/image_indicator"
             android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:src="@android:drawable/ic_menu_gallery"
-                app:tint="#666" />
+                app:tint="@color/text_secondary" />
 
             <TextView
                 android:id="@+id/text_image_count"
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:text="0"
                 android:textSize="12sp"
-                android:textColor="#666"
+                android:textColor="@color/text_secondary"
                 android:layout_marginStart="4dp" />
 
         </LinearLayout>

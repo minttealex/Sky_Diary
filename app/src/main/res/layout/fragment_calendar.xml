@@ -5,12 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Кастомный фон со звездами -->
     <com.example.skydiary.StarryBackgroundView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:startColor="@color/start_color"
-        app:endColor="@color/end_color" />
+        app:startColor="@color/start_color_light"
+        app:endColor="@color/end_color_light" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -22,7 +21,8 @@
         <CalendarView
             android:id="@+id/calendar_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
         <FrameLayout
             android:id="@+id/bottom_container"
@@ -37,7 +37,7 @@
                 android:text="@string/choose_date_to_see_notes"
                 android:gravity="center"
                 android:textSize="16sp"
-                android:textColor="#666" />
+                android:textColor="@color/text_secondary" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_notes_by_date"
@@ -48,7 +48,6 @@
         </FrameLayout>
     </LinearLayout>
 
-    <!-- Floating calendar icon button at bottom corner -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_change_date"
         android:layout_width="wrap_content"
@@ -56,6 +55,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/change_date"
-        app:srcCompat="@android:drawable/ic_menu_my_calendar" />
+        app:srcCompat="@android:drawable/ic_menu_my_calendar"
+        app:tint="@android:color/white"
+        app:backgroundTint="?attr/colorPrimary" />
 
 </FrameLayout>

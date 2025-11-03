@@ -3,13 +3,13 @@
     <color name="background_light">#FFFFFF</color>
     <color name="background_dark">#121212</color>
 
-    <color name="button_color_light">#BB86FD</color>
-    <color name="button_color_dark">#7C46BD</color>
+    <color name="button_color_light">#936AC8</color>
+    <color name="button_color_dark">#664490</color>
 
     <color name="start_color_light">#0A0E2A</color>
-    <color name="start_color_dark">#040618</color>
+    <color name="start_color_dark">#030518</color>
     <color name="end_color_light">#1A1F4B</color>
-    <color name="end_color_dark">#0F133A</color>
+    <color name="end_color_dark">#0B1038</color>
 
     <color name="card_background_light">#CC1E2A4B</color>
     <color name="card_background_dark">#CC0E162C</color>
@@ -29,5 +29,5 @@
     <color name="stroke_dark_search">#33FFFFFF</color>
 
     <color name="tag_background_light">#DDDDDD</color>
-    <color name="tag_background_dark">#444444</color>
+    <color name="tag_background_dark">#80FFFFFF</color>
 </resources>

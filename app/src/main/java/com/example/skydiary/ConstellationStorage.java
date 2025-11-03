@@ -1,5 +1,7 @@
 package com.example.skydiary;
 
+import static android.provider.Settings.System.getString;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import com.google.gson.Gson;
@@ -7,18 +9,59 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ConstellationStorage {
     private static final String PREFS_NAME = "constellations_prefs";
     private static final String CONSTELLATIONS_KEY = "constellations";
-    private static final String MIGRATION_KEY = "migration_v2_done";
+    private static final String MIGRATION_KEY = "migration_v5_done";
 
     private static ConstellationStorage instance;
     private final SharedPreferences prefs;
     private final Gson gson;
     private List<Constellation> constellations;
     private final Context context;
+
+    public List<Constellation> getConstellations() {
+        return sortConstellationsByName(new ArrayList<>(constellations));
+    }
+
+    public List<Constellation> getFavoriteConstellations() {
+        List<Constellation> favorites = new ArrayList<>();
+        for (Constellation constellation : constellations) {
+            if (constellation.isFavorite()) {
+                favorites.add(constellation);
+            }
+        }
+        return sortConstellationsByName(favorites);
+    }
+
+    public List<Constellation> searchConstellations(String query) {
+        List<Constellation> results = new ArrayList<>();
+        if (query == null || query.trim().isEmpty()) {
+            return getConstellations(); // This will now return sorted list
+        }
+
+        String searchQuery = query.toLowerCase().trim();
+        for (Constellation constellation : constellations) {
+            if (constellation.getName().toLowerCase().contains(searchQuery)) {
+                results.add(constellation);
+            }
+        }
+        return sortConstellationsByName(results);
+    }
+
+    private List<Constellation> sortConstellationsByName(List<Constellation> constellationsToSort) {
+        Collections.sort(constellationsToSort, new Comparator<Constellation>() {
+            @Override
+            public int compare(Constellation c1, Constellation c2) {
+                return c1.getName().compareToIgnoreCase(c2.getName());
+            }
+        });
+        return constellationsToSort;
+    }
 
     private ConstellationStorage(Context context) {
         this.context = context.getApplicationContext();
@@ -47,55 +90,71 @@ public class ConstellationStorage {
     private void checkAndMigrateData() {
         boolean migrationDone = prefs.getBoolean(MIGRATION_KEY, false);
         if (!migrationDone || constellations.isEmpty()) {
+            constellations.clear();
             initializeDefaultConstellations();
             prefs.edit().putBoolean(MIGRATION_KEY, true).apply();
+        } else {
+            fixConstellationNames();
+        }
+    }
+
+    private void fixConstellationNames() {
+        boolean needsFix = false;
+        for (Constellation constellation : constellations) {
+            if (constellation.getName() == null || constellation.getName().isEmpty()) {
+                needsFix = true;
+                break;
+            }
+        }
+
+        if (needsFix) {
+            constellations.clear();
+            initializeDefaultConstellations();
+            saveConstellations();
         }
     }
 
     private void initializeDefaultConstellations() {
         constellations.clear();
 
-        constellations.add(createConstellation("Orion", "The Hunter", 7, "orion"));
-        constellations.add(createConstellation("Ursa Major", "The Great Bear", 7, "ursa_major"));
-        constellations.add(createConstellation("Cassiopeia", "The Seated Queen", 5, "cassiopeia"));
-        constellations.add(createConstellation("Leo", "The Lion", 9, "leo"));
-        constellations.add(createConstellation("Scorpius", "The Scorpion", 18, "scorpius"));
-        constellations.add(createConstellation("Cygnus", "The Swan", 9, "cygnus"));
-        constellations.add(createConstellation("Lyra", "The Lyre", 5, "lyra"));
-        constellations.add(createConstellation("Andromeda", "The Chained Maiden", 16, "andromeda"));
+        constellations.add(new Constellation(getString(R.string.constellation_orion), "The Hunter", 7, ConstellationResources.getConstellationImageResource("Orion")));
+        constellations.add(new Constellation(getString(R.string.constellation_ursa_major), "The Great Bear", 7, ConstellationResources.getConstellationImageResource("Ursa Major")));
+        constellations.add(new Constellation(getString(R.string.constellation_cassiopeia), "The Seated Queen", 5, ConstellationResources.getConstellationImageResource("Cassiopeia")));
+        constellations.add(new Constellation(getString(R.string.constellation_leo), "The Lion", 9, ConstellationResources.getConstellationImageResource("Leo")));
+        constellations.add(new Constellation(getString(R.string.constellation_scorpius), "The Scorpion", 18, ConstellationResources.getConstellationImageResource("Scorpius")));
+        constellations.add(new Constellation(getString(R.string.constellation_cygnus), "The Swan", 9, ConstellationResources.getConstellationImageResource("Cygnus")));
+        constellations.add(new Constellation(getString(R.string.constellation_lyra), "The Lyre", 5, ConstellationResources.getConstellationImageResource("Lyra")));
+        constellations.add(new Constellation(getString(R.string.constellation_andromeda), "The Chained Maiden", 16, ConstellationResources.getConstellationImageResource("Andromeda")));
+        constellations.add(new Constellation(getString(R.string.constellation_ursa_minor), "The Little Bear", 7, ConstellationResources.getConstellationImageResource("Ursa Minor")));
+        constellations.add(new Constellation(getString(R.string.constellation_draco), "The Dragon", 14, ConstellationResources.getConstellationImageResource("Draco")));
+        constellations.add(new Constellation(getString(R.string.constellation_cepheus), "The King", 7, ConstellationResources.getConstellationImageResource("Cepheus")));
+        constellations.add(new Constellation(getString(R.string.constellation_perseus), "The Hero", 19, ConstellationResources.getConstellationImageResource("Perseus")));
+        constellations.add(new Constellation(getString(R.string.constellation_auriga), "The Charioteer", 8, ConstellationResources.getConstellationImageResource("Auriga")));
+        constellations.add(new Constellation(getString(R.string.constellation_bootes), "The Herdsman", 13, ConstellationResources.getConstellationImageResource("Bootes")));
+        constellations.add(new Constellation(getString(R.string.constellation_corona_borealis), "The Northern Crown", 8, ConstellationResources.getConstellationImageResource("Corona Borealis")));
+        constellations.add(new Constellation(getString(R.string.constellation_hercules), "The Hero", 23, ConstellationResources.getConstellationImageResource("Hercules")));
+        constellations.add(new Constellation(getString(R.string.constellation_sagitta), "The Arrow", 4, ConstellationResources.getConstellationImageResource("Sagitta")));
+        constellations.add(new Constellation(getString(R.string.constellation_aquila), "The Eagle", 10, ConstellationResources.getConstellationImageResource("Aquila")));
+        constellations.add(new Constellation(getString(R.string.constellation_delphinus), "The Dolphin", 5, ConstellationResources.getConstellationImageResource("Delphinus")));
+        constellations.add(new Constellation(getString(R.string.constellation_pegasus), "The Winged Horse", 17, ConstellationResources.getConstellationImageResource("Pegasus")));
+        constellations.add(new Constellation(getString(R.string.constellation_pisces), "The Fishes", 18, ConstellationResources.getConstellationImageResource("Pisces")));
+        constellations.add(new Constellation(getString(R.string.constellation_aries), "The Ram", 6, ConstellationResources.getConstellationImageResource("Aries")));
+        constellations.add(new Constellation(getString(R.string.constellation_taurus), "The Bull", 19, ConstellationResources.getConstellationImageResource("Taurus")));
+        constellations.add(new Constellation(getString(R.string.constellation_gemini), "The Twins", 8, ConstellationResources.getConstellationImageResource("Gemini")));
+        constellations.add(new Constellation(getString(R.string.constellation_cancer), "The Crab", 5, ConstellationResources.getConstellationImageResource("Cancer")));
+        constellations.add(new Constellation(getString(R.string.constellation_virgo), "The Maiden", 15, ConstellationResources.getConstellationImageResource("Virgo")));
+        constellations.add(new Constellation(getString(R.string.constellation_libra), "The Scales", 8, ConstellationResources.getConstellationImageResource("Libra")));
 
         saveConstellations();
     }
 
-    private Constellation createConstellation(String name, String description, int starCount, String imageName) {
-        int resId = getResourceId(imageName);
-        if (resId == 0) {
-            resId = android.R.drawable.ic_menu_gallery;
-        }
-        return new Constellation(name, description, starCount, resId);
-    }
-
-    private int getResourceId(String imageName) {
-        return context.getResources().getIdentifier(imageName, "drawable", context.getPackageName());
+    private String getString(int resId) {
+        return context.getString(resId);
     }
 
     private void saveConstellations() {
         String json = gson.toJson(constellations);
         prefs.edit().putString(CONSTELLATIONS_KEY, json).apply();
-    }
-
-    public List<Constellation> getConstellations() {
-        return new ArrayList<>(constellations);
-    }
-
-    public List<Constellation> getFavoriteConstellations() {
-        List<Constellation> favorites = new ArrayList<>();
-        for (Constellation constellation : constellations) {
-            if (constellation.isFavorite()) {
-                favorites.add(constellation);
-            }
-        }
-        return favorites;
     }
 
     public int getSeenCount() {
@@ -120,20 +179,5 @@ public class ConstellationStorage {
                 return;
             }
         }
-    }
-
-    public List<Constellation> searchConstellations(String query) {
-        List<Constellation> results = new ArrayList<>();
-        if (query == null || query.trim().isEmpty()) {
-            return new ArrayList<>(constellations);
-        }
-
-        String searchQuery = query.toLowerCase().trim();
-        for (Constellation constellation : constellations) {
-            if (constellation.getName().toLowerCase().contains(searchQuery)) {
-                results.add(constellation);
-            }
-        }
-        return results;
     }
 }

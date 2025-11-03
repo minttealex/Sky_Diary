@@ -1,5 +1,6 @@
 package com.example.skydiary;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,16 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
         notifyDataSetChanged();
     }
 
+    public void updateConstellationSeenState(Constellation constellation, boolean isSeen) {
+        for (int i = 0; i < constellations.size(); i++) {
+            if (constellations.get(i).getId() == constellation.getId()) {
+                constellations.get(i).setSeen(isSeen);
+                notifyItemChanged(i);
+                break;
+            }
+        }
+    }
+
     @NonNull
     @Override
     public ConstellationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -61,9 +73,11 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
         private final TextView tvStarCount;
         private final CheckBox cbSeen;
         private final ImageButton btnFavorite;
+        private final View itemView;
 
         public ConstellationViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.itemView = itemView;
             ivConstellation = itemView.findViewById(R.id.iv_constellation);
             tvName = itemView.findViewById(R.id.tv_constellation_name);
             tvStarCount = itemView.findViewById(R.id.tv_star_count);
@@ -76,10 +90,26 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
             String starCountText = itemView.getContext().getString(R.string.star_count_format, constellation.getStarCount());
             tvStarCount.setText(starCountText);
 
+            if (constellation.isSeen()) {
+                itemView.setAlpha(0.6f);
+                tvName.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.text_secondary));
+                tvStarCount.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.text_secondary));
+            } else {
+                itemView.setAlpha(1.0f);
+                tvName.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.text_primary));
+                tvStarCount.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.text_primary));
+            }
+
             try {
                 if (constellation.getImageResId() != 0) {
                     ivConstellation.setImageResource(constellation.getImageResId());
                     ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                    if (constellation.isSeen()) {
+                        ivConstellation.setAlpha(0.6f);
+                    } else {
+                        ivConstellation.setAlpha(1.0f);
+                    }
                 } else {
                     ivConstellation.setImageResource(android.R.drawable.ic_menu_gallery);
                     ivConstellation.setBackgroundColor(0xFF334477);
@@ -93,9 +123,15 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
             cbSeen.setOnCheckedChangeListener(null);
             btnFavorite.setOnClickListener(null);
 
+            btnFavorite.setSelected(constellation.isFavorite());
+
             cbSeen.setChecked(constellation.isSeen());
 
-            updateFavoriteButtonAppearance(constellation.isFavorite());
+            if (constellation.isSeen()) {
+                btnFavorite.setAlpha(0.7f);
+            } else {
+                btnFavorite.setAlpha(1.0f);
+            }
 
             cbSeen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -111,19 +147,18 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
                 public void onClick(View v) {
                     if (listener != null) {
                         boolean newFavoriteState = !constellation.isFavorite();
+                        btnFavorite.setSelected(newFavoriteState);
+
+                        if (constellation.isSeen()) {
+                            btnFavorite.setAlpha(0.7f);
+                        } else {
+                            btnFavorite.setAlpha(1.0f);
+                        }
+
                         listener.onConstellationFavoriteChanged(constellation, newFavoriteState);
-                        updateFavoriteButtonAppearance(newFavoriteState);
                     }
                 }
             });
-        }
-
-        private void updateFavoriteButtonAppearance(boolean isFavorite) {
-            if (isFavorite) {
-                btnFavorite.setColorFilter(itemView.getContext().getColor(android.R.color.holo_orange_light));
-            } else {
-                btnFavorite.setColorFilter(itemView.getContext().getColor(android.R.color.darker_gray));
-            }
         }
     }
 }

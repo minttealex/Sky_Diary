@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="constellation_orion">Orion</string>
+    <string name="constellation_ursa_major">Ursa Major</string>
+    <string name="constellation_cassiopeia">Cassiopeia</string>
+    <string name="constellation_leo">Leo</string>
+    <string name="constellation_scorpius">Scorpius</string>
+    <string name="constellation_cygnus">Cygnus</string>
+    <string name="constellation_lyra">Lyra</string>
+    <string name="constellation_andromeda">Andromeda</string>
+    <string name="constellation_ursa_minor">Ursa Minor</string>
+    <string name="constellation_draco">Draco</string>
+    <string name="constellation_cepheus">Cepheus</string>
+    <string name="constellation_perseus">Perseus</string>
+    <string name="constellation_auriga">Auriga</string>
+    <string name="constellation_bootes">Bootes</string>
+    <string name="constellation_corona_borealis">Corona Borealis</string>
+    <string name="constellation_hercules">Hercules</string>
+    <string name="constellation_sagitta">Sagitta</string>
+    <string name="constellation_aquila">Aquila</string>
+    <string name="constellation_delphinus">Delphinus</string>
+    <string name="constellation_pegasus">Pegasus</string>
+    <string name="constellation_pisces">Pisces</string>
+    <string name="constellation_aries">Aries</string>
+    <string name="constellation_taurus">Taurus</string>
+    <string name="constellation_gemini">Gemini</string>
+    <string name="constellation_cancer">Cancer</string>
+    <string name="constellation_virgo">Virgo</string>
+    <string name="constellation_libra">Libra</string>
+</resources>

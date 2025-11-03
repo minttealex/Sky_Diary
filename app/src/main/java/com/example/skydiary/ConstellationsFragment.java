@@ -80,7 +80,7 @@ public class ConstellationsFragment extends Fragment implements ConstellationsAd
         recyclerFavorites = view.findViewById(R.id.recycler_favorites);
         recyclerConstellations = view.findViewById(R.id.recycler_constellations);
         tvNoFavorites = view.findViewById(R.id.tv_no_favorites);
-        ImageButton btnBack = view.findViewById(R.id.btn_back);
+        ImageButton btnBack = view.findViewById(R.id.button_back);
 
         btnBack.setOnClickListener(v -> {
             if (getActivity() != null) {

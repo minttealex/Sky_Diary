@@ -54,18 +54,17 @@
             android:id="@+id/cb_seen"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:buttonTint="?attr/colorPrimary" />
+            android:buttonTint="?attr/colorPrimary"
+            android:contentDescription="Mark as seen" />
 
         <ImageButton
             android:id="@+id/btn_favorite"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginStart="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/btn_star"
-            android:contentDescription="@string/toggle_favorite"
-            app:tint="@color/text_primary"
-            android:alpha="0.7" />
+            android:src="@drawable/ic_star_selector"
+            android:contentDescription="@string/toggle_favorite" />
 
     </LinearLayout>
 

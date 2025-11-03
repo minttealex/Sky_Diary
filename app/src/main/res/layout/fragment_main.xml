@@ -20,48 +20,52 @@
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sky Diary"
-            android:textColor="@color/text_primary"
-            android:textSize="62sp"
-            android:fontFamily="cursive"
-            android:textStyle="italic"
-            android:layout_marginBottom="80dp"
+            android:layout_height="329dp"
+            android:layout_marginBottom="30dp"
+            android:paddingTop="100dp"
+            android:paddingBottom="30dp"
             android:shadowColor="#80000000"
             android:shadowDx="3"
             android:shadowDy="3"
-            android:shadowRadius="6" />
+            android:shadowRadius="6"
+            android:text="Sky Diary"
+            android:textColor="@color/text_primary"
+            android:textSize="80sp"
+            android:textStyle="italic" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_constellations"
             android:layout_width="220dp"
-            android:layout_height="60dp"
+            android:layout_height="55dp"
             android:text="@string/constellations"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"
             android:layout_marginBottom="24dp"
+            app:tint="?attr/colorOnPrimary"
             app:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_new_note"
             android:layout_width="220dp"
-            android:layout_height="60dp"
+            android:layout_height="55dp"
             android:text="@string/new_note"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"
             android:layout_marginBottom="24dp"
+            app:tint="?attr/colorOnPrimary"
             app:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_new_picture"
             android:layout_width="220dp"
-            android:layout_height="60dp"
+            android:layout_height="55dp"
             android:text="@string/new_picture"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"
+            app:tint="?attr/colorOnPrimary"
             app:backgroundTint="?attr/colorPrimary" />
 
     </LinearLayout>

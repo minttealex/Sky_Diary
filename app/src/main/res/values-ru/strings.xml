@@ -23,7 +23,7 @@
     <string name="note_not_found">Запись не найдена</string>
     <string name="note_deleted">Запись удалена</string>
     <string name="note_with_images">Запись с изображениями</string>
-    <string name="search">Поиск</string>
+    <string name="search">Искать записи…</string>
 
     <!-- Pictures -->
     <string name="add_picture">Добавить изображение</string>
@@ -113,6 +113,7 @@
     <string name="stars">звёзды</string>
     <string name="star_count">0 звёзд</string>
     <string name="star_count_format">%d звёзд</string>
+    <string name="Seen">Найдено</string>
 
     <!-- Image notes -->
     <string name="image_note_created_single">Запись с изображением создана</string>

@@ -9,7 +9,6 @@ public class Constellation {
     private String description;
     private boolean isSeen;
     private boolean isFavorite;
-    private String imagePath;
     private int starCount;
     private int imageResId;
 

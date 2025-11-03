@@ -23,7 +23,7 @@
     <string name="note_not_found">Note not found</string>
     <string name="note_deleted">Note deleted</string>
     <string name="note_with_images">Note with images</string>
-    <string name="search">Search</string>
+    <string name="search">Search notes…</string>
 
     <!-- Pictures -->
     <string name="add_picture">Add a picture</string>
@@ -113,6 +113,7 @@
     <string name="stars">stars</string>
     <string name="star_count">0 stars</string>
     <string name="star_count_format">%d stars</string>
+    <string name="Seen">Seen</string>
 
     <!-- Image notes -->
     <string name="image_note_created_single">Image note created</string>

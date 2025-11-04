@@ -1,6 +1,5 @@
 package com.example.skydiary;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,16 +35,6 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
             this.constellations.addAll(newConstellations);
         }
         notifyDataSetChanged();
-    }
-
-    public void updateConstellationSeenState(Constellation constellation, boolean isSeen) {
-        for (int i = 0; i < constellations.size(); i++) {
-            if (constellations.get(i).getId() == constellation.getId()) {
-                constellations.get(i).setSeen(isSeen);
-                notifyItemChanged(i);
-                break;
-            }
-        }
     }
 
     @NonNull
@@ -86,7 +75,7 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
         }
 
         public void bind(Constellation constellation, OnConstellationInteractionListener listener) {
-            tvName.setText(constellation.getName());
+            tvName.setText(constellation.getName(itemView.getContext()));
             String starCountText = itemView.getContext().getString(R.string.star_count_format, constellation.getStarCount());
             tvStarCount.setText(starCountText);
 
@@ -111,8 +100,13 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
                         ivConstellation.setAlpha(1.0f);
                     }
                 } else {
-                    ivConstellation.setImageResource(android.R.drawable.ic_menu_gallery);
-                    ivConstellation.setBackgroundColor(0xFF334477);
+                    ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                    if (constellation.isSeen()) {
+                        ivConstellation.setAlpha(0.6f);
+                    } else {
+                        ivConstellation.setAlpha(1.0f);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -133,30 +127,24 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
                 btnFavorite.setAlpha(1.0f);
             }
 
-            cbSeen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                    if (listener != null) {
-                        listener.onConstellationSeenChanged(constellation, isChecked);
-                    }
+            cbSeen.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (listener != null) {
+                    listener.onConstellationSeenChanged(constellation, isChecked);
                 }
             });
 
-            btnFavorite.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        boolean newFavoriteState = !constellation.isFavorite();
-                        btnFavorite.setSelected(newFavoriteState);
+            btnFavorite.setOnClickListener(v -> {
+                if (listener != null) {
+                    boolean newFavoriteState = !constellation.isFavorite();
+                    btnFavorite.setSelected(newFavoriteState);
 
-                        if (constellation.isSeen()) {
-                            btnFavorite.setAlpha(0.7f);
-                        } else {
-                            btnFavorite.setAlpha(1.0f);
-                        }
-
-                        listener.onConstellationFavoriteChanged(constellation, newFavoriteState);
+                    if (constellation.isSeen()) {
+                        btnFavorite.setAlpha(0.7f);
+                    } else {
+                        btnFavorite.setAlpha(1.0f);
                     }
+
+                    listener.onConstellationFavoriteChanged(constellation, newFavoriteState);
                 }
             });
         }

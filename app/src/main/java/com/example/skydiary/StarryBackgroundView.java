@@ -11,7 +11,6 @@ import android.view.View;
 import java.util.Random;
 
 public class StarryBackgroundView extends View {
-    // === НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ ===
     private int starCount = 100;
     private float minStarSize = 0.5f;
     private float maxStarSize = 3.0f;
@@ -21,10 +20,8 @@ public class StarryBackgroundView extends View {
     private long maxTwinkleSpeed = 8000L;
     private int refreshRate = 80;
 
-    // Цвета градиента по умолчанию (будут переопределены из ресурсов)
     private int startColor = 0xFF0A0E2A;
     private int endColor = 0xFF1A1F4B;
-    // === КОНЕЦ НАСТРАИВАЕМЫХ ПАРАМЕТРОВ ===
 
     private final Star[] stars;
     private final Paint paint = new Paint();
@@ -43,7 +40,6 @@ public class StarryBackgroundView extends View {
     public StarryBackgroundView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        // Чтение кастомных атрибутов из XML
         if (attrs != null) {
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.StarryBackgroundView);
             startColor = a.getColor(R.styleable.StarryBackgroundView_startColor, startColor);
@@ -57,11 +53,9 @@ public class StarryBackgroundView extends View {
     }
 
     private void init() {
-        // Настройка paint для звезд
         paint.setColor(0xFFFFFFFF);
         paint.setAntiAlias(true);
 
-        // Настройка paint для градиента
         gradientPaint.setStyle(Paint.Style.FILL);
         gradientPaint.setAntiAlias(true);
 
@@ -72,7 +66,6 @@ public class StarryBackgroundView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (w > 0 && h > 0) {
-            // Создаем градиент с цветами из ресурсов
             LinearGradient gradient = new LinearGradient(
                     0, 0, w, h,
                     new int[]{startColor, endColor},
@@ -81,7 +74,6 @@ public class StarryBackgroundView extends View {
             );
             gradientPaint.setShader(gradient);
 
-            // Инициализируем звезды
             initializeStars(w, h);
         }
     }
@@ -102,10 +94,8 @@ public class StarryBackgroundView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Рисуем градиентный фон
         canvas.drawRect(0, 0, getWidth(), getHeight(), gradientPaint);
 
-        // Если звезды еще не инициализированы, инициализируем их
         if (!starsInitialized && getWidth() > 0 && getHeight() > 0) {
             initializeStars(getWidth(), getHeight());
         }
@@ -114,7 +104,6 @@ public class StarryBackgroundView extends View {
 
         for (Star star : stars) {
             if (star != null) {
-                // Расчет альфа-канала для мерцания
                 float progress = (currentTime % star.twinkleSpeed) / (float) star.twinkleSpeed;
                 float alpha = minBrightness + (float) Math.abs(Math.sin(progress * Math.PI * 2)) * (maxBrightness - minBrightness);
 
@@ -123,7 +112,6 @@ public class StarryBackgroundView extends View {
             }
         }
 
-        // Перерисовка для анимации
         postInvalidateDelayed(refreshRate);
     }
 
@@ -139,7 +127,6 @@ public class StarryBackgroundView extends View {
         }
     }
 
-    // === ПУБЛИЧНЫЕ МЕТОДЫ ДЛЯ ИЗМЕНЕНИЯ ПАРАМЕТРОВ ===
 
     public void setColors(int startColor, int endColor) {
         this.startColor = startColor;

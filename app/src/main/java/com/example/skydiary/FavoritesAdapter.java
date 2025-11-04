@@ -58,7 +58,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         }
 
         public void bind(Constellation constellation) {
-            tvName.setText(constellation.getName());
+            tvName.setText(constellation.getName(itemView.getContext()));
 
             try {
                 int resId = constellation.getImageResId();
@@ -66,21 +66,14 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
                     ivConstellation.setImageResource(resId);
                     ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 } else {
-                    ivConstellation.setImageResource(android.R.drawable.ic_menu_gallery);
-                    ivConstellation.setBackgroundColor(0xFF334477);
+                    ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 }
             } catch (Resources.NotFoundException e) {
-                ivConstellation.setImageResource(android.R.drawable.ic_menu_gallery);
-                ivConstellation.setBackgroundColor(0xFF334477);
-                Log.e("ConstellationAdapter", "Image not found for: " + constellation.getName());
+                ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                Log.e("FavoritesAdapter", "Image not found for: " + constellation.getName(itemView.getContext()));
             } catch (Exception e) {
                 ivConstellation.setImageResource(android.R.drawable.ic_menu_gallery);
                 ivConstellation.setBackgroundColor(0xFF334477);
-            }
-            if (constellation.getImageResId() != 0) {
-                ivConstellation.setImageResource(constellation.getImageResId());
-            } else {
-                ivConstellation.setImageResource(android.R.drawable.ic_menu_gallery);
             }
         }
     }

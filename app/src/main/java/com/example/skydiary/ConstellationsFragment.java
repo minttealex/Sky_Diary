@@ -57,7 +57,7 @@ public class ConstellationsFragment extends Fragment implements ConstellationsAd
         List<Constellation> constellations = constellationStorage.getConstellations();
         for (Constellation constellation : constellations) {
             int resId = constellation.getImageResId();
-            String resName = "Unknown";
+            String resName;
             try {
                 if (resId != 0) {
                     resName = getResources().getResourceName(resId);
@@ -68,7 +68,7 @@ public class ConstellationsFragment extends Fragment implements ConstellationsAd
                 resName = "Error: " + e.getMessage();
             }
             Log.d("ConstellationDebug",
-                    "Name: " + constellation.getName() +
+                    "Name: " + constellation.getName(requireContext()) +
                             ", ImageResId: " + resId +
                             ", ResId Name: " + resName);
         }
@@ -144,7 +144,7 @@ public class ConstellationsFragment extends Fragment implements ConstellationsAd
     }
 
     private void searchConstellations(String query) {
-        List<Constellation> results = constellationStorage.searchConstellations(query);
+        List<Constellation> results = constellationStorage.searchConstellations(query, requireContext());
         constellationsAdapter.updateConstellations(results);
     }
 
@@ -173,6 +173,13 @@ public class ConstellationsFragment extends Fragment implements ConstellationsAd
     @Override
     public void onResume() {
         super.onResume();
+
+        constellationStorage.forceRefreshConstellations();
         refreshData();
+
+        List<Constellation> constellations = constellationStorage.getConstellations();
+        for (Constellation constellation : constellations) {
+            Log.d("ConstellationFinal", "Final Name: " + constellation.getName(requireContext()));
+        }
     }
 }

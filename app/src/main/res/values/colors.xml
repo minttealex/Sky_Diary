@@ -7,9 +7,9 @@
     <color name="button_color_dark">#664490</color>
 
     <color name="start_color_light">#0A0E2A</color>
-    <color name="start_color_dark">#030518</color>
+    <color name="start_color_dark">#020414</color>
     <color name="end_color_light">#1A1F4B</color>
-    <color name="end_color_dark">#0B1038</color>
+    <color name="end_color_dark">#070A2A</color>
 
     <color name="card_background_light">#CC1E2A4B</color>
     <color name="card_background_dark">#CC0E162C</color>

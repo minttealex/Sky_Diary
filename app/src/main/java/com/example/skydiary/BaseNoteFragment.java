@@ -447,7 +447,9 @@ public abstract class BaseNoteFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), getString(R.string.error_displaying_image), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(),
+                    getString(R.string.error_displaying_image),
+                    Toast.LENGTH_SHORT).show();
         }
 
         setupImageInteractions(imageView);
@@ -469,11 +471,23 @@ public abstract class BaseNoteFragment extends Fragment {
             int imageHeight = options.outHeight;
 
             DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-            int maxWidth = displayMetrics.widthPixels - 100;
+
+            int maxWidth = displayMetrics.widthPixels - 40;
             int maxHeight = (int) (displayMetrics.heightPixels * 0.7);
 
-            float scale = Math.min((float) maxWidth / imageWidth, (float) maxHeight / imageHeight);
-            scale = Math.min(scale, 1.0f);
+            float widthRatio = (float) maxWidth / imageWidth;
+            float heightRatio = (float) maxHeight / imageHeight;
+
+            float scale = Math.min(widthRatio, heightRatio);
+
+            if (scale > 2.0f) {
+                scale = 2.0f;
+            }
+
+            if (imageWidth < maxWidth / 3 && imageHeight < maxHeight / 3) {
+                float minScale = (float) (maxWidth / 3) / imageWidth;
+                scale = Math.max(scale, minScale);
+            }
 
             int scaledWidth = (int) (imageWidth * scale);
             int scaledHeight = (int) (imageHeight * scale);
@@ -846,7 +860,6 @@ public abstract class BaseNoteFragment extends Fragment {
         }
     }
 
-    // Handle permission results
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

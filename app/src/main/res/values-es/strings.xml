@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Diario del Cielo</string>
+    <string name="welcome_message">¡Bienvenido!</string>
+    <string name="get_started">Comenzar</string>
+
+    <!-- Navigation Menu -->
+    <string name="menu_home">Inicio</string>
+    <string name="menu_calendar">Calendario</string>
+    <string name="menu_notes">Notas</string>
+    <string name="menu_settings">Ajustes</string>
+
+    <!-- Notes -->
+    <string name="add_note">Añadir nota</string>
+    <string name="new_note">Nueva nota</string>
+    <string name="note_name">Nombre de la nota</string>
+    <string name="date">Fecha</string>
+    <string name="enter_note_name">Nombre de la nota (opcional)</string>
+    <string name="write_note">Escribe tu nota aquí</string>
+    <string name="note_cannot_be_empty">La nota no puede estar vacía</string>
+    <string name="note_saved">Nota guardada</string>
+    <string name="note_from_format">Nota del %s</string>
+    <string name="note_not_found">Nota no encontrada</string>
+    <string name="note_deleted">Nota eliminada</string>
+    <string name="note_with_images">Nota con imágenes</string>
+    <string name="search">Buscar notas…</string>
+
+    <!-- Pictures -->
+    <string name="add_picture">Añadir imagen</string>
+    <string name="new_picture">Nueva imagen</string>
+    <string name="take_photo">Tomar foto</string>
+    <string name="choose_from_gallery">Elegir de la galería</string>
+    <string name="choose_multiple_from_gallery">Elegir múltiples de la galería</string>
+    <string name="select_picture">Seleccionar imagen</string>
+    <string name="remove_image">Eliminar imagen</string>
+    <string name="remove_image_confirmation">¿Estás seguro de que quieres eliminar esta imagen?</string>
+    <string name="image_added">Imagen añadida</string>
+    <string name="image_removed">Imagen eliminada</string>
+    <string name="image_reordered">Imagen reordenada</string>
+    <string name="image_moved_up">Imagen movida arriba</string>
+    <string name="image_moved_down">Imagen movida abajo</string>
+    <string name="image_at_top">La imagen ya está en la parte superior</string>
+    <string name="image_at_bottom">La imagen ya está en la parte inferior</string>
+    <string name="image_content_description">Imagen de nota</string>
+    <string name="image_options">Opciones de imagen</string>
+    <string name="rotate">Rotar</string>
+    <string name="move_up">Mover arriba</string>
+    <string name="move_down">Mover abajo</string>
+    <string name="delete_picture">Eliminar imagen</string>
+    <string name="delete_picture_confirmation">¿Estás seguro de que quieres eliminar esta imagen?</string>
+    <string name="save_to_gallery">Guardar en galería</string>
+    <string name="image_saved_to_gallery">Imagen guardada en galería</string>
+    <string name="image_rotated">Imagen rotada %d°</string>
+    <string name="image_too_large">La imagen es demasiado grande. Tamaño máximo: %dMB</string>
+    <string name="error_loading_image">Error cargando imagen</string>
+    <string name="error_displaying_image">Error mostrando imagen</string>
+    <string name="error_creating_image_file">Error creando archivo de imagen</string>
+    <string name="error_loading_image_file">Error cargando archivo de imagen</string>
+    <string name="error_starting_camera">Error iniciando cámara</string>
+    <string name="error_processing_camera_image">Error procesando imagen de cámara</string>
+    <string name="error_saving_image">Error guardando imagen</string>
+
+    <!-- Location -->
+    <string name="location_hint">Añadir ubicación (coordenadas o nombre)</string>
+    <string name="get_current_location">Obtener ubicación actual</string>
+    <string name="location_permission_required">Se requiere permiso de ubicación</string>
+    <string name="location_permission_denied">Permiso de ubicación denegado</string>
+    <string name="getting_location">Obteniendo ubicación…</string>
+    <string name="location_retrieved">Ubicación obtenida</string>
+    <string name="location_error">Error obteniendo ubicación</string>
+    <string name="enable_gps">Por favor activa el GPS</string>
+    <string name="invalid_coordinates">Formato de coordenadas inválido</string>
+    <string name="coordinates_format_hint">Formato: 40.7128, -74.0060 o nombre del lugar</string>
+
+    <!-- Tags -->
+    <string name="add_tag">Añadir etiqueta</string>
+    <string name="edit_tags">Editar etiquetas</string>
+    <string name="no_tags_yet">Sin etiquetas aún</string>
+    <string name="tags_saved">Etiquetas guardadas</string>
+    <string name="manage_tag">Gestionar etiqueta</string>
+    <string name="enter_new_tag">Ingresar nueva etiqueta</string>
+    <string name="rename_tag">Renombrar etiqueta</string>
+    <string name="delete_tag">Eliminar etiqueta</string>
+    <string name="delete_tag_confirmation">¿Estás seguro de eliminar esta etiqueta?</string>
+    <string name="tag_cannot_be_empty">El nombre de la etiqueta no puede estar vacío</string>
+    <string name="tag_already_exists">La etiqueta ya existe</string>
+    <string name="tags_updated_format">Etiquetas actualizadas: %d seleccionadas</string>
+
+    <!-- Date and Time -->
+    <string name="change_date">Cambiar fecha</string>
+    <string name="date_changed">Fecha cambiada</string>
+    <string name="choose_date_to_see_notes">Elige una fecha para ver tus notas</string>
+    <string name="no_notes_added_on_day">No hay notas en este día</string>
+
+    <!-- Settings -->
+    <string name="settings">Ajustes</string>
+    <string name="theme">Tema</string>
+    <string name="light_theme">Tema claro</string>
+    <string name="dark_theme">Tema oscuro</string>
+    <string name="auto_theme">Automático</string>
+    <string name="language">Idioma</string>
+    <string name="auto_language">Automático</string>
+    <string name="english">Inglés</string>
+    <string name="russian">Ruso</string>
+    <string name="spanish">Español</string>
+
+    <!-- Constellations -->
+    <string name="constellations">Constelaciones</string>
+    <string name="search_constellations">Buscar constelaciones…</string>
+    <string name="favorites">Favoritos</string>
+    <string name="no_favorites">Sin constelaciones favoritas</string>
+    <string name="all_constellations">Todas las constelaciones</string>
+    <string name="constellation_name">Nombre de constelación</string>
+    <string name="constellation_image">Imagen de constelación</string>
+    <string name="toggle_favorite">Alternar favorito</string>
+    <string name="stars">estrellas</string>
+    <string name="star_count">0 estrellas</string>
+    <string name="star_count_format">%d estrellas</string>
+    <string name="Seen">Vistos</string>
+
+    <!-- Image notes -->
+    <string name="image_note_created_single">Nota con imagen creada</string>
+    <string name="image_note_created_multiple">Nota creada con %d imágenes</string>
+    <string name="filtering_by_tags_format">Filtrando por %d etiquetas</string>
+
+    <!-- Confirmation dialogs -->
+    <string name="confirm_save">Confirmar guardado</string>
+    <string name="confirm_save_message">¿Estás seguro de guardar los cambios?</string>
+    <string name="confirm_delete">Confirmar eliminación</string>
+    <string name="confirm_delete_message">¿Estás seguro de eliminar esta nota? No se puede deshacer.</string>
+
+    <!-- Shared Labels -->
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+    <string name="save_changes">Guardar cambios</string>
+    <string name="cancel">Cancelar</string>
+    <string name="rename">Renombrar</string>
+    <string name="delete">Eliminar</string>
+    <string name="apply">Aplicar</string>
+    <string name="remove">Eliminar</string>
+
+    <!-- Accessibility -->
+    <string name="back_button">Atrás</string>
+    <string name="back">Atrás</string>
+    <string name="menu_button">Menú</string>
+    <string name="add_tag_button">Añadir etiqueta</string>
+    <string name="add_button">Añadir</string>
+    <string name="no_matching_notes">No se encontraron notas</string>
+    <string name="error_could_not_open_note">Error: no se pudo abrir la nota</string>
+
+    <!-- Welcome page -->
+    <string name="welcome_to_sky_diary">Diario del Cielo</string>
+    <string name="sign_up">Registrarse</string>
+    <string name="log_in">Iniciar Sesión</string>
+    <string name="skip_for_now">Omitir por ahora</string>
+
+    <!-- Constellation Names -->
+    <string name="constellation_orion">Orión</string>
+    <string name="constellation_ursa_major">Osa Mayor</string>
+    <string name="constellation_cassiopeia">Casiopea</string>
+    <string name="constellation_leo">Leo</string>
+    <string name="constellation_scorpius">Escorpio</string>
+    <string name="constellation_cygnus">Cisne</string>
+    <string name="constellation_lyra">Lira</string>
+    <string name="constellation_andromeda">Andrómeda</string>
+    <string name="constellation_ursa_minor">Osa Menor</string>
+    <string name="constellation_draco">Dragón</string>
+    <string name="constellation_cepheus">Cefeo</string>
+    <string name="constellation_perseus">Perseo</string>
+    <string name="constellation_auriga">Auriga</string>
+    <string name="constellation_bootes">Boyero</string>
+    <string name="constellation_corona_borealis">Corona Boreal</string>
+    <string name="constellation_hercules">Hércules</string>
+    <string name="constellation_sagitta">Flecha</string>
+    <string name="constellation_aquila">Águila</string>
+    <string name="constellation_delphinus">Delfín</string>
+    <string name="constellation_pegasus">Pegaso</string>
+    <string name="constellation_pisces">Piscis</string>
+    <string name="constellation_aries">Aries</string>
+    <string name="constellation_taurus">Tauro</string>
+    <string name="constellation_gemini">Géminis</string>
+    <string name="constellation_cancer">Cáncer</string>
+    <string name="constellation_virgo">Virgo</string>
+    <string name="constellation_libra">Libra</string>
+
+    <!-- Constellation Descriptions -->
+    <string name="constellation_orion_description">El Cazador</string>
+    <string name="constellation_ursa_major_description">La Osa Mayor</string>
+    <string name="constellation_cassiopeia_description">La Reina Sentada</string>
+    <string name="constellation_leo_description">El León</string>
+    <string name="constellation_scorpius_description">El Escorpión</string>
+    <string name="constellation_cygnus_description">El Cisne</string>
+    <string name="constellation_lyra_description">La Lira</string>
+    <string name="constellation_andromeda_description">La Doncella Encadenada</string>
+    <string name="constellation_ursa_minor_description">La Osa Menor</string>
+    <string name="constellation_draco_description">El Dragón</string>
+    <string name="constellation_cepheus_description">El Rey</string>
+    <string name="constellation_perseus_description">El Héroe</string>
+    <string name="constellation_auriga_description">El Cochero</string>
+    <string name="constellation_bootes_description">El Boyero</string>
+    <string name="constellation_corona_borealis_description">La Corona del Norte</string>
+    <string name="constellation_hercules_description">El Héroe</string>
+    <string name="constellation_sagitta_description">La Flecha</string>
+    <string name="constellation_aquila_description">El Águila</string>
+    <string name="constellation_delphinus_description">El Delfín</string>
+    <string name="constellation_pegasus_description">El Caballo Alado</string>
+    <string name="constellation_pisces_description">Los Peces</string>
+    <string name="constellation_aries_description">El Carnero</string>
+    <string name="constellation_taurus_description">El Toro</string>
+    <string name="constellation_gemini_description">Los Gemelos</string>
+    <string name="constellation_cancer_description">El Cangrejo</string>
+    <string name="constellation_virgo_description">La Virgen</string>
+    <string name="constellation_libra_description">La Balanza</string>
+</resources>

@@ -96,18 +96,18 @@ public class MainFragment extends Fragment {
         builder.setTitle(getString(R.string.add_picture));
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
-                case 0: // Take Photo
+                case 0:
                     if (((MainActivity) requireActivity()).checkCameraPermission()) {
                         dispatchTakePictureIntent();
                     }
                     break;
-                case 1: // Choose from Gallery
+                case 1:
                     dispatchPickPictureIntent(false);
                     break;
-                case 2: // Choose Multiple
+                case 2:
                     dispatchPickPictureIntent(true);
                     break;
-                case 3: // Cancel
+                case 3:
                     dialog.dismiss();
                     break;
             }
@@ -134,8 +134,7 @@ public class MainFragment extends Fragment {
                 requireContext().grantUriPermission(
                         resolvedIntentInfo.activityInfo.packageName,
                         currentCameraUri,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
             }
 
@@ -153,8 +152,9 @@ public class MainFragment extends Fragment {
         String imageFileName = "JPEG_" + timeStamp + "_";
 
         File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+        assert storageDir != null;
         if (!storageDir.exists()) {
-            storageDir.mkdirs();
+            boolean mkdirs = storageDir.mkdirs();
         }
 
         return File.createTempFile(
@@ -225,8 +225,20 @@ public class MainFragment extends Fragment {
 
     private void createNoteWithImages(List<Uri> imageUris) {
         List<NoteImage> noteImages = new ArrayList<>();
+        NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+
         for (int i = 0; i < imageUris.size(); i++) {
-            noteImages.add(new NoteImage(imageUris.get(i).toString(), i));
+            String internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), imageUris.get(i));
+            if (internalImagePath != null) {
+                noteImages.add(new NoteImage(internalImagePath, i));
+            }
+        }
+
+        if (noteImages.isEmpty()) {
+            Toast.makeText(requireContext(),
+                    getString(R.string.error_loading_image),
+                    Toast.LENGTH_SHORT).show();
+            return;
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault());
@@ -262,7 +274,7 @@ public class MainFragment extends Fragment {
             try {
                 File cameraFile = new File(Objects.requireNonNull(currentCameraUri.getPath()));
                 if (cameraFile.exists()) {
-                    cameraFile.delete();
+                    boolean delete = cameraFile.delete();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -21,8 +21,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     }
 
     private List<Note> notes;
-    private OnItemClickListener listener;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+    private final OnItemClickListener listener;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
     public NotesAdapter(List<Note> notes, OnItemClickListener listener) {
         this.notes = notes != null ? notes : new ArrayList<>();
@@ -30,11 +30,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     }
 
     public void updateNotes(List<Note> newNotes) {
-        // Use DiffUtil for better performance (simplified version)
-        List<Note> oldNotes = this.notes;
         this.notes = newNotes != null ? new ArrayList<>(newNotes) : new ArrayList<>();
 
-        // For now, use notifyDataSetChanged but in production consider DiffUtil
         notifyDataSetChanged();
     }
 
@@ -52,7 +49,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         holder.noteName.setText(note.getName());
         holder.noteDate.setText(dateFormat.format(note.getTimestamp()));
 
-        // Show image indicator if note has images
         if (note.getImages() != null && !note.getImages().isEmpty()) {
             holder.imageIndicator.setVisibility(View.VISIBLE);
             holder.imageCount.setText(String.valueOf(note.getImages().size()));

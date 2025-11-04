@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="97dp"
-            android:layout_marginBottom="60dp"
+            android:layout_marginBottom="30dp"
             android:shadowColor="#80000000"
             android:shadowDx="2"
             android:shadowDy="2"
@@ -40,6 +40,17 @@
             android:layout_marginBottom="16dp" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_auto_theme"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="@string/auto_theme"
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnPrimary"
+            app:cornerRadius="20dp"
+            android:layout_marginBottom="16dp"
+            app:backgroundTint="?attr/colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_light_theme"
             android:layout_width="200dp"
             android:layout_height="50dp"
@@ -47,7 +58,7 @@
             android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="16dp"
             app:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
@@ -58,7 +69,7 @@
             android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"
-            android:layout_marginBottom="60dp"
+            android:layout_marginBottom="40dp"
             app:backgroundTint="?attr/colorPrimary" />
 
         <TextView
@@ -77,7 +88,7 @@
             android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="16dp"
             app:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
@@ -85,6 +96,17 @@
             android:layout_width="200dp"
             android:layout_height="50dp"
             android:text="Русский"
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnPrimary"
+            app:cornerRadius="20dp"
+            android:layout_marginBottom="16dp"
+            app:backgroundTint="?attr/colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_language_es"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="Español"
             android:textSize="14sp"
             android:textColor="?attr/colorOnPrimary"
             app:cornerRadius="20dp"

@@ -97,9 +97,12 @@
     <string name="theme">Тема</string>
     <string name="light_theme">Светлая тема</string>
     <string name="dark_theme">Тёмная тема</string>
+    <string name="auto_theme">Системная</string>
     <string name="language">Язык</string>
+    <string name="auto_language">Язык системы</string>
     <string name="english">Английский</string>
     <string name="russian">Русский</string>
+    <string name="spanish">Испанский</string>
 
     <!-- Constellations -->
     <string name="constellations">Созвездия</string>
@@ -144,4 +147,68 @@
     <string name="add_button">Добавить</string>
     <string name="no_matching_notes">Соответствующие записи не найдены</string>
     <string name="error_could_not_open_note">Ошибка: не удалось открыть запись</string>
+
+    <!-- Welcome page -->
+    <string name="welcome_to_sky_diary">Sky Diary</string>
+    <string name="sign_up">Регистрация</string>
+    <string name="log_in">Войти</string>
+    <string name="skip_for_now">Пропустить</string>
+
+    <!-- Constellation Names -->
+    <string name="constellation_orion">Орион</string>
+    <string name="constellation_ursa_major">Большая Медведица</string>
+    <string name="constellation_cassiopeia">Кассиопея</string>
+    <string name="constellation_leo">Лев</string>
+    <string name="constellation_scorpius">Скорпион</string>
+    <string name="constellation_cygnus">Лебедь</string>
+    <string name="constellation_lyra">Лира</string>
+    <string name="constellation_andromeda">Андромеда</string>
+    <string name="constellation_ursa_minor">Малая Медведица</string>
+    <string name="constellation_draco">Дракон</string>
+    <string name="constellation_cepheus">Зевс</string>
+    <string name="constellation_perseus">Персей</string>
+    <string name="constellation_auriga">Возничий</string>
+    <string name="constellation_bootes">Волопас</string>
+    <string name="constellation_corona_borealis">Северная Корона</string>
+    <string name="constellation_hercules">Геркулес</string>
+    <string name="constellation_sagitta">Стрела</string>
+    <string name="constellation_aquila">Орёл</string>
+    <string name="constellation_delphinus">Дельфин</string>
+    <string name="constellation_pegasus">Пегас</string>
+    <string name="constellation_pisces">Рыбы</string>
+    <string name="constellation_aries">Овен</string>
+    <string name="constellation_taurus">Телец</string>
+    <string name="constellation_gemini">Близнецы</string>
+    <string name="constellation_cancer">Рак</string>
+    <string name="constellation_virgo">Дева</string>
+    <string name="constellation_libra">Весы</string>
+
+    <!-- Constellation Descriptions -->
+    <string name="constellation_orion_description">Охотник</string>
+    <string name="constellation_ursa_major_description">Большая Медведица</string>
+    <string name="constellation_cassiopeia_description">Царица на троне</string>
+    <string name="constellation_leo_description">Лев</string>
+    <string name="constellation_scorpius_description">Скорпион</string>
+    <string name="constellation_cygnus_description">Лебедь</string>
+    <string name="constellation_lyra_description">Лира</string>
+    <string name="constellation_andromeda_description">Прикованная дева</string>
+    <string name="constellation_ursa_minor_description">Малая Медведица</string>
+    <string name="constellation_draco_description">Дракон</string>
+    <string name="constellation_cepheus_description">Царь</string>
+    <string name="constellation_perseus_description">Герой</string>
+    <string name="constellation_auriga_description">Возничий</string>
+    <string name="constellation_bootes_description">Пастух</string>
+    <string name="constellation_corona_borealis_description">Северная Корона</string>
+    <string name="constellation_hercules_description">Герой</string>
+    <string name="constellation_sagitta_description">Стрела</string>
+    <string name="constellation_aquila_description">Орёл</string>
+    <string name="constellation_delphinus_description">Дельфин</string>
+    <string name="constellation_pegasus_description">Крылатый конь</string>
+    <string name="constellation_pisces_description">Рыбы</string>
+    <string name="constellation_aries_description">Овен</string>
+    <string name="constellation_taurus_description">Телец</string>
+    <string name="constellation_gemini_description">Близнецы</string>
+    <string name="constellation_cancer_description">Рак</string>
+    <string name="constellation_virgo_description">Дева</string>
+    <string name="constellation_libra_description">Весы</string>
 </resources>

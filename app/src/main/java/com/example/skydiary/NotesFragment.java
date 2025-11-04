@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickListener {
@@ -48,7 +49,6 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     private TextView tvNoMatches;
     private Uri currentCameraUri;
 
-    // Modern Activity Result API for image picking
     private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -56,18 +56,15 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
                     Intent data = result.getData();
 
                     if (currentCameraUri != null) {
-                        // Handle camera image
                         handleCameraImageFromFile();
                         currentCameraUri = null;
                     } else if (data != null) {
-                        // Handle gallery images
                         handleImagePickerResult(data);
                     }
                 } else if (result.getResultCode() == androidx.appcompat.app.AppCompatActivity.RESULT_CANCELED) {
-                    // Camera was cancelled, clean up
                     if (currentCameraUri != null) {
                         try {
-                            File cameraFile = new File(currentCameraUri.getPath());
+                            File cameraFile = new File(Objects.requireNonNull(currentCameraUri.getPath()));
                             if (cameraFile.exists()) {
                                 cameraFile.delete();
                             }
@@ -102,7 +99,6 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         tagsContainer = view.findViewById(R.id.tags_container);
         tvNoMatches = view.findViewById(R.id.tv_no_matches);
 
-        // Initialize adapter early to avoid "No adapter attached" errors
         notesAdapter = new NotesAdapter(new ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(notesAdapter);
@@ -153,7 +149,6 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             popupMenu.show();
         });
 
-        // Load initial data
         refreshAllData();
     }
 
@@ -190,28 +185,25 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             File photoFile = createImageFile();
-            if (photoFile != null) {
-                currentCameraUri = FileProvider.getUriForFile(requireContext(),
-                        requireContext().getPackageName() + ".fileprovider",
-                        photoFile);
+            currentCameraUri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    photoFile);
 
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
 
-                // Grant permissions
-                List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
-                        .getPackageManager().queryIntentActivities(takePictureIntent,
-                                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
+            List<android.content.pm.ResolveInfo> resolvedIntentActivities = requireContext()
+                    .getPackageManager().queryIntentActivities(takePictureIntent,
+                            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
 
-                for (android.content.pm.ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
-                    requireContext().grantUriPermission(
-                            resolvedIntentInfo.activityInfo.packageName,
-                            currentCameraUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    );
-                }
-
-                imagePickerLauncher.launch(takePictureIntent);
+            for (android.content.pm.ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+                requireContext().grantUriPermission(
+                        resolvedIntentInfo.activityInfo.packageName,
+                        currentCameraUri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
             }
+
+            imagePickerLauncher.launch(takePictureIntent);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(requireContext(), getString(R.string.error_starting_camera), Toast.LENGTH_SHORT).show();
@@ -223,6 +215,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         String imageFileName = "JPEG_" + timeStamp + "_";
 
         File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+        assert storageDir != null;
         if (!storageDir.exists()) {
             storageDir.mkdirs();
         }
@@ -249,19 +242,16 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         List<Uri> imageUris = new ArrayList<>();
 
         if (data.getClipData() != null) {
-            // Multiple images selected
             for (int i = 0; i < data.getClipData().getItemCount(); i++) {
                 Uri imageUri = data.getClipData().getItemAt(i).getUri();
                 imageUris.add(imageUri);
             }
         } else if (data.getData() != null) {
-            // Single image selected
             Uri imageUri = data.getData();
             imageUris.add(imageUri);
         }
 
         if (!imageUris.isEmpty()) {
-            // Create a new note with the selected images
             createNoteWithImages(imageUris);
         }
     }
@@ -277,7 +267,6 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
                     imageUris.add(Uri.parse(internalImagePath));
                     createNoteWithImages(imageUris);
 
-                    // Scan the file so it appears in gallery
                     Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                     mediaScanIntent.setData(currentCameraUri);
                     requireContext().sendBroadcast(mediaScanIntent);
@@ -292,18 +281,15 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     }
 
     private void createNoteWithImages(List<Uri> imageUris) {
-        // Create a new note with the selected images
         List<NoteImage> noteImages = new ArrayList<>();
         for (int i = 0; i < imageUris.size(); i++) {
             noteImages.add(new NoteImage(imageUris.get(i).toString(), i));
         }
 
-        // Create note name with date
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault());
         String dateString = sdf.format(new Date());
         String noteName = getString(R.string.note_from_format, dateString);
 
-        // Create a note with just images (empty text)
         Note newNote = new Note(
                 noteName,
                 "",
@@ -312,10 +298,8 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
                 noteImages
         );
 
-        // Save the note
         NoteStorage.getInstance(requireContext()).addNote(newNote);
 
-        // Show success message
         if (imageUris.size() == 1) {
             Toast.makeText(requireContext(), getString(R.string.image_note_created_single), Toast.LENGTH_SHORT).show();
         } else {
@@ -323,14 +307,12 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
         }
 
-        // Refresh the notes list
         refreshAllData();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh data when returning to this fragment
         Log.d("NotesFragment", "Refreshing notes on resume");
         refreshAllData();
     }
@@ -407,7 +389,6 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             String name = note.getName() != null ? note.getName().toLowerCase() : "";
             String text = note.getText() != null ? note.getText().toLowerCase() : "";
 
-            // Search filter
             boolean matchesSearch = true;
             for (String kw : keywords) {
                 if (!name.contains(kw) && !text.contains(kw)) {
@@ -417,7 +398,6 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             }
             if (!matchesSearch) continue;
 
-            // Tag filter - show notes that have ALL selected tags
             if (!selectedTags.isEmpty()) {
                 if (note.getTags() == null || note.getTags().isEmpty()) {
                     continue;

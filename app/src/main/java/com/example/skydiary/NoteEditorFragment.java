@@ -51,7 +51,6 @@ public class NoteEditorFragment extends BaseNoteFragment {
     protected void setupSpecificViews(View view) {
         FloatingActionButton btnSave = view.findViewById(R.id.button_save_note);
 
-        // Load note if in edit mode
         Bundle args = getArguments();
         if (args != null) {
             int mode = args.getInt(ARG_MODE, MODE_ADD);
@@ -70,10 +69,8 @@ public class NoteEditorFragment extends BaseNoteFragment {
         }
 
         if (currentNote != null) {
-            // Edit mode - show save confirmation
             btnSave.setOnClickListener(v -> showSaveConfirmationDialog());
         } else {
-            // Add mode - save directly
             btnSave.setOnClickListener(v -> saveNoteImplementation());
         }
     }
@@ -96,16 +93,13 @@ public class NoteEditorFragment extends BaseNoteFragment {
         }
 
         if (currentNote != null) {
-            // Update existing note
             currentNote.setName(name);
             currentNote.setLocation(location);
             currentNote.setText(text);
-            // Keep original timestamp unless explicitly changed via date picker
             currentNote.setTags(new ArrayList<>(selectedTags));
             currentNote.setImages(new ArrayList<>(noteImages));
             NoteStorage.getInstance(requireContext()).updateNote(currentNote);
         } else {
-            // Create new note
             Note newNote = new Note(name, location, text, selectedDate.getTimeInMillis(),
                     new ArrayList<>(selectedTags), new ArrayList<>(noteImages));
             NoteStorage.getInstance(requireContext()).addNote(newNote);

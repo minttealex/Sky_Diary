@@ -97,9 +97,12 @@
     <string name="theme">Theme</string>
     <string name="light_theme">Light theme</string>
     <string name="dark_theme">Dark theme</string>
+    <string name="auto_theme">System default</string>
     <string name="language">Language</string>
+    <string name="auto_language">System default</string>
     <string name="english">English</string>
     <string name="russian">Russian</string>
+    <string name="spanish">Spanish</string>
 
     <!-- Constellations -->
     <string name="constellations">Constellations</string>
@@ -144,4 +147,68 @@
     <string name="add_button">Add</string>
     <string name="no_matching_notes">No matching notes found</string>
     <string name="error_could_not_open_note">Error: could not open note</string>
+
+    <!-- Welcome page -->
+    <string name="welcome_to_sky_diary">Sky Diary</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="log_in">Log In</string>
+    <string name="skip_for_now">Skip for now</string>
+
+    <!-- Constellation Names -->
+    <string name="constellation_orion">Orion</string>
+    <string name="constellation_ursa_major">Ursa Major</string>
+    <string name="constellation_cassiopeia">Cassiopeia</string>
+    <string name="constellation_leo">Leo</string>
+    <string name="constellation_scorpius">Scorpius</string>
+    <string name="constellation_cygnus">Cygnus</string>
+    <string name="constellation_lyra">Lyra</string>
+    <string name="constellation_andromeda">Andromeda</string>
+    <string name="constellation_ursa_minor">Ursa Minor</string>
+    <string name="constellation_draco">Draco</string>
+    <string name="constellation_cepheus">Cepheus</string>
+    <string name="constellation_perseus">Perseus</string>
+    <string name="constellation_auriga">Auriga</string>
+    <string name="constellation_bootes">Bootes</string>
+    <string name="constellation_corona_borealis">Corona Borealis</string>
+    <string name="constellation_hercules">Hercules</string>
+    <string name="constellation_sagitta">Sagitta</string>
+    <string name="constellation_aquila">Aquila</string>
+    <string name="constellation_delphinus">Delphinus</string>
+    <string name="constellation_pegasus">Pegasus</string>
+    <string name="constellation_pisces">Pisces</string>
+    <string name="constellation_aries">Aries</string>
+    <string name="constellation_taurus">Taurus</string>
+    <string name="constellation_gemini">Gemini</string>
+    <string name="constellation_cancer">Cancer</string>
+    <string name="constellation_virgo">Virgo</string>
+    <string name="constellation_libra">Libra</string>
+
+    <!-- Constellation Descriptions -->
+    <string name="constellation_orion_description">The Hunter</string>
+    <string name="constellation_ursa_major_description">The Great Bear</string>
+    <string name="constellation_cassiopeia_description">The Seated Queen</string>
+    <string name="constellation_leo_description">The Lion</string>
+    <string name="constellation_scorpius_description">The Scorpion</string>
+    <string name="constellation_cygnus_description">The Swan</string>
+    <string name="constellation_lyra_description">The Lyre</string>
+    <string name="constellation_andromeda_description">The Chained Maiden</string>
+    <string name="constellation_ursa_minor_description">The Little Bear</string>
+    <string name="constellation_draco_description">The Dragon</string>
+    <string name="constellation_cepheus_description">The King</string>
+    <string name="constellation_perseus_description">The Hero</string>
+    <string name="constellation_auriga_description">The Charioteer</string>
+    <string name="constellation_bootes_description">The Herdsman</string>
+    <string name="constellation_corona_borealis_description">The Northern Crown</string>
+    <string name="constellation_hercules_description">The Hero</string>
+    <string name="constellation_sagitta_description">The Arrow</string>
+    <string name="constellation_aquila_description">The Eagle</string>
+    <string name="constellation_delphinus_description">The Dolphin</string>
+    <string name="constellation_pegasus_description">The Winged Horse</string>
+    <string name="constellation_pisces_description">The Fishes</string>
+    <string name="constellation_aries_description">The Ram</string>
+    <string name="constellation_taurus_description">The Bull</string>
+    <string name="constellation_gemini_description">The Twins</string>
+    <string name="constellation_cancer_description">The Crab</string>
+    <string name="constellation_virgo_description">The Maiden</string>
+    <string name="constellation_libra_description">The Scales</string>
 </resources>

@@ -1,8 +1,14 @@
 package com.example.skydiary;
 
 public class ConstellationResources {
-    public static int getConstellationImageResource(String constellationName) {
-        switch (constellationName) {
+    public static int getConstellationImageResource(String englishName) {
+        if (englishName == null) {
+            return android.R.drawable.ic_menu_gallery;
+        }
+
+        String cleanName = englishName.trim();
+
+        switch (cleanName) {
             case "Orion": return R.drawable.const_orion;
             case "Ursa Major": return R.drawable.const_ursa_major;
             case "Cassiopeia": return R.drawable.const_cassiopeia;

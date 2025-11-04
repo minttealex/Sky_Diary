@@ -50,7 +50,6 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
 
         FloatingActionButton fabChangeDate = view.findViewById(R.id.fab_change_date);
 
-        // Initialize adapter early to avoid "No adapter attached" errors
         adapter = new NotesAdapter(new ArrayList<>(), this);
         recyclerNotes.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerNotes.setAdapter(adapter);
@@ -91,7 +90,6 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh the notes list when returning to this fragment
         if (currentSelectedDate != null) {
             Log.d("CalendarNotesFragment", "Refreshing calendar notes on resume");
             loadNotesForDate(

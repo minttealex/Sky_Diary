@@ -12,11 +12,6 @@ import androidx.core.content.ContextCompat;
 
 public class LocationHelper {
 
-    public interface LocationCallback {
-        void onLocationReceived(String location);
-        void onLocationError(String error);
-    }
-
     public static boolean hasLocationPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
@@ -30,7 +25,6 @@ public class LocationHelper {
 
     @SuppressLint("DefaultLocale")
     public static String formatCoordinates(double latitude, double longitude) {
-        // Use simpler format without directions for better accuracy
         return String.format("%.6f, %.6f", latitude, longitude);
     }
 
@@ -39,13 +33,5 @@ public class LocationHelper {
         return locationManager != null &&
                 (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                         locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-    }
-
-    // Remove auto-formatting methods since we want to allow both coordinates and place names
-    public static boolean isValidLocationInput(String input) {
-        if (input == null || input.trim().isEmpty()) return false;
-
-        // Allow any non-empty input - could be coordinates or place name
-        return !input.trim().isEmpty();
     }
 }

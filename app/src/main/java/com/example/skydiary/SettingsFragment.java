@@ -34,35 +34,100 @@ public class SettingsFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Button buttonAutoTheme = view.findViewById(R.id.button_auto_theme);
         Button buttonLight = view.findViewById(R.id.button_light_theme);
         Button buttonDark = view.findViewById(R.id.button_dark_theme);
+
+        updateThemeButtonStates();
+
+        buttonAutoTheme.setOnClickListener(v -> {
+            applyTheme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            saveThemePreference("auto");
+            updateThemeButtonStates();
+        });
 
         buttonLight.setOnClickListener(v -> {
             applyTheme(AppCompatDelegate.MODE_NIGHT_NO);
             saveThemePreference("light");
+            updateThemeButtonStates();
         });
 
         buttonDark.setOnClickListener(v -> {
             applyTheme(AppCompatDelegate.MODE_NIGHT_YES);
             saveThemePreference("dark");
+            updateThemeButtonStates();
         });
 
         Button buttonEn = view.findViewById(R.id.button_language_en);
         Button buttonRu = view.findViewById(R.id.button_language_ru);
+        Button buttonEs = view.findViewById(R.id.button_language_es);
+
+        updateLanguageButtonStates();
 
         buttonEn.setOnClickListener(v -> changeLanguage("en"));
         buttonRu.setOnClickListener(v -> changeLanguage("ru"));
+        buttonEs.setOnClickListener(v -> changeLanguage("es"));
+    }
+
+    private void updateThemeButtonStates() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, 0);
+        String currentTheme = prefs.getString(KEY_THEME, "auto");
+
+        Button buttonAutoTheme = requireView().findViewById(R.id.button_auto_theme);
+        Button buttonLight = requireView().findViewById(R.id.button_light_theme);
+        Button buttonDark = requireView().findViewById(R.id.button_dark_theme);
+
+        buttonAutoTheme.setAlpha(0.7f);
+        buttonLight.setAlpha(0.7f);
+        buttonDark.setAlpha(0.7f);
+
+        switch (currentTheme) {
+            case "auto":
+                buttonAutoTheme.setAlpha(1.0f);
+                break;
+            case "light":
+                buttonLight.setAlpha(1.0f);
+                break;
+            case "dark":
+                buttonDark.setAlpha(1.0f);
+                break;
+        }
+    }
+
+    private void updateLanguageButtonStates() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, 0);
+        String currentLanguage = prefs.getString(KEY_LANGUAGE, "auto");
+
+        Button buttonEn = requireView().findViewById(R.id.button_language_en);
+        Button buttonRu = requireView().findViewById(R.id.button_language_ru);
+        Button buttonEs = requireView().findViewById(R.id.button_language_es);
+
+        buttonEn.setAlpha(0.7f);
+        buttonRu.setAlpha(0.7f);
+        buttonEs.setAlpha(0.7f);
+
+        switch (currentLanguage) {
+            case "auto":
+                break;
+            case "en":
+                buttonEn.setAlpha(1.0f);
+                break;
+            case "ru":
+                buttonRu.setAlpha(1.0f);
+                break;
+            case "es":
+                buttonEs.setAlpha(1.0f);
+                break;
+        }
     }
 
     private void applyTheme(int mode) {
         AppCompatDelegate.setDefaultNightMode(mode);
-        // Recreate activity to apply theme, or notify activity to recreate
         requireActivity().recreate();
     }
 
     private void saveThemePreference(String theme) {
-        SharedPreferences prefs = requireActivity()
-                .getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, 0);
         prefs.edit().putString(KEY_THEME, theme).apply();
     }
 
@@ -76,7 +141,12 @@ public class SettingsFragment extends Fragment {
     }
 
     private void applyLocale(String langCode) {
-        Locale locale = new Locale(langCode);
+        Locale locale;
+        if ("auto".equals(langCode)) {
+            locale = Locale.getDefault();
+        } else {
+            locale = new Locale(langCode);
+        }
         Locale.setDefault(locale);
         Configuration config = new Configuration();
         config.setLocale(locale);
@@ -86,15 +156,12 @@ public class SettingsFragment extends Fragment {
     }
 
     private void saveLanguagePreference(String langCode) {
-        SharedPreferences prefs = requireActivity()
-                .getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, 0);
         prefs.edit().putString(KEY_LANGUAGE, langCode).apply();
     }
 
     private String getSavedLanguage() {
-        SharedPreferences prefs = requireActivity()
-                .getSharedPreferences(PREFS_NAME, 0);
-        return prefs.getString(KEY_LANGUAGE, "en");
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, 0);
+        return prefs.getString(KEY_LANGUAGE, "auto");
     }
 }
-

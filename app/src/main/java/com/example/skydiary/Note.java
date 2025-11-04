@@ -16,7 +16,6 @@ public class Note {
     private List<String> tags;
     private List<NoteImage> images;
 
-    // Default constructor for Gson
     public Note() {
         this.id = UUID.randomUUID().toString();
         this.tags = new ArrayList<>();
@@ -50,7 +49,6 @@ public class Note {
         this.images = images != null ? images : new ArrayList<>();
     }
 
-    // Add location constructor
     public Note(String name, String location, String text, long timestamp, List<String> tags, List<NoteImage> images) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
@@ -61,7 +59,6 @@ public class Note {
         this.images = images != null ? images : new ArrayList<>();
     }
 
-    // Getters and setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

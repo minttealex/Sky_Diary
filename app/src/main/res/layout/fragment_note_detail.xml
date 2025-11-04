@@ -138,7 +138,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/save_changes"
-        app:srcCompat="@android:drawable/ic_menu_save"
+        app:srcCompat="@drawable/ic_save"
         app:tint="?attr/colorOnPrimary"
         app:backgroundTint="?attr/colorPrimary" />
 

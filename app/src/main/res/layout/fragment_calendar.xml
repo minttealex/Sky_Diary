@@ -55,7 +55,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/change_date"
-        app:srcCompat="@android:drawable/ic_menu_my_calendar"
+        app:srcCompat="@drawable/ic_calendar"
         app:tint="?attr/colorOnPrimary"
         app:backgroundTint="?attr/colorPrimary" />
 

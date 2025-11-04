@@ -274,7 +274,7 @@ public class MainFragment extends Fragment {
             try {
                 File cameraFile = new File(Objects.requireNonNull(currentCameraUri.getPath()));
                 if (cameraFile.exists()) {
-                    boolean delete = cameraFile.delete();
+                    cameraFile.delete();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

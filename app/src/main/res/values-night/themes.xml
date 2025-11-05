@@ -7,6 +7,9 @@
         <item name="colorSecondary">@color/button_color_dark</item>
         <item name="colorOnSecondary">@android:color/black</item>
 
+        <item name="startColor">@color/start_color_dark</item>
+        <item name="endColor">@color/end_color_dark</item>
+
         <item name="bottomNavigationStyle">@style/Widget.SkyDiary.BottomNavigationView.Dark</item>
     </style>
 

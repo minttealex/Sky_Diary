@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Info -->
-    <string name="app_name">Diario del Cielo</string>
+    <string name="app_name">Sky Diary</string>
     <string name="welcome_message">¡Bienvenido!</string>
     <string name="get_started">Comenzar</string>
 
@@ -146,14 +146,14 @@
     <string name="menu_button">Menú</string>
     <string name="add_tag_button">Añadir etiqueta</string>
     <string name="add_button">Añadir</string>
-    <string name="no_matching_notes">No se encontraron notas</string>
+    <string name="no_matching_notes">No se encontraron notas coincidentes</string>
     <string name="error_could_not_open_note">Error: no se pudo abrir la nota</string>
 
     <!-- Welcome page -->
-    <string name="welcome_to_sky_diary">Diario del Cielo</string>
+    <string name="welcome_to_sky_diary">Sky Diary</string>
     <string name="sign_up">Registrarse</string>
     <string name="log_in">Iniciar Sesión</string>
-    <string name="skip_for_now">Omitir por ahora</string>
+    <string name="skip_for_now">Omitir</string>
 
     <!-- Constellation Names -->
     <string name="constellation_orion">Orión</string>

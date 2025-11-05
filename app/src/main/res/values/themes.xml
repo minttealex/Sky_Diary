@@ -7,6 +7,9 @@
         <item name="colorSecondary">@color/button_color_light</item>
         <item name="colorOnSecondary">@android:color/white</item>
 
+        <item name="startColor">@color/start_color_light</item>
+        <item name="endColor">@color/end_color_light</item>
+
         <item name="bottomNavigationStyle">@style/Widget.SkyDiary.BottomNavigationView.Light</item>
     </style>
 

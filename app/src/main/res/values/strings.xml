@@ -152,7 +152,7 @@
     <string name="welcome_to_sky_diary">Sky Diary</string>
     <string name="sign_up">Sign Up</string>
     <string name="log_in">Log In</string>
-    <string name="skip_for_now">Skip for now</string>
+    <string name="skip_for_now">Skip</string>
 
     <!-- Constellation Names -->
     <string name="constellation_orion">Orion</string>

@@ -11,8 +11,9 @@
     <com.example.skydiary.StarryBackgroundView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:startColor="@color/start_color_light"
-        app:endColor="@color/end_color_light" />
+        app:startColor="?attr/startColor"
+        app:endColor="?attr/endColor"
+        />
 
     <LinearLayout
         android:orientation="vertical"

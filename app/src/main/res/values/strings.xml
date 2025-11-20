@@ -85,6 +85,9 @@
     <string name="tag_cannot_be_empty">Tag name cannot be empty</string>
     <string name="tag_already_exists">Tag already exists</string>
     <string name="tags_updated_format">Tags updated: %d selected</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="log_out">Log Out</string>
+    <string name="update_account">Update Account</string>
 
     <!-- Date and Time -->
     <string name="change_date">Change date</string>
@@ -152,7 +155,18 @@
     <string name="welcome_to_sky_diary">Sky Diary</string>
     <string name="sign_up">Sign Up</string>
     <string name="log_in">Log In</string>
+    <string name="logging_in">Logging in…</string>
     <string name="skip_for_now">Skip</string>
+    <string name="username">Username</string>
+    <string name="email">Email (optional)</string>
+    <string name="password">Password</string>
+    <string name="account">Account</string>
+    <string name="logged_in_as">Logged in as: %s</string>
+    <string name="not_logged_in">Not logged in</string>
+    <string name="logged_out">Logged out successfully</string>
+    <string name="account_settings">Account Settings</string>
+    <string name="create_account">Create account</string>
+    <string name="creating_account">Creating account…</string>
 
     <!-- Constellation Names -->
     <string name="constellation_orion">Orion</string>

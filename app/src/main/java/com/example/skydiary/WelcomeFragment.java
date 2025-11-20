@@ -34,26 +34,13 @@ public class WelcomeFragment extends Fragment {
         MaterialButton btnLogIn = view.findViewById(R.id.btn_log_in);
         TextView tvSkip = view.findViewById(R.id.tv_skip);
 
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showSignUpFragment();
-            }
-        });
+        btnSignUp.setOnClickListener(v -> showSignUpFragment());
 
-        btnLogIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showLogInFragment();
-            }
-        });
+        btnLogIn.setOnClickListener(v -> showLogInFragment());
 
-        tvSkip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                markFirstLaunchCompleted();
-                showMainFragment();
-            }
+        tvSkip.setOnClickListener(v -> {
+            markFirstLaunchCompleted();
+            showMainFragment();
         });
     }
 

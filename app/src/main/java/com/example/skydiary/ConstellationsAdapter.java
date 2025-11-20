@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -92,21 +91,13 @@ public class ConstellationsAdapter extends RecyclerView.Adapter<ConstellationsAd
             try {
                 if (constellation.getImageResId() != 0) {
                     ivConstellation.setImageResource(constellation.getImageResId());
-                    ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-                    if (constellation.isSeen()) {
-                        ivConstellation.setAlpha(0.6f);
-                    } else {
-                        ivConstellation.setAlpha(1.0f);
-                    }
+                }
+                ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                if (constellation.isSeen()) {
+                    ivConstellation.setAlpha(0.6f);
                 } else {
-                    ivConstellation.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-                    if (constellation.isSeen()) {
-                        ivConstellation.setAlpha(0.6f);
-                    } else {
-                        ivConstellation.setAlpha(1.0f);
-                    }
+                    ivConstellation.setAlpha(1.0f);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

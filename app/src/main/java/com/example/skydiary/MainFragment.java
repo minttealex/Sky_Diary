@@ -26,11 +26,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class MainFragment extends Fragment {
 
     private Uri currentCameraUri;
+    private File currentCameraFile;
 
     private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -119,10 +119,10 @@ public class MainFragment extends Fragment {
         try {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-            File photoFile = createImageFile();
+            currentCameraFile = createImageFile(); // Store the file reference
             currentCameraUri = FileProvider.getUriForFile(requireContext(),
                     requireContext().getPackageName() + ".fileprovider",
-                    photoFile);
+                    currentCameraFile);
 
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentCameraUri);
 
@@ -154,7 +154,7 @@ public class MainFragment extends Fragment {
         File storageDir = requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
         assert storageDir != null;
         if (!storageDir.exists()) {
-            boolean mkdirs = storageDir.mkdirs();
+            storageDir.mkdirs();
         }
 
         return File.createTempFile(
@@ -195,33 +195,41 @@ public class MainFragment extends Fragment {
 
     private void handleCameraImageFromFile() {
         try {
-            if (currentCameraUri != null) {
+            if (currentCameraFile != null && currentCameraFile.exists()) {
                 NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
-                String internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), currentCameraUri);
-
+                String internalImagePath = noteStorage.saveImageToInternalStorage(requireContext(), Uri.fromFile(currentCameraFile));
                 if (internalImagePath != null) {
-                    List<Uri> imageUris = new ArrayList<>();
-                    imageUris.add(Uri.parse(internalImagePath));
-                    createNoteWithImages(imageUris);
+                    List<NoteImage> noteImages = new ArrayList<>();
+                    noteImages.add(new NoteImage(internalImagePath, 0));
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+                    String dateString = sdf.format(new Date());
+                    String noteName = getString(R.string.note_from_format, dateString);
+                    Note newNote = new Note(noteName, "", System.currentTimeMillis(), new ArrayList<>(), noteImages);
+                    NoteStorage.getInstance(requireContext()).addNote(newNote);
 
+                    Toast.makeText(requireContext(), getString(R.string.image_note_created_single), Toast.LENGTH_SHORT).show();
                     Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    mediaScanIntent.setData(currentCameraUri);
+                    mediaScanIntent.setData(Uri.fromFile(currentCameraFile));
                     requireContext().sendBroadcast(mediaScanIntent);
+
+                    // Show notes fragment
+                    requireActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new NotesFragment())
+                            .commit();
                 } else {
-                    Toast.makeText(requireContext(),
-                            getString(R.string.error_loading_image),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.error_loading_image), Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.error_processing_camera_image), Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(),
-                    getString(R.string.error_processing_camera_image),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_processing_camera_image), Toast.LENGTH_SHORT).show();
         } finally {
             cleanupCameraFiles();
         }
     }
+
 
     private void createNoteWithImages(List<Uri> imageUris) {
         List<NoteImage> noteImages = new ArrayList<>();
@@ -270,16 +278,16 @@ public class MainFragment extends Fragment {
     }
 
     private void cleanupCameraFiles() {
-        if (currentCameraUri != null) {
+        if (currentCameraFile != null) {
             try {
-                File cameraFile = new File(Objects.requireNonNull(currentCameraUri.getPath()));
-                if (cameraFile.exists()) {
-                    cameraFile.delete();
+                if (currentCameraFile.exists()) {
+                    currentCameraFile.delete();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            currentCameraUri = null;
+            currentCameraFile = null;
         }
+        currentCameraUri = null;
     }
 }

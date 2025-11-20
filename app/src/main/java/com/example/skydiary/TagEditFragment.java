@@ -26,9 +26,8 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
     }
 
     private TagEditListener listener;
-    private List<String> allTags;
     private List<String> selectedTags;
-    private List<CheckBox> checkBoxes = new ArrayList<>();
+    private final List<CheckBox> checkBoxes = new ArrayList<>();
     private LinearLayout tagsLayout;
     private android.widget.TextView noTagsText;
     private List<String> currentTags;
@@ -50,7 +49,7 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
     @NonNull
     @Override
     public android.app.Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        allTags = getArguments() != null ? getArguments().getStringArrayList("allTags") : new ArrayList<>();
+        List<String> allTags = getArguments() != null ? getArguments().getStringArrayList("allTags") : new ArrayList<>();
         selectedTags = getArguments() != null ? getArguments().getStringArrayList("selectedTags") : new ArrayList<>();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -61,12 +60,10 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         int paddingPx = (int) (16 * getResources().getDisplayMetrics().density);
         container.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
 
-        // Add tag button
         ImageButton btnAddTag = new ImageButton(requireContext());
         btnAddTag.setImageResource(android.R.drawable.ic_input_add);
-        btnAddTag.setBackgroundColor(0x00000000); // transparent background
+        btnAddTag.setBackgroundColor(0x00000000);
 
-        // Resolve colorPrimary attribute from current theme
         TypedValue typedValue = new TypedValue();
         requireContext().getTheme().resolveAttribute(
                 androidx.appcompat.R.attr.colorPrimary, typedValue, true);
@@ -79,7 +76,6 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         btnAddTag.setLayoutParams(params);
         container.addView(btnAddTag);
 
-        // Scrollable tags container
         ScrollView scrollView = new ScrollView(requireContext());
         tagsLayout = new LinearLayout(requireContext());
         tagsLayout.setOrientation(LinearLayout.VERTICAL);
@@ -88,19 +84,16 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 (int) (200 * getResources().getDisplayMetrics().density)));
 
-        // No tags message
         noTagsText = new android.widget.TextView(requireContext());
         noTagsText.setText(getString(R.string.no_tags_yet));
         tagsLayout.addView(noTagsText);
 
-        // Current tags list (we'll work with a copy)
+        assert allTags != null;
         currentTags = new ArrayList<>(allTags);
         noteStorage = NoteStorage.getInstance(requireContext());
 
-        // Initial refresh
         refreshTags();
 
-        // Add new tag
         btnAddTag.setOnClickListener(v -> {
             EditText input = new EditText(requireContext());
             input.setHint(getString(R.string.enter_new_tag));
@@ -118,7 +111,7 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
                             return;
                         }
                         currentTags.add(newTag);
-                        noteStorage.addTag(newTag); // Persist globally
+                        noteStorage.addTag(newTag);
                         refreshTags();
                     })
                     .setNegativeButton(getString(R.string.cancel), null)
@@ -128,7 +121,6 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         builder.setView(container);
 
         builder.setPositiveButton(getString(R.string.save_changes), (dialog, which) -> {
-            // Collect all selected tags from checkboxes
             selectedTags.clear();
             for (CheckBox cb : checkBoxes) {
                 if (cb.isChecked()) {
@@ -162,10 +154,8 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
                 cb.setChecked(selectedTags.contains(tag));
                 final int index = i;
 
-                // Store checkbox for later retrieval
                 checkBoxes.add(cb);
 
-                // Long click for tag management
                 cb.setOnLongClickListener(v -> {
                     new AlertDialog.Builder(requireContext())
                             .setTitle(getString(R.string.manage_tag))
@@ -188,7 +178,6 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
                                                     Toast.makeText(requireContext(), getString(R.string.tag_already_exists), Toast.LENGTH_SHORT).show();
                                                     return;
                                                 }
-                                                // Rename globally in NoteStorage
                                                 noteStorage.renameTag(tag, newName);
                                                 currentTags.set(index, newName);
                                                 if (selectedTags.contains(tag)) {
@@ -200,7 +189,6 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
                                             .setNegativeButton(getString(R.string.cancel), null)
                                             .show();
                                 } else if (which == 1) {
-                                    // Delete tag
                                     new AlertDialog.Builder(requireContext())
                                             .setTitle(getString(R.string.delete_tag))
                                             .setMessage(getString(R.string.delete_tag_confirmation))

@@ -103,6 +103,9 @@
     <string name="english">Английский</string>
     <string name="russian">Русский</string>
     <string name="spanish">Испанский</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="log_out">Выйти</string>
+    <string name="update_account">Обновить аккаунт</string>
 
     <!-- Constellations -->
     <string name="constellations">Созвездия</string>
@@ -152,7 +155,18 @@
     <string name="welcome_to_sky_diary">Sky Diary</string>
     <string name="sign_up">Регистрация</string>
     <string name="log_in">Войти</string>
+    <string name="logging_in">Авторизация…</string>
     <string name="skip_for_now">Пропустить</string>
+    <string name="username">Имя пользователя</string>
+    <string name="email">Email (необязательно)</string>
+    <string name="password">Пароль</string>
+    <string name="account">Аккаунт</string>
+    <string name="logged_in_as">Вошли как: %s</string>
+    <string name="not_logged_in">Не вошли в аккаунт</string>
+    <string name="logged_out">Вышли успешно</string>
+    <string name="account_settings">Настройки аккаунта</string>
+    <string name="create_account">Создать аккаунт</string>
+    <string name="creating_account">Создание аккаунта…</string>
 
     <!-- Constellation Names -->
     <string name="constellation_orion">Орион</string>

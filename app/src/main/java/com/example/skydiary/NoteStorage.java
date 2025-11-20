@@ -4,15 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
-import androidx.core.content.FileProvider;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -211,30 +208,6 @@ public class NoteStorage {
             }
         }
         return null;
-    }
-
-    public void cleanupOrphanedImages(Context context, List<Note> currentNotes) {
-        Set<String> usedImagePaths = new HashSet<>();
-        for (Note note : currentNotes) {
-            if (note.getImages() != null) {
-                for (NoteImage noteImage : note.getImages()) {
-                    usedImagePaths.add(noteImage.getImagePath());
-                }
-            }
-        }
-
-        // Delete unused images
-        File imagesDir = new File(context.getFilesDir(), "note_images");
-        if (imagesDir.exists() && imagesDir.isDirectory()) {
-            File[] imageFiles = imagesDir.listFiles();
-            if (imageFiles != null) {
-                for (File imageFile : imageFiles) {
-                    if (!usedImagePaths.contains(imageFile.getAbsolutePath())) {
-                        imageFile.delete();
-                    }
-                }
-            }
-        }
     }
 
     public String saveImageToInternalStorage(Context context, Uri imageUri) {

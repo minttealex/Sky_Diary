@@ -8,17 +8,13 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+
 import java.util.Random;
 
 public class StarryBackgroundView extends View {
     private int starCount = 100;
-    private float minStarSize = 0.5f;
-    private float maxStarSize = 3.0f;
-    private float minBrightness = 0.1f;
-    private float maxBrightness = 0.9f;
-    private long minTwinkleSpeed = 4000L;
-    private long maxTwinkleSpeed = 8000L;
-    private int refreshRate = 80;
 
     private int startColor = 0xFF0A0E2A;
     private int endColor = 0xFF1A1F4B;
@@ -80,6 +76,10 @@ public class StarryBackgroundView extends View {
 
     private void initializeStars(int width, int height) {
         for (int i = 0; i < starCount; i++) {
+            float minStarSize = 0.5f;
+            float maxStarSize = 3.0f;
+            long minTwinkleSpeed = 4000L;
+            long maxTwinkleSpeed = 8000L;
             stars[i] = new Star(
                     random.nextFloat() * width,
                     random.nextFloat() * height,
@@ -91,7 +91,7 @@ public class StarryBackgroundView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         canvas.drawRect(0, 0, getWidth(), getHeight(), gradientPaint);
@@ -105,6 +105,8 @@ public class StarryBackgroundView extends View {
         for (Star star : stars) {
             if (star != null) {
                 float progress = (currentTime % star.twinkleSpeed) / (float) star.twinkleSpeed;
+                float minBrightness = 0.1f;
+                float maxBrightness = 0.9f;
                 float alpha = minBrightness + (float) Math.abs(Math.sin(progress * Math.PI * 2)) * (maxBrightness - minBrightness);
 
                 paint.setAlpha((int) (alpha * 255));
@@ -112,6 +114,7 @@ public class StarryBackgroundView extends View {
             }
         }
 
+        int refreshRate = 80;
         postInvalidateDelayed(refreshRate);
     }
 
@@ -128,49 +131,4 @@ public class StarryBackgroundView extends View {
     }
 
 
-    public void setColors(int startColor, int endColor) {
-        this.startColor = startColor;
-        this.endColor = endColor;
-        // Пересоздаем градиент
-        if (getWidth() > 0 && getHeight() > 0) {
-            LinearGradient gradient = new LinearGradient(
-                    0, 0, getWidth(), getHeight(),
-                    new int[]{startColor, endColor},
-                    new float[]{0f, 1f},
-                    Shader.TileMode.CLAMP
-            );
-            gradientPaint.setShader(gradient);
-            invalidate();
-        }
-    }
-
-    public void setBrightnessRange(float minBrightness, float maxBrightness) {
-        this.minBrightness = minBrightness;
-        this.maxBrightness = maxBrightness;
-        invalidate();
-    }
-
-    public void setStarSizeRange(float minSize, float maxSize) {
-        this.minStarSize = minSize;
-        this.maxStarSize = maxSize;
-        starsInitialized = false;
-        invalidate();
-    }
-
-    public void setTwinkleSpeed(long minSpeed, long maxSpeed) {
-        this.minTwinkleSpeed = minSpeed;
-        this.maxTwinkleSpeed = maxSpeed;
-        starsInitialized = false;
-        invalidate();
-    }
-
-    public void setRefreshRate(int refreshRate) {
-        this.refreshRate = refreshRate;
-    }
-
-    public void setStarCount(int count) {
-        this.starCount = count;
-        starsInitialized = false;
-        invalidate();
-    }
 }

@@ -1,17 +1,18 @@
 package com.example.skydiary;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class NoteImage {
     private String id;
-    private final String imagePath;
+    private String imagePath;
     private int position;
     private float rotation;
     private int originalWidth;
     private int originalHeight;
 
     public NoteImage(String imagePath, int position) {
-        this.id = java.util.UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString();
         this.imagePath = imagePath;
         this.position = position;
         this.rotation = 0f;
@@ -19,10 +20,21 @@ public class NoteImage {
         this.originalHeight = 0;
     }
 
+    public NoteImage(String id, String imagePath, int position, float rotation, int originalWidth, int originalHeight) {
+        this.id = id != null ? id : UUID.randomUUID().toString();
+        this.imagePath = imagePath;
+        this.position = position;
+        this.rotation = rotation;
+        this.originalWidth = originalWidth;
+        this.originalHeight = originalHeight;
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
     public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
     public int getPosition() { return position; }
     public void setPosition(int position) { this.position = position; }
 

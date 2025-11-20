@@ -79,7 +79,6 @@ public class CalendarNotesFragment extends Fragment implements NotesAdapter.OnIt
             loadNotesForDate(year, month, dayOfMonth);
         });
 
-        // Load initial data
         loadNotesForDate(
                 currentSelectedDate.get(Calendar.YEAR),
                 currentSelectedDate.get(Calendar.MONTH),

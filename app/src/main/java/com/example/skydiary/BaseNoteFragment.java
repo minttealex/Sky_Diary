@@ -817,20 +817,18 @@ public abstract class BaseNoteFragment extends Fragment {
             if (locationManager != null && LocationHelper.hasLocationPermission(requireContext())) {
                 android.location.LocationListener locationListener = new android.location.LocationListener() {
                     @Override
-                    public void onLocationChanged(Location location) {
-                        if (location != null) {
-                            String formattedLocation = LocationHelper.formatCoordinates(
-                                    location.getLatitude(), location.getLongitude());
-                            editNoteLocation.setText(formattedLocation);
-                            Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
+                    public void onLocationChanged(@NonNull Location location) {
+                        String formattedLocation = LocationHelper.formatCoordinates(
+                                location.getLatitude(), location.getLongitude());
+                        editNoteLocation.setText(formattedLocation);
+                        Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
 
-                            locationManager.removeUpdates(this);
-                        }
+                        locationManager.removeUpdates(this);
                     }
 
                     @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-                    @Override public void onProviderEnabled(String provider) {}
-                    @Override public void onProviderDisabled(String provider) {}
+                    @Override public void onProviderEnabled(@NonNull String provider) {}
+                    @Override public void onProviderDisabled(@NonNull String provider) {}
                 };
 
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {

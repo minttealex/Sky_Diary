@@ -3,11 +3,11 @@ package com.example.skydiary;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -96,42 +96,41 @@ public class SettingsFragment extends Fragment {
         Button btnLogin = view.findViewById(R.id.btn_login);
         Button btnCreateAccount = view.findViewById(R.id.btn_create_account);
         Button btnAccountSettings = view.findViewById(R.id.btn_account_settings);
+        ImageButton btnSync = view.findViewById(R.id.btn_sync);
         LinearLayout llNonLoggedInButtons = view.findViewById(R.id.ll_non_logged_in);
 
         currentUser = userStorage.getCurrentUser();
 
-        // Debug logging
-        Log.d("SettingsFragment", "NetworkManager isLoggedIn: " + networkManager.isLoggedIn());
-        Log.d("SettingsFragment", "UserStorage currentUser: " + (currentUser != null ? currentUser.getUsername() : "null"));
-
         if (networkManager.isLoggedIn()) {
-            String displayUsername = "Unknown User";
-            if (currentUser != null) {
-                displayUsername = currentUser.getUsername();
-            } else {
-                Log.w("SettingsFragment", "UserStorage is null but NetworkManager is logged in");
-            }
-
-            tvAccountStatus.setText(R.string.logged_in_as + displayUsername);
+            String displayUsername = currentUser != null ? currentUser.getUsername() : "Unknown User";
+            tvAccountStatus.setText(String.format("%s%s", getString(R.string.logged_in_as), displayUsername));
             llNonLoggedInButtons.setVisibility(View.GONE);
             btnAccountSettings.setVisibility(View.VISIBLE);
+            btnSync.setVisibility(View.VISIBLE);
 
             btnLogin.setText(R.string.log_out);
-            btnLogin.setOnClickListener(v -> new android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Log Out")
-                    .setMessage("Are you sure you want to log out?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        networkManager.logout();
-                        userStorage.logout();
-                        Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                        refreshFragment();
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show());
+            btnLogin.setOnClickListener(v -> showLogoutConfirmation());
+
+            btnSync.setOnClickListener(v -> {
+                CloudSyncManager syncManager = new CloudSyncManager(requireContext());
+                syncManager.syncAllData(new CloudSyncManager.SyncCallback() {
+                    @Override
+                    public void onSyncComplete(boolean success, String message) {
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onSyncError(String error) {
+                        Toast.makeText(requireContext(), "Sync failed: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+
         } else {
             tvAccountStatus.setText(R.string.not_logged_in);
             llNonLoggedInButtons.setVisibility(View.VISIBLE);
             btnAccountSettings.setVisibility(View.GONE);
+            btnSync.setVisibility(View.GONE);
 
             btnLogin.setText(R.string.log_in);
             btnLogin.setOnClickListener(v -> requireActivity().getSupportFragmentManager().beginTransaction()
@@ -154,17 +153,31 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private void showAccountSettingsFragment() {
-        AccountSettingsFragment fragment = new AccountSettingsFragment();
-        requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack("settings_to_account")
-                .commit();
+    private void showLogoutConfirmation() {
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Log Out")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    networkManager.logout();
+                    userStorage.logout();
+                    Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                    refreshFragment();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void refreshFragment() {
         requireActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new SettingsFragment())
+                .commit();
+    }
+
+    private void showAccountSettingsFragment() {
+        AccountSettingsFragment fragment = new AccountSettingsFragment();
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack("settings_to_account")
                 .commit();
     }
 

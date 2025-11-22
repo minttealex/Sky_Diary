@@ -15,6 +15,35 @@ public class CloudSyncManager {
         this.noteStorage = NoteStorage.getInstance(context);
     }
 
+    public void syncOnLogin(final SyncCallback callback) {
+        if (!networkManager.isLoggedIn()) {
+            callback.onSyncError("User not logged in");
+            return;
+        }
+
+        List<Note> localNotes = noteStorage.getNotes();
+
+        if (localNotes.isEmpty()) {
+            downloadNotes(callback);
+        } else {
+            uploadLocalNotesAndSync(localNotes, callback);
+        }
+    }
+
+    private void uploadLocalNotesAndSync(List<Note> localNotes, final SyncCallback callback) {
+        networkManager.uploadLocalNotes(localNotes, new NetworkManager.ApiCallback<>() {
+            @Override
+            public void onSuccess(SyncResult result) {
+                downloadNotes(callback);
+            }
+
+            @Override
+            public void onError(String error) {
+                callback.onSyncError("Upload failed: " + error);
+            }
+        });
+    }
+
     public void syncAllData(final SyncCallback callback) {
         if (!networkManager.isLoggedIn()) {
             Log.w(TAG, "Sync failed: User not logged in");

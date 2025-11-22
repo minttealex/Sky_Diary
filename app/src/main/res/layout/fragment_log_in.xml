@@ -100,6 +100,20 @@
             app:cornerRadius="20dp"
             app:backgroundTint="?attr/colorPrimary" />
 
+        <TextView
+            android:id="@+id/tv_forgot_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Forgot Password?"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            android:padding="8dp"
+            android:textAllCaps="false"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
 
 </FrameLayout>

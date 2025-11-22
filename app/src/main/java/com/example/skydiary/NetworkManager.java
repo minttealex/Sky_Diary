@@ -12,6 +12,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -174,7 +175,10 @@ public class NetworkManager {
         Log.d(TAG, "Attempting to sync " + notes.size() + " notes");
         Log.d(TAG, "Full URL: " + BASE_URL + "api/notes/sync");
 
-        apiService.syncNotes("Bearer " + token, notes).enqueue(new Callback<>() {
+        SyncRequest request = new SyncRequest(notes);
+
+        Call<SyncResult> call = apiService.syncNotes("Bearer " + token, request);
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<SyncResult> call, @NonNull Response<SyncResult> response) {
                 Log.d(TAG, "Sync response code: " + response.code());
@@ -200,6 +204,72 @@ public class NetworkManager {
             @Override
             public void onFailure(@NonNull Call<SyncResult> call, @NonNull Throwable t) {
                 Log.e(TAG, "Sync failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void updateUser(String username, String email, final ApiCallback<UserResponse> callback) {
+        String token = getToken();
+        if (token == null) {
+            callback.onError("Not authenticated");
+            return;
+        }
+
+        UserUpdateRequest request = new UserUpdateRequest(username, email);
+
+        apiService.updateUser("Bearer " + token, request).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<UserResponse> call, @NonNull Response<UserResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    String error = "Update failed - Code: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            error += " - " + errorBody;
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error reading error body", e);
+                    }
+                    callback.onError(error);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<UserResponse> call, @NonNull Throwable t) {
+                Log.e(TAG, "Update failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void uploadLocalNotes(List<Note> notes, final ApiCallback<SyncResult> callback) {
+        String token = getToken();
+        if (token == null) {
+            callback.onError("Not authenticated");
+            return;
+        }
+
+        Log.d(TAG, "Uploading " + notes.size() + " notes");
+
+        SyncRequest request = new SyncRequest(notes);
+
+        Call<SyncResult> call = apiService.uploadLocalNotes("Bearer " + token, request);
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<SyncResult> call, @NonNull Response<SyncResult> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    String error = "Upload failed - Code: " + response.code();
+                    callback.onError(error);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SyncResult> call, @NonNull Throwable t) {
                 callback.onError("Network error: " + t.getMessage());
             }
         });

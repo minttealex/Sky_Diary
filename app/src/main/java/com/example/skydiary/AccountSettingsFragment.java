@@ -1,6 +1,8 @@
 package com.example.skydiary;
 
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,13 +74,44 @@ public class AccountSettingsFragment extends Fragment {
             return;
         }
 
-        if (currentUser != null) {
-            currentUser.setUsername(username);
-            currentUser.setEmail(email);
-            userStorage.setCurrentUser(currentUser);
-            Toast.makeText(requireContext(), "Account updated locally", Toast.LENGTH_SHORT).show();
-            requireActivity().getSupportFragmentManager().popBackStack();
+        if (!email.isEmpty() && !isValidEmail(email)) {
+            etEmail.setError("Invalid email format");
+            return;
         }
+
+        if (networkManager.isLoggedIn()) {
+            networkManager.updateUser(username, email, new NetworkManager.ApiCallback<UserResponse>() {
+                @Override
+                public void onSuccess(UserResponse result) {
+                    // Update local storage
+                    if (currentUser != null) {
+                        currentUser.setUsername(username);
+                        currentUser.setEmail(email);
+                        userStorage.setCurrentUser(currentUser);
+                    }
+
+                    Toast.makeText(requireContext(), "Account updated successfully", Toast.LENGTH_SHORT).show();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(requireContext(), "Update failed: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            if (currentUser != null) {
+                currentUser.setUsername(username);
+                currentUser.setEmail(email);
+                userStorage.setCurrentUser(currentUser);
+                Toast.makeText(requireContext(), "Account updated locally", Toast.LENGTH_SHORT).show();
+                requireActivity().getSupportFragmentManager().popBackStack();
+            }
+        }
+    }
+
+    private boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
     private void showLogoutConfirmation() {

@@ -15,10 +15,16 @@ public interface ApiService {
     Call<List<Note>> getNotes(@Header("Authorization") String token);
 
     @POST("api/notes/sync")
-    Call<SyncResult> syncNotes(@Header("Authorization") String token, @Body List<Note> notes);
+    Call<SyncResult> syncNotes(@Header("Authorization") String token, @Body SyncRequest request);
 
     @POST("api/notes")
     Call<Note> createNote(@Header("Authorization") String token, @Body Note note);
+
+    @POST("api/notes/upload-local")
+    Call<SyncResult> uploadLocalNotes(@Header("Authorization") String token, @Body SyncRequest request);
+
+    @PUT("api/auth/update")
+    Call<UserResponse> updateUser(@Header("Authorization") String token, @Body UserUpdateRequest request);
 
     @PUT("api/notes/{id}")
     Call<Note> updateNote(@Header("Authorization") String token, @Path("id") String id, @Body Note note);

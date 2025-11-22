@@ -1,10 +1,14 @@
 package com.example.skydiary;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -68,21 +72,66 @@ public class LogInFragment extends Fragment {
                     User savedUser = userStorage.getCurrentUser();
                     Log.d("LogInFragment", "User saved to storage: " + (savedUser != null ? savedUser.getUsername() : "null"));
 
-                    Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+                    CloudSyncManager syncManager = new CloudSyncManager(requireContext());
+                    syncManager.syncOnLogin(new CloudSyncManager.SyncCallback() {
+                        @Override
+                        public void onSyncComplete(boolean success, String message) {
+                            Log.d("Login", "Sync completed: " + message);
+                            Toast.makeText(requireContext(), "Login successful! " + message, Toast.LENGTH_SHORT).show();
 
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, new MainFragment())
-                            .commit();
+                            requireActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, new MainFragment())
+                                    .commit();
+                        }
+
+                        @Override
+                        public void onSyncError(String error) {
+                            Log.e("Login", "Sync error: " + error);
+                            Toast.makeText(requireContext(), "Login successful but sync failed: " + error, Toast.LENGTH_LONG).show();
+                            requireActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, new MainFragment())
+                                    .commit();
+                        }
+                    });
                 }
 
                 @Override
                 public void onError(String error) {
                     btnLogIn.setEnabled(true);
                     btnLogIn.setText(R.string.log_in);
-
                     Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
                 }
             });
         });
+
+        TextView tvForgotPassword = view.findViewById(R.id.tv_forgot_password);
+        tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+    }
+
+    private void showForgotPasswordDialog() {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_forgot_password, null);
+        TextInputEditText etEmail = dialogView.findViewById(R.id.et_email);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Reset Password")
+                .setView(dialogView)
+                .setPositiveButton("Send Reset Link", (dialog, which) -> {
+                    String email = Objects.requireNonNull(etEmail.getText()).toString().trim();
+                    if (email.isEmpty() || !isValidEmail(email)) {
+                        Toast.makeText(requireContext(), "Please enter a valid email", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    sendPasswordResetEmail(email);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void sendPasswordResetEmail(String email) {
+        Toast.makeText(requireContext(), "Reset link would be sent to: " + email, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }

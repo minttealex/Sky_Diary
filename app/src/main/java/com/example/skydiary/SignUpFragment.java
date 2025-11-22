@@ -1,6 +1,7 @@
 package com.example.skydiary;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,18 +71,33 @@ public class SignUpFragment extends Fragment {
                     User user = new User(result.getUsername(), result.getEmail());
                     userStorage.setCurrentUser(user);
 
-                    Toast.makeText(requireContext(), "Registration successful!", Toast.LENGTH_SHORT).show();
+                    CloudSyncManager syncManager = new CloudSyncManager(requireContext());
+                    syncManager.syncOnLogin(new CloudSyncManager.SyncCallback() {
+                        @Override
+                        public void onSyncComplete(boolean success, String message) {
+                            Log.d("SignUp", "Sync completed: " + message);
+                            Toast.makeText(requireContext(), "Registration successful! " + message, Toast.LENGTH_SHORT).show();
 
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, new MainFragment())
-                            .commit();
+                            requireActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, new MainFragment())
+                                    .commit();
+                        }
+
+                        @Override
+                        public void onSyncError(String error) {
+                            Log.e("SignUp", "Sync error: " + error);
+                            Toast.makeText(requireContext(), "Registration successful but sync failed: " + error, Toast.LENGTH_LONG).show();
+                            requireActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, new MainFragment())
+                                    .commit();
+                        }
+                    });
                 }
 
                 @Override
                 public void onError(String error) {
                     btnSignUp.setEnabled(true);
                     btnSignUp.setText(R.string.sign_up);
-
                     Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
                 }
             });

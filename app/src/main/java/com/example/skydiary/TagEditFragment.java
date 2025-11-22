@@ -63,7 +63,6 @@ public class TagEditFragment extends androidx.fragment.app.DialogFragment {
         ImageButton btnAddTag = new ImageButton(requireContext());
         btnAddTag.setImageResource(android.R.drawable.ic_input_add);
         btnAddTag.setBackgroundColor(0x00000000);
-
         TypedValue typedValue = new TypedValue();
         requireContext().getTheme().resolveAttribute(
                 androidx.appcompat.R.attr.colorPrimary, typedValue, true);

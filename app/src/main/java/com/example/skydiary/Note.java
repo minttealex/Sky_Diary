@@ -22,6 +22,8 @@ public class Note {
     private List<NoteImage> images;
     private String createdAt;
     private String updatedAt;
+    private boolean isDeleted;
+    private String deletedAt;
 
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
@@ -30,6 +32,7 @@ public class Note {
         this.id = UUID.randomUUID().toString();
         this.tags = new ArrayList<>();
         this.images = new ArrayList<>();
+        this.isDeleted = false;
         Date now = new Date();
         this.createdAt = formatDate(now);
         this.updatedAt = this.createdAt;
@@ -86,6 +89,16 @@ public class Note {
         this.images = images != null ? new ArrayList<>(images) : new ArrayList<>();
         this.createdAt = createdAt != null ? formatDate(createdAt) : formatDate(new Date());
         this.updatedAt = updatedAt != null ? formatDate(updatedAt) : this.createdAt;
+        this.isDeleted = false;
+    }
+
+    public Date getNoteDate() {
+        return new Date(timestamp);
+    }
+
+    public void setNoteDate(Date date) {
+        this.timestamp = date.getTime();
+        updateTimestamp();
     }
 
     private String formatDate(Date date) {
@@ -194,6 +207,30 @@ public class Note {
         this.updatedAt = formatDate(updatedAt);
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.isDeleted = deleted;
+        if (deleted) {
+            this.deletedAt = formatDate(new Date());
+        }
+        updateTimestamp();
+    }
+
+    public boolean getDeleted() {
+        return isDeleted();
+    }
+
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
     private void updateTimestamp() {
         this.updatedAt = formatDate(new Date());
     }
@@ -254,6 +291,8 @@ public class Note {
                 ", images=" + images +
                 ", createdAt='" + createdAt + '\'' +
                 ", updatedAt='" + updatedAt + '\'' +
+                ", isDeleted=" + isDeleted +
+                ", deletedAt='" + deletedAt + '\'' +
                 '}';
     }
 

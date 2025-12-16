@@ -1,6 +1,8 @@
 package com.example.skydiary;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class LogInFragment extends Fragment {
@@ -63,6 +66,9 @@ public class LogInFragment extends Fragment {
             btnLogIn.setEnabled(false);
             btnLogIn.setText(R.string.logging_in);
 
+            // Clear existing user data BEFORE login to ensure clean state
+            clearExistingUserData();
+
             networkManager.login(username, password, new NetworkManager.ApiCallback<>() {
                 @Override
                 public void onSuccess(UserResponse result) {
@@ -106,6 +112,19 @@ public class LogInFragment extends Fragment {
 
         TextView tvForgotPassword = view.findViewById(R.id.tv_forgot_password);
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+    }
+
+    private void clearExistingUserData() {
+        NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+        noteStorage.saveNotes(new ArrayList<>());
+
+        ConstellationStorage constellationStorage = ConstellationStorage.getInstance(requireContext());
+        constellationStorage.resetToDefault();
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("notes_prefs", Context.MODE_PRIVATE);
+        prefs.edit().remove("tags").apply();
+
+        Log.d("LogInFragment", "Cleared existing user data before login");
     }
 
     private void showForgotPasswordDialog() {

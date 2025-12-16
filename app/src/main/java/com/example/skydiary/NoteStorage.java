@@ -3,37 +3,37 @@ package com.example.skydiary;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class NoteStorage {
+    private static final String TAG = "NoteStorage";
     private static final String PREFS_NAME = "notes_prefs";
     private static final String NOTES_KEY = "notes";
-    private static final String MIGRATION_KEY = "migration_done";
+    private static final String DELETED_NOTES_KEY = "deleted_notes";
+    private static final String LAST_SYNC_KEY = "last_sync";
+    private static final String TAGS_KEY = "tags";
 
     private static NoteStorage instance;
     private final SharedPreferences prefs;
     private final Gson gson;
-    private static final String TAGS_KEY = "tags";
 
     private NoteStorage(Context context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         gson = new GsonBuilder().create();
-        ensureMigration();
     }
 
     public static synchronized NoteStorage getInstance(Context context) {
@@ -43,54 +43,33 @@ public class NoteStorage {
         return instance;
     }
 
-    private void ensureMigration() {
-        boolean migrationDone = prefs.getBoolean(MIGRATION_KEY, false);
-        if (!migrationDone) {
-            migrateNotes();
-            prefs.edit().putBoolean(MIGRATION_KEY, true).apply();
+    public List<Note> getAllNotes() {
+        try {
+            String json = prefs.getString(NOTES_KEY, "[]");
+            Type listType = new TypeToken<List<Note>>() {}.getType();
+            List<Note> notes = gson.fromJson(json, listType);
+            return notes != null ? notes : new ArrayList<>();
+        } catch (Exception e) {
+            Log.e(TAG, "Error reading notes: " + e.getMessage());
+            return new ArrayList<>();
         }
-    }
-
-    private void migrateNotes() {
-        String json = prefs.getString(NOTES_KEY, "[]");
-        Type listType = new TypeToken<List<OldNote>>() {}.getType();
-        List<OldNote> oldNotes = gson.fromJson(json, listType);
-
-        if (oldNotes != null && !oldNotes.isEmpty()) {
-            List<Note> newNotes = new ArrayList<>();
-            for (OldNote oldNote : oldNotes) {
-                Note newNote = new Note();
-                newNote.setId(UUID.randomUUID().toString());
-                newNote.setName(oldNote.name);
-                newNote.setLocation(oldNote.location);
-                newNote.setText(oldNote.text);
-                newNote.setTimestamp(oldNote.timestamp);
-                newNote.setTags(oldNote.tags != null ? oldNote.tags : new ArrayList<>());
-                newNotes.add(newNote);
-            }
-            saveNotes(newNotes);
-        }
-    }
-
-    private static class OldNote {
-        private String name;
-        private String location;
-        private String text;
-        private long timestamp;
-        private List<String> tags;
     }
 
     public List<Note> getNotes() {
-        String json = prefs.getString(NOTES_KEY, "[]");
-        Type listType = new TypeToken<List<Note>>() {}.getType();
-        List<Note> notes = gson.fromJson(json, listType);
-        return notes != null ? notes : new ArrayList<>();
+        List<Note> allNotes = getAllNotes();
+        List<Note> activeNotes = new ArrayList<>();
+        for (Note note : allNotes) {
+            if (!note.isDeleted()) {
+                activeNotes.add(note);
+            }
+        }
+        return activeNotes;
     }
 
     public void addNote(Note note) {
-        List<Note> notes = getNotes();
-        notes.add(note);
-        saveNotes(notes);
+        List<Note> allNotes = getAllNotes();
+        allNotes.add(note);
+        saveNotes(allNotes);
     }
 
     public void saveNotes(List<Note> notes) {
@@ -110,15 +89,19 @@ public class NoteStorage {
     }
 
     public void updateNote(Note currentNote) {
-        List<Note> notes = getNotes();
-        for (int i = 0; i < notes.size(); i++) {
-            if (notes.get(i).getId().equals(currentNote.getId())) {
-                notes.set(i, currentNote);
-                saveNotes(notes);
-                return;
+        List<Note> allNotes = getAllNotes();
+        boolean found = false;
+        for (int i = 0; i < allNotes.size(); i++) {
+            if (allNotes.get(i).getId().equals(currentNote.getId())) {
+                allNotes.set(i, currentNote);
+                found = true;
+                break;
             }
         }
-        addNote(currentNote);
+        if (!found) {
+            allNotes.add(currentNote);
+        }
+        saveNotes(allNotes);
     }
 
     public Set<String> getAllTags() {
@@ -153,16 +136,16 @@ public class NoteStorage {
             prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
         }
 
-        List<Note> notes = getNotes();
+        List<Note> allNotes = getAllNotes();
         boolean notesUpdated = false;
-        for (Note note : notes) {
+        for (Note note : allNotes) {
             if (note.getTags() != null && note.getTags().contains(tag)) {
                 note.getTags().remove(tag);
                 notesUpdated = true;
             }
         }
         if (notesUpdated) {
-            saveNotes(notes);
+            saveNotes(allNotes);
         }
     }
 
@@ -176,9 +159,9 @@ public class NoteStorage {
             prefs.edit().putStringSet(TAGS_KEY, newTags).apply();
         }
 
-        List<Note> notes = getNotes();
+        List<Note> allNotes = getAllNotes();
         boolean notesUpdated = false;
-        for (Note note : notes) {
+        for (Note note : allNotes) {
             if (note.getTags() != null && note.getTags().contains(oldTag)) {
                 note.getTags().remove(oldTag);
                 note.getTags().add(newTag);
@@ -186,23 +169,23 @@ public class NoteStorage {
             }
         }
         if (notesUpdated) {
-            saveNotes(notes);
+            saveNotes(allNotes);
         }
     }
 
     public void deleteNote(Note note) {
         if (note == null) return;
-        List<Note> notes = getNotes();
-        boolean removed = notes.removeIf(n -> n.getId().equals(note.getId()));
-        if (removed) {
-            saveNotes(notes);
-        }
+
+        note.setDeleted(true);
+        updateNote(note);
+
+        markNoteAsDeleted(note.getId());
     }
 
     public Note getNoteById(String noteId) {
         if (noteId == null) return null;
-        List<Note> notes = getNotes();
-        for (Note note : notes) {
+        List<Note> allNotes = getAllNotes();
+        for (Note note : allNotes) {
             if (noteId.equals(note.getId())) {
                 return note;
             }
@@ -241,5 +224,57 @@ public class NoteStorage {
             return null;
         }
     }
-}
 
+    public void markNoteAsDeleted(String noteId) {
+        if (noteId == null) return;
+
+        Set<String> deletedNotes = prefs.getStringSet(DELETED_NOTES_KEY, new HashSet<>());
+        Set<String> newDeletedNotes = new HashSet<>(deletedNotes);
+        newDeletedNotes.add(noteId);
+
+        prefs.edit().putStringSet(DELETED_NOTES_KEY, newDeletedNotes).apply();
+        Log.d(TAG, "Marked note as deleted: " + noteId);
+    }
+
+    public List<String> getDeletedNoteIds() {
+        Set<String> deletedNotes = prefs.getStringSet(DELETED_NOTES_KEY, new HashSet<>());
+        return new ArrayList<>(deletedNotes);
+    }
+
+    public void clearDeletedNotes() {
+        prefs.edit().remove(DELETED_NOTES_KEY).apply();
+        Log.d(TAG, "Cleared deleted notes tracking");
+    }
+
+    public long getLastSyncTime() {
+        return prefs.getLong(LAST_SYNC_KEY, 0);
+    }
+
+    public void setLastSyncTime(long timestamp) {
+        prefs.edit().putLong(LAST_SYNC_KEY, timestamp).apply();
+    }
+
+    public void clearAllData() {
+        try {
+            prefs.edit().putString(NOTES_KEY, "[]").apply();
+
+            prefs.edit().remove(DELETED_NOTES_KEY).apply();
+
+            prefs.edit().remove(LAST_SYNC_KEY).apply();
+
+            prefs.edit().remove(TAGS_KEY).apply();
+
+            Log.d(TAG, "Cleared all local note data");
+        } catch (Exception e) {
+            Log.e(TAG, "Error clearing data: " + e.getMessage());
+        }
+    }
+    public void clearTags() {
+        try {
+            prefs.edit().remove(TAGS_KEY).apply();
+            Log.d(TAG, "Cleared all tags");
+        } catch (Exception e) {
+            Log.e(TAG, "Error clearing tags: " + e.getMessage());
+        }
+    }
+}

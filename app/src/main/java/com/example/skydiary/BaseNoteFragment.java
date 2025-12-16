@@ -27,12 +27,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -44,8 +46,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public abstract class BaseNoteFragment extends Fragment {
 
@@ -56,6 +60,8 @@ public abstract class BaseNoteFragment extends Fragment {
     protected ImageButton btnGetLocation;
     protected LinearLayout imagesContainer;
     protected ScrollView scrollView;
+    protected LinearLayout tagsContainer;
+    protected ImageButton btnAddTag;
 
     protected Calendar selectedDate;
     protected final List<String> selectedTags = new ArrayList<>();
@@ -112,6 +118,7 @@ public abstract class BaseNoteFragment extends Fragment {
         btnGetLocation = view.findViewById(R.id.button_get_location);
         scrollView = view.findViewById(R.id.scroll_view);
 
+        setupTagContainer(view);
         setupImagesContainer();
 
         selectedDate = Calendar.getInstance();
@@ -125,8 +132,78 @@ public abstract class BaseNoteFragment extends Fragment {
 
         setupSpecificViews(view);
 
+        // Load all tags (show available tags even for new notes)
+        loadAllTags();
+
         if (currentNote != null) {
             loadExistingNoteData();
+        }
+    }
+
+    protected void setupTagContainer(View view) {
+        tagsContainer = view.findViewById(R.id.tags_container);
+        btnAddTag = view.findViewById(R.id.btn_add_tag);
+
+        if (btnAddTag != null) {
+            btnAddTag.setOnClickListener(v -> showEditTagsDialog());
+        }
+    }
+
+    protected void loadAllTags() {
+        if (tagsContainer == null) return;
+
+        // Get all available tags from storage
+        Set<String> allTagsSet = NoteStorage.getInstance(requireContext()).getAllTags();
+        tagsContainer.removeAllViews();
+
+        for (String tag : allTagsSet) {
+            TextView tagView = new TextView(requireContext());
+            tagView.setText(tag);
+            tagView.setPadding(20, 10, 20, 10);
+            tagView.setMaxLines(1);
+
+            // Check if this tag is selected for the current note
+            if (selectedTags.contains(tag)) {
+                tagView.setBackgroundResource(R.drawable.tag_selected_background);
+                tagView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+            } else {
+                tagView.setBackgroundResource(R.drawable.tag_background);
+                tagView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+            }
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(10, 0, 10, 0);
+            tagView.setLayoutParams(params);
+
+            // Make tags clickable to toggle selection
+            tagView.setOnClickListener(v -> {
+                if (selectedTags.contains(tag)) {
+                    selectedTags.remove(tag);
+                    tagView.setBackgroundResource(R.drawable.tag_background);
+                } else {
+                    selectedTags.add(tag);
+                    tagView.setBackgroundResource(R.drawable.tag_selected_background);
+                }
+
+                // Update the note if it exists
+                if (currentNote != null) {
+                    currentNote.setTags(new ArrayList<>(selectedTags));
+                    NoteStorage.getInstance(requireContext()).updateNote(currentNote);
+                }
+            });
+
+            tagsContainer.addView(tagView);
+        }
+
+        // If no tags exist, show a message
+        if (allTagsSet.isEmpty() && tagsContainer.getChildCount() == 0) {
+            TextView noTagsText = new TextView(requireContext());
+            noTagsText.setText(getString(R.string.no_tags_yet));
+            noTagsText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
+            noTagsText.setPadding(20, 10, 20, 10);
+            tagsContainer.addView(noTagsText);
         }
     }
 
@@ -143,6 +220,9 @@ public abstract class BaseNoteFragment extends Fragment {
         if (currentNote.getTags() != null) {
             selectedTags.addAll(currentNote.getTags());
         }
+
+        // Refresh the tag container to show which tags are selected
+        loadAllTags();
 
         noteImages.clear();
         if (currentNote.getImages() != null) {
@@ -708,6 +788,8 @@ public abstract class BaseNoteFragment extends Fragment {
     }
 
     protected void saveNoteSilently() {
+        if (currentNote == null) return;
+
         String name = editNoteName.getText().toString().trim();
         String location = editNoteLocation.getText().toString().trim();
         String text = editNoteText.getText().toString().trim();
@@ -736,6 +818,8 @@ public abstract class BaseNoteFragment extends Fragment {
         fragment.setTagEditListener(tags -> {
             selectedTags.clear();
             selectedTags.addAll(tags);
+
+            loadAllTags();
 
             if (currentNote != null) {
                 currentNote.setTags(new ArrayList<>(selectedTags));

@@ -35,7 +35,7 @@
             android:shadowDx="2"
             android:shadowDy="2"
             android:shadowRadius="4"
-            android:text="Account Settings"
+            android:text="@string/account_settings"
             android:textColor="@color/text_primary"
             android:textSize="32sp"
             android:textStyle="italic" />
@@ -107,7 +107,7 @@
                 android:id="@+id/et_current_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Current Password"
+                android:hint="@string/current_password"
                 android:inputType="textPassword"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint" />
@@ -132,7 +132,7 @@
                 android:id="@+id/et_new_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="New Password (optional)"
+                android:hint="@string/new_password_optional"
                 android:inputType="textPassword"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_hint" />
@@ -160,7 +160,7 @@
             android:textSize="14sp"
             app:backgroundTint="@color/bottom_nav_icon_tint"
             app:cornerRadius="20dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/tv_delete_account"
@@ -171,7 +171,7 @@
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             android:textStyle="normal"
-            android:padding="8dp"
+            android:padding="1dp"
             android:textAllCaps="false"
             android:clickable="true"
             android:focusable="true" />

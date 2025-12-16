@@ -80,10 +80,9 @@ public class AccountSettingsFragment extends Fragment {
         }
 
         if (networkManager.isLoggedIn()) {
-            networkManager.updateUser(username, email, new NetworkManager.ApiCallback<UserResponse>() {
+            networkManager.updateUser(username, email, new NetworkManager.ApiCallback<>() {
                 @Override
                 public void onSuccess(UserResponse result) {
-                    // Update local storage
                     if (currentUser != null) {
                         currentUser.setUsername(username);
                         currentUser.setEmail(email);
@@ -116,10 +115,10 @@ public class AccountSettingsFragment extends Fragment {
 
     private void showLogoutConfirmation() {
         new android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Log Out")
-                .setMessage("Are you sure you want to log out?")
-                .setPositiveButton("Yes", (dialog, which) -> performLogout())
-                .setNegativeButton("Cancel", null)
+                .setTitle(R.string.log_out)
+                .setMessage(R.string.confirm_log_out)
+                .setPositiveButton(R.string.yes, (dialog, which) -> performLogout())
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
@@ -127,7 +126,7 @@ public class AccountSettingsFragment extends Fragment {
         networkManager.logout();
         userStorage.logout();
 
-        Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), R.string.logged_out, Toast.LENGTH_SHORT).show();
 
         requireActivity().getSupportFragmentManager().popBackStack();
     }

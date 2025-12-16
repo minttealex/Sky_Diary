@@ -1,8 +1,10 @@
 package com.example.skydiary;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class SettingsFragment extends Fragment {
@@ -103,7 +107,7 @@ public class SettingsFragment extends Fragment {
 
         if (networkManager.isLoggedIn()) {
             String displayUsername = currentUser != null ? currentUser.getUsername() : "Unknown User";
-            tvAccountStatus.setText(String.format("%s%s", getString(R.string.logged_in_as), displayUsername));
+            tvAccountStatus.setText(getString(R.string.logged_in_as, displayUsername));
             llNonLoggedInButtons.setVisibility(View.GONE);
             btnAccountSettings.setVisibility(View.VISIBLE);
             btnSync.setVisibility(View.VISIBLE);
@@ -133,16 +137,18 @@ public class SettingsFragment extends Fragment {
             btnSync.setVisibility(View.GONE);
 
             btnLogin.setText(R.string.log_in);
-            btnLogin.setOnClickListener(v -> requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new LogInFragment())
-                    .addToBackStack("settings_to_login")
-                    .commit());
+            btnLogin.setOnClickListener(v ->
+                    requireActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new LogInFragment())
+                            .addToBackStack("settings_to_login")
+                            .commit());
         }
 
-        btnCreateAccount.setOnClickListener(v -> requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new SignUpFragment())
-                .addToBackStack("settings_to_create_account")
-                .commit());
+        btnCreateAccount.setOnClickListener(v ->
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new SignUpFragment())
+                        .addToBackStack("settings_to_create_account")
+                        .commit());
 
         btnAccountSettings.setOnClickListener(v -> {
             if (networkManager.isLoggedIn()) {
@@ -156,21 +162,43 @@ public class SettingsFragment extends Fragment {
     private void showLogoutConfirmation() {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle("Log Out")
-                .setMessage("Are you sure you want to log out?")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    networkManager.logout();
-                    userStorage.logout();
-                    Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                    refreshFragment();
-                })
+                .setMessage("Are you sure you want to log out? This will clear all user data from this device.")
+                .setPositiveButton("Yes", (dialog, which) -> performLogout())
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void refreshFragment() {
+    private void performLogout() {
+        clearUserSpecificData();
+
+        networkManager.logout();
+        userStorage.logout();
+
+        Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new SettingsFragment())
+                .replace(R.id.fragment_container, new WelcomeFragment())
                 .commit();
+    }
+
+    private void clearUserSpecificData() {
+        NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
+
+        // Clear all notes for the current user
+        List<Note> emptyNotes = new ArrayList<>();
+        noteStorage.saveNotes(emptyNotes);
+
+        // Clear user-specific tags
+        SharedPreferences prefs = requireContext().getSharedPreferences("notes_prefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove("tags");
+        editor.apply();
+
+        // Reset constellations to default (unseen, not favorite)
+        ConstellationStorage constellationStorage = ConstellationStorage.getInstance(requireContext());
+        constellationStorage.resetToDefault();
+
+        Log.d("Logout", "User-specific data cleared");
     }
 
     private void showAccountSettingsFragment() {

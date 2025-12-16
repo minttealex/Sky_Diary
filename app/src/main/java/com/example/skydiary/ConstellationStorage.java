@@ -2,6 +2,8 @@ package com.example.skydiary;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -144,5 +146,15 @@ public class ConstellationStorage {
     }
 
     public void forceRefreshConstellations() {
+    }
+
+    public void resetToDefault() {
+        List<Constellation> constellations = getConstellations();
+        for (Constellation constellation : constellations) {
+            constellation.setSeen(false);
+            constellation.setFavorite(false);
+        }
+        saveConstellations();
+        Log.d("ConstellationStorage", "Reset all constellations to default state");
     }
 }

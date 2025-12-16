@@ -4,6 +4,7 @@ import java.util.List;
 
 public class SyncResult {
     private List<Note> notes;
+    private List<String> deletedNoteIds;
     private String message;
     private boolean success;
 
@@ -13,6 +14,14 @@ public class SyncResult {
 
     public void setNotes(List<Note> notes) {
         this.notes = notes;
+    }
+
+    public List<String> getDeletedNoteIds() {
+        return deletedNoteIds != null ? deletedNoteIds : new java.util.ArrayList<>();
+    }
+
+    public void setDeletedNoteIds(List<String> deletedNoteIds) {
+        this.deletedNoteIds = deletedNoteIds;
     }
 
     public String getMessage() {

@@ -2,6 +2,7 @@ package com.example.skydiary;
 
 import retrofit2.Call;
 import retrofit2.http.*;
+
 import java.util.List;
 
 public interface ApiService {
@@ -31,4 +32,10 @@ public interface ApiService {
 
     @DELETE("api/notes/{id}")
     Call<Void> deleteNote(@Header("Authorization") String token, @Path("id") String id);
+
+    @POST("api/constellations/sync")
+    Call<ConstellationSyncResult> syncConstellations(@Header("Authorization") String token, @Body ConstellationSyncRequest request);
+
+    @GET("api/constellations")
+    Call<List<UserConstellation>> getConstellations(@Header("Authorization") String token);
 }

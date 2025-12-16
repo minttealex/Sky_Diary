@@ -62,7 +62,7 @@
     <string name="error_saving_image">Error guardando imagen</string>
 
     <!-- Location -->
-    <string name="location_hint">Añadir ubicación (coordenadas o nombre)</string>
+    <string name="location_hint">Ubicación (coordenadas o nombre)</string>
     <string name="get_current_location">Obtener ubicación actual</string>
     <string name="location_permission_required">Se requiere permiso de ubicación</string>
     <string name="location_permission_denied">Permiso de ubicación denegado</string>
@@ -104,9 +104,6 @@
     <string name="english">Inglés</string>
     <string name="russian">Ruso</string>
     <string name="spanish">Español</string>
-    <string name="delete_account">Eliminar cuenta</string>
-    <string name="log_out">Cerrar sesión</string>
-    <string name="update_account">Actualiar cuenta</string>
 
     <!-- Constellations -->
     <string name="constellations">Constelaciones</string>
@@ -132,6 +129,7 @@
     <string name="confirm_save_message">¿Estás seguro de guardar los cambios?</string>
     <string name="confirm_delete">Confirmar eliminación</string>
     <string name="confirm_delete_message">¿Estás seguro de eliminar esta nota? No se puede deshacer.</string>
+    <string name="confirm_log_out">¿Estás seguro que quieres cerrar sesión?</string>
 
     <!-- Shared Labels -->
     <string name="yes">Sí</string>
@@ -152,7 +150,7 @@
     <string name="no_matching_notes">No se encontraron notas coincidentes</string>
     <string name="error_could_not_open_note">Error: no se pudo abrir la nota</string>
 
-    <!-- Welcome page -->
+    <!-- Welcome page and account settings -->
     <string name="welcome_to_sky_diary">Sky Diary</string>
     <string name="sign_up">Registrarse</string>
     <string name="log_in">Iniciar Sesión</string>
@@ -162,12 +160,17 @@
     <string name="email">Correo (opcional)</string>
     <string name="password">Contraseña</string>
     <string name="account">Cuenta</string>
-    <string name="logged_in_as">Conectado como: %s</string>
+    <string name="logged_in_as">Conectado como: %1$s</string>
     <string name="not_logged_in">No conectado</string>
     <string name="logged_out">Sesión cerrada</string>
-    <string name="account_settings">Configuración de cuenta</string>
-    <string name="create_account">Crear cuenta</string>
+    <string name="account_settings">Ajustes de cuenta</string>
     <string name="creating_account">Creando cuenta…</string>
+    <string name="forgot_password">¿Has olvidado tu contraseña?</string>
+    <string name="current_password">Contraseña actual</string>
+    <string name="new_password_optional">Nueva contraseña (opcional)</string>
+    <string name="delete_account">Eliminar cuenta</string>
+    <string name="log_out">Cerrar sesión</string>
+    <string name="update_account">Actualiar cuenta</string>
 
     <!-- Constellation Names -->
     <string name="constellation_orion">Orión</string>

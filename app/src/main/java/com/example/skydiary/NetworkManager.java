@@ -13,6 +13,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -142,11 +143,6 @@ public class NetworkManager {
         return prefs.getString(KEY_TOKEN, null);
     }
 
-    public String getUserId() {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_USER_ID, null);
-    }
-
     public boolean isLoggedIn() {
         return getToken() != null;
     }
@@ -157,7 +153,11 @@ public class NetworkManager {
         editor.remove(KEY_TOKEN);
         editor.remove(KEY_USER_ID);
         editor.apply();
-        Log.d(TAG, "User logged out");
+
+        NoteStorage.getInstance(context).clearAllData();
+        NoteStorage.getInstance(context).clearTags();
+
+        Log.d(TAG, "User logged out and local data cleared");
     }
 
     public interface ApiCallback<T> {
@@ -165,17 +165,16 @@ public class NetworkManager {
         void onError(String error);
     }
 
-    public void syncNotes(List<Note> notes, final ApiCallback<SyncResult> callback) {
+    public void syncNotes(List<Note> notes, List<String> deletedNoteIds, Date lastSyncAt, final ApiCallback<SyncResult> callback) {
         String token = getToken();
         if (token == null) {
             callback.onError("Not authenticated");
             return;
         }
 
-        Log.d(TAG, "Attempting to sync " + notes.size() + " notes");
-        Log.d(TAG, "Full URL: " + BASE_URL + "api/notes/sync");
+        Log.d(TAG, "Attempting to sync " + notes.size() + " notes, " + deletedNoteIds.size() + " deletions");
 
-        SyncRequest request = new SyncRequest(notes);
+        SyncRequest request = new SyncRequest(notes, deletedNoteIds, lastSyncAt);
 
         Call<SyncResult> call = apiService.syncNotes("Bearer " + token, request);
         call.enqueue(new Callback<>() {
@@ -183,11 +182,13 @@ public class NetworkManager {
             public void onResponse(@NonNull Call<SyncResult> call, @NonNull Response<SyncResult> response) {
                 Log.d(TAG, "Sync response code: " + response.code());
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "Sync successful, received " + response.body().getNotes().size() + " notes");
-                    callback.onSuccess(response.body());
+                    SyncResult syncResult = response.body();
+                    int notesCount = syncResult.getNotes() != null ? syncResult.getNotes().size() : 0;
+                    int deletedCount = syncResult.getDeletedNoteIds() != null ? syncResult.getDeletedNoteIds().size() : 0;
+                    Log.d(TAG, "Sync successful, received " + notesCount + " notes, " + deletedCount + " deletions");
+                    callback.onSuccess(syncResult);
                 } else {
                     String error = "Sync failed - Code: " + response.code();
-                    Log.e(TAG, error);
                     try {
                         if (response.errorBody() != null) {
                             String errorBody = response.errorBody().string();
@@ -245,16 +246,14 @@ public class NetworkManager {
         });
     }
 
-    public void uploadLocalNotes(List<Note> notes, final ApiCallback<SyncResult> callback) {
+    public void uploadLocalNotes(SyncRequest request, final ApiCallback<SyncResult> callback) {
         String token = getToken();
         if (token == null) {
             callback.onError("Not authenticated");
             return;
         }
 
-        Log.d(TAG, "Uploading " + notes.size() + " notes");
-
-        SyncRequest request = new SyncRequest(notes);
+        Log.d(TAG, "Uploading " + request.getNotes().size() + " notes");
 
         Call<SyncResult> call = apiService.uploadLocalNotes("Bearer " + token, request);
         call.enqueue(new Callback<>() {
@@ -270,6 +269,93 @@ public class NetworkManager {
 
             @Override
             public void onFailure(@NonNull Call<SyncResult> call, @NonNull Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void syncConstellations(List<UserConstellation> constellations, final ApiCallback<ConstellationSyncResult> callback) {
+        String token = getToken();
+        if (token == null) {
+            callback.onError("Not authenticated");
+            return;
+        }
+
+        ConstellationSyncRequest request = new ConstellationSyncRequest(constellations);
+
+        apiService.syncConstellations("Bearer " + token, request).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ConstellationSyncResult> call, @NonNull Response<ConstellationSyncResult> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    String error = "Constellation sync failed - Code: " + response.code();
+                    callback.onError(error);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ConstellationSyncResult> call, @NonNull Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void getNotes(final ApiCallback<List<Note>> callback) {
+        String token = getToken();
+        if (token == null) {
+            callback.onError("Not authenticated");
+            return;
+        }
+
+        Log.d(TAG, "Getting notes from server");
+
+        Call<List<Note>> call = apiService.getNotes("Bearer " + token);
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Note>> call, @NonNull Response<List<Note>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Got " + response.body().size() + " notes from server");
+                    callback.onSuccess(response.body());
+                } else {
+                    String error = "Failed to get notes - Code: " + response.code();
+                    callback.onError(error);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Note>> call, @NonNull Throwable t) {
+                Log.e(TAG, "Get notes failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void getConstellations(final ApiCallback<List<UserConstellation>> callback) {
+        String token = getToken();
+        if (token == null) {
+            callback.onError("Not authenticated");
+            return;
+        }
+
+        Log.d(TAG, "Getting constellations from server");
+
+        Call<List<UserConstellation>> call = apiService.getConstellations("Bearer " + token);
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<UserConstellation>> call, @NonNull Response<List<UserConstellation>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Got " + response.body().size() + " constellations from server");
+                    callback.onSuccess(response.body());
+                } else {
+                    String error = "Failed to get constellations - Code: " + response.code();
+                    callback.onError(error);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<UserConstellation>> call, @NonNull Throwable t) {
+                Log.e(TAG, "Get constellations failed", t);
                 callback.onError("Network error: " + t.getMessage());
             }
         });

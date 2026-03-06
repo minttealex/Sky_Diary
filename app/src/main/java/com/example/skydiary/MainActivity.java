@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Locale;
 
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST = 2001;
     private static final String PREFS_NAME = "app_prefs";
     private static final String KEY_FIRST_LAUNCH = "first_launch";
+    private static final String KEY_WAS_LOGGED_IN = "was_logged_in";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,34 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseAuth auth = FirebaseManager.getInstance().getAuth();
+
+        auth.addAuthStateListener(firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            boolean wasLoggedIn = prefs.getBoolean(KEY_WAS_LOGGED_IN, false);
+
+            if (user == null || user.isAnonymous()) {
+                if (wasLoggedIn) {
+                    NoteStorage.getInstance(this).clearAllNotes();
+                    ConstellationStorage.getInstance(this).resetToDefault();
+                    prefs.edit().putBoolean(KEY_WAS_LOGGED_IN, false).apply();
+                }
+            } else {
+                prefs.edit().putBoolean(KEY_WAS_LOGGED_IN, true).apply();
+            }
+        });
+
+        if (auth.getCurrentUser() == null) {
+            auth.signInAnonymously()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            // Signed in anonymously
+                        } else {
+                            // Handle error
+                        }
+                    });
+        }
 
         if (savedInstanceState == null) {
             if (isFirstLaunch(prefs)) {

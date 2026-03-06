@@ -30,10 +30,12 @@ public class NoteStorage {
     private static NoteStorage instance;
     private final SharedPreferences prefs;
     private final Gson gson;
+    private final Context context;
 
     private NoteStorage(Context context) {
-        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        gson = new GsonBuilder().create();
+        this.context = context.getApplicationContext();
+        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.gson = new GsonBuilder().create();
     }
 
     public static synchronized NoteStorage getInstance(Context context) {
@@ -48,6 +50,7 @@ public class NoteStorage {
             String json = prefs.getString(NOTES_KEY, "[]");
             Type listType = new TypeToken<List<Note>>() {}.getType();
             List<Note> notes = gson.fromJson(json, listType);
+            Log.d(TAG, "getAllNotes() returning " + (notes != null ? notes.size() : 0) + " notes");
             return notes != null ? notes : new ArrayList<>();
         } catch (Exception e) {
             Log.e(TAG, "Error reading notes: " + e.getMessage());
@@ -225,6 +228,21 @@ public class NoteStorage {
         }
     }
 
+    public String saveBase64ImageToInternalStorage(String base64Data) {
+        try {
+            File imagesDir = new File(context.getFilesDir(), "note_images");
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs();
+            }
+            String filename = "image_" + System.currentTimeMillis() + ".jpg";
+            File imageFile = new File(imagesDir, filename);
+            return ImageUtils.saveBase64ToFile(base64Data, imageFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void markNoteAsDeleted(String noteId) {
         if (noteId == null) return;
 
@@ -236,45 +254,11 @@ public class NoteStorage {
         Log.d(TAG, "Marked note as deleted: " + noteId);
     }
 
-    public List<String> getDeletedNoteIds() {
-        Set<String> deletedNotes = prefs.getStringSet(DELETED_NOTES_KEY, new HashSet<>());
-        return new ArrayList<>(deletedNotes);
-    }
-
-    public void clearDeletedNotes() {
-        prefs.edit().remove(DELETED_NOTES_KEY).apply();
-        Log.d(TAG, "Cleared deleted notes tracking");
-    }
-
-    public long getLastSyncTime() {
-        return prefs.getLong(LAST_SYNC_KEY, 0);
-    }
-
-    public void setLastSyncTime(long timestamp) {
-        prefs.edit().putLong(LAST_SYNC_KEY, timestamp).apply();
-    }
-
-    public void clearAllData() {
-        try {
-            prefs.edit().putString(NOTES_KEY, "[]").apply();
-
-            prefs.edit().remove(DELETED_NOTES_KEY).apply();
-
-            prefs.edit().remove(LAST_SYNC_KEY).apply();
-
-            prefs.edit().remove(TAGS_KEY).apply();
-
-            Log.d(TAG, "Cleared all local note data");
-        } catch (Exception e) {
-            Log.e(TAG, "Error clearing data: " + e.getMessage());
-        }
-    }
-    public void clearTags() {
-        try {
-            prefs.edit().remove(TAGS_KEY).apply();
-            Log.d(TAG, "Cleared all tags");
-        } catch (Exception e) {
-            Log.e(TAG, "Error clearing tags: " + e.getMessage());
-        }
+    public void clearAllNotes() {
+        Log.d(TAG, "clearAllNotes() called. Before clear, notes count: " + getAllNotes().size());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        boolean committed = editor.commit();
+        Log.d(TAG, "clearAllNotes() committed: " + committed + ". After clear, notes count: " + getAllNotes().size());
     }
 }

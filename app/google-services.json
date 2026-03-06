@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "276533073062",
+    "project_id": "skydiary26",
+    "storage_bucket": "skydiary26.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276533073062:android:9657f8d5491a4276371067",
+        "android_client_info": {
+          "package_name": "com.example.skydiary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGqk90S_sdWgWqpJyQYPLJ9feZjU9gMrU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

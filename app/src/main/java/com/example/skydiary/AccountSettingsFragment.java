@@ -16,19 +16,26 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class AccountSettingsFragment extends Fragment {
 
     private TextInputEditText etUsername, etEmail, etCurrentPassword, etNewPassword;
-    private UserStorage userStorage;
-    private NetworkManager networkManager;
-    private User currentUser;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private FirebaseUser currentUser;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_account_settings, container, false);
     }
 
@@ -36,9 +43,9 @@ public class AccountSettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        userStorage = UserStorage.getInstance(requireContext());
-        networkManager = NetworkManager.getInstance(requireContext());
-        currentUser = userStorage.getCurrentUser();
+        auth = FirebaseManager.getInstance().getAuth();
+        db = FirebaseManager.getInstance().getDb();
+        currentUser = auth.getCurrentUser();
 
         ImageButton buttonBack = view.findViewById(R.id.button_back);
         etUsername = view.findViewById(R.id.et_username);
@@ -50,11 +57,13 @@ public class AccountSettingsFragment extends Fragment {
         TextView tvDeleteAccount = view.findViewById(R.id.tv_delete_account);
 
         if (currentUser != null) {
-            etUsername.setText(currentUser.getUsername());
+            String displayName = currentUser.getDisplayName();
+            if (displayName != null) etUsername.setText(displayName);
             etEmail.setText(currentUser.getEmail());
         }
 
-        buttonBack.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
+        buttonBack.setOnClickListener(v ->
+                requireActivity().getSupportFragmentManager().popBackStack());
 
         btnUpdate.setOnClickListener(v -> updateAccount());
 
@@ -79,34 +88,49 @@ public class AccountSettingsFragment extends Fragment {
             return;
         }
 
-        if (networkManager.isLoggedIn()) {
-            networkManager.updateUser(username, email, new NetworkManager.ApiCallback<>() {
-                @Override
-                public void onSuccess(UserResponse result) {
-                    if (currentUser != null) {
-                        currentUser.setUsername(username);
-                        currentUser.setEmail(email);
-                        userStorage.setCurrentUser(currentUser);
-                    }
+        if (currentUser == null) {
+            Toast.makeText(requireContext(), "Not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(username)
+                .build();
+        currentUser.updateProfile(profileUpdates)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!email.isEmpty() && !email.equals(currentUser.getEmail())) {
+                            currentUser.updateEmail(email)
+                                    .addOnCompleteListener(emailTask -> {
+                                        if (emailTask.isSuccessful()) {
+                                            updateFirestoreUser(username, email);
+                                        } else {
+                                            Toast.makeText(requireContext(), "Email update failed", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        } else {
+                            updateFirestoreUser(username, email);
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Profile update failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void updateFirestoreUser(String username, String email) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("username", username);
+        updates.put("email", email);
+        db.collection("users").document(currentUser.getUid())
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
                     Toast.makeText(requireContext(), "Account updated successfully", Toast.LENGTH_SHORT).show();
                     requireActivity().getSupportFragmentManager().popBackStack();
-                }
-
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(requireContext(), "Update failed: " + error, Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            if (currentUser != null) {
-                currentUser.setUsername(username);
-                currentUser.setEmail(email);
-                userStorage.setCurrentUser(currentUser);
-                Toast.makeText(requireContext(), "Account updated locally", Toast.LENGTH_SHORT).show();
-                requireActivity().getSupportFragmentManager().popBackStack();
-            }
-        }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Account updated locally, but cloud sync failed", Toast.LENGTH_SHORT).show();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                });
     }
 
     private boolean isValidEmail(CharSequence target) {
@@ -123,15 +147,15 @@ public class AccountSettingsFragment extends Fragment {
     }
 
     private void performLogout() {
-        networkManager.logout();
-        userStorage.logout();
-
+        NoteStorage.getInstance(requireContext()).clearAllNotes();
+        ConstellationStorage.getInstance(requireContext()).resetToDefault();
+        auth.signOut();
+        auth.signInAnonymously();
         Toast.makeText(requireContext(), R.string.logged_out, Toast.LENGTH_SHORT).show();
-
         requireActivity().getSupportFragmentManager().popBackStack();
     }
 
     private void deleteAccount() {
-        Toast.makeText(requireContext(), "Account deletion would be implemented here", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), "Account deletion not implemented", Toast.LENGTH_SHORT).show();
     }
 }

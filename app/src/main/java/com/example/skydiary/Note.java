@@ -28,6 +28,7 @@ public class Note {
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
 
+    // Required no-arg constructor for Firestore
     public Note() {
         this.id = UUID.randomUUID().toString();
         this.tags = new ArrayList<>();
@@ -92,20 +93,14 @@ public class Note {
         this.isDeleted = false;
     }
 
-    public Date getNoteDate() {
-        return new Date(timestamp);
-    }
-
-    public void setNoteDate(Date date) {
-        this.timestamp = date.getTime();
-        updateTimestamp();
-    }
-
+    // Helper method to format dates consistently
     private String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
         sdf.setTimeZone(TIME_ZONE);
         return sdf.format(date);
     }
+
+    // --- Getters and Setters (only one version per field) ---
 
     public String getId() {
         return id;
@@ -188,10 +183,6 @@ public class Note {
         this.createdAt = createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = formatDate(createdAt);
-    }
-
     public String getUpdatedAt() {
         if (updatedAt == null) {
             updatedAt = getCreatedAt();
@@ -201,10 +192,6 @@ public class Note {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = formatDate(updatedAt);
     }
 
     public boolean isDeleted() {
@@ -219,10 +206,6 @@ public class Note {
         updateTimestamp();
     }
 
-    public boolean getDeleted() {
-        return isDeleted();
-    }
-
     public String getDeletedAt() {
         return deletedAt;
     }
@@ -231,10 +214,22 @@ public class Note {
         this.deletedAt = deletedAt;
     }
 
+    // Convenience method to get the note date as Date object
+    public Date getNoteDate() {
+        return new Date(timestamp);
+    }
+
+    public void setNoteDate(Date date) {
+        this.timestamp = date.getTime();
+        updateTimestamp();
+    }
+
+    // Internal method to update the updatedAt timestamp
     private void updateTimestamp() {
         this.updatedAt = formatDate(new Date());
     }
 
+    // Utility methods for tags and images
     public void addTag(String tag) {
         if (tags == null) {
             tags = new ArrayList<>();

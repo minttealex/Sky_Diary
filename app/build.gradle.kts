@@ -53,6 +53,9 @@ dependencies {
     debugImplementation("com.google.firebase:firebase-appcheck-debug:17.0.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

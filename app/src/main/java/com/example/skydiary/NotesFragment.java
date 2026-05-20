@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +43,7 @@ import java.util.Set;
 public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickListener {
 
     private EditText searchBar;
+    private ImageButton btnSort;
     private NotesAdapter notesAdapter;
     private FloatingActionButton fabAdd;
     private List<Note> allNotes;
@@ -48,6 +51,13 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     private LinearLayout tagsContainer;
     private TextView tvNoMatches;
     private Uri currentCameraUri;
+
+    // Sorting constants
+    private static final int SORT_DATE_DESC = 0; // Newest first (default)
+    private static final int SORT_DATE_ASC = 1;  // Oldest first
+    private static final int SORT_ALPHA_ASC = 2; // A–Z
+
+    private int currentSortMode = SORT_DATE_DESC;
 
     private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -93,6 +103,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         selectedTags.clear();
 
         searchBar = view.findViewById(R.id.search_bar);
+        btnSort = view.findViewById(R.id.btn_sort);
         ImageButton btnAddTag = view.findViewById(R.id.btn_add_tag);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_notes);
         fabAdd = view.findViewById(R.id.fab_add);
@@ -103,6 +114,10 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(notesAdapter);
 
+        // Sort button
+        btnSort.setOnClickListener(v -> showSortMenu());
+
+        // Tag button
         btnAddTag.setOnClickListener(v -> {
             NoteStorage noteStorage = NoteStorage.getInstance(requireContext());
             ArrayList<String> allTagsList = new ArrayList<>(noteStorage.getAllTags());
@@ -150,6 +165,41 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
         });
 
         refreshAllData();
+    }
+
+    private void showSortMenu() {
+        PopupMenu popup = new PopupMenu(requireContext(), btnSort);
+        popup.getMenu().add(0, SORT_DATE_DESC, 0, R.string.sort_newest_first);
+        popup.getMenu().add(0, SORT_DATE_ASC, 1, R.string.sort_oldest_first);
+        popup.getMenu().add(0, SORT_ALPHA_ASC, 2, R.string.sort_alphabetical);
+        popup.setOnMenuItemClickListener(item -> {
+            currentSortMode = item.getItemId();
+            filterNotes();
+            return true;
+        });
+        popup.show();
+    }
+
+    private void sortNotes(List<Note> notes) {
+        switch (currentSortMode) {
+            case SORT_DATE_DESC:
+                Collections.sort(notes, (n1, n2) -> Long.compare(n2.getTimestamp(), n1.getTimestamp()));
+                break;
+            case SORT_DATE_ASC:
+                Collections.sort(notes, (n1, n2) -> Long.compare(n1.getTimestamp(), n2.getTimestamp()));
+                break;
+            case SORT_ALPHA_ASC:
+                Collections.sort(notes, (n1, n2) -> {
+                    String name1 = n1.getName() != null ? n1.getName().toLowerCase() : "";
+                    String name2 = n2.getName() != null ? n2.getName().toLowerCase() : "";
+                    return name1.compareTo(name2);
+                });
+                break;
+            default:
+                // default same as date desc
+                Collections.sort(notes, (n1, n2) -> Long.compare(n2.getTimestamp(), n1.getTimestamp()));
+                break;
+        }
     }
 
     private void showImageSourceDialog() {
@@ -339,6 +389,8 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
     private void loadNotes() {
         allNotes = NoteStorage.getInstance(requireContext()).getNotes();
         Log.d("NotesFragment", "Loaded " + allNotes.size() + " notes");
+        // Apply default sort (or current sort) to the raw list just in case
+        sortNotes(allNotes);
     }
 
     private void loadTags() {
@@ -416,8 +468,14 @@ public class NotesFragment extends Fragment implements NotesAdapter.OnItemClickL
             filteredNotes.add(note);
         }
 
+        // Sort the filtered list according to the currently selected sort mode
+        sortNotes(filteredNotes);
+
         notesAdapter.updateList(filteredNotes);
         showNoMatchesMessage(filteredNotes.isEmpty());
+
+        // Hide the sort button if there are no notes at all
+        btnSort.setVisibility(allNotes.isEmpty() ? View.GONE : View.VISIBLE);
 
         Log.d("NotesFragment", "Filtered to " + filteredNotes.size() + " notes");
     }

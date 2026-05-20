@@ -24,6 +24,10 @@
     <string name="note_deleted">Запись удалена</string>
     <string name="note_with_images">Запись с изображениями</string>
     <string name="search">Искать записи…</string>
+    <string name="sort_newest_first">Сначала новые</string>
+    <string name="sort_oldest_first">Сначала старые</string>
+    <string name="sort_alphabetical">В алфавитном порядке (А-Я)</string>
+    <string name="sort_notes">Сортировать записи</string>
 
     <!-- Pictures -->
     <string name="add_picture">Добавить изображение</string>
@@ -47,7 +51,7 @@
     <string name="move_up">Переместить вверх</string>
     <string name="move_down">Переместить вниз</string>
     <string name="delete_picture">Удалить изображение</string>
-    <string name="delete_picture_confirmation">Are you sure you want to delete this picture?</string>
+    <string name="delete_picture_confirmation">Вы уверены, что хотите удалить это изображение?</string>
     <string name="save_to_gallery">Сохранить в галерею</string>
     <string name="image_saved_to_gallery">Изображение сохранено в галерею</string>
     <string name="image_rotated">Изображение повёрнуто на %d°</string>
@@ -71,6 +75,10 @@
     <string name="enable_gps">Пожалуйста, включите GPS для получения местоположения</string>
     <string name="invalid_coordinates">Неверный формат координат</string>
     <string name="coordinates_format_hint">Формат: 40.7128, -74.0060 или название места</string>
+    <string name="location_timed_out">Не удалось определить местоположение. Попробуйте выйти на улицу или введите название места.</string>
+    <string name="location_dialog_title">Режим определения местоположения</string>
+    <string name="location_dialog_message">На устройстве выбран режим «Только GPS» – в помещении он может не работать.\n\nЧтобы быстро определять местоположение даже внутри зданий, перейдите в Настройки → Местоположение → Режим и выберите «Высокая точность».\n\nВы также можете просто ввести название места вручную.</string>
+    <string name="location_open_settings">Открыть настройки</string>
 
     <!-- Tags -->
     <string name="add_tag">Добавить тег</string>
@@ -104,20 +112,6 @@
     <string name="russian">Русский</string>
     <string name="spanish">Испанский</string>
 
-    <!-- Constellations -->
-    <string name="constellations">Созвездия</string>
-    <string name="search_constellations">Искать созвездия…</string>
-    <string name="favorites">Избранное</string>
-    <string name="no_favorites">Избранные созвездия отсутствуют</string>
-    <string name="all_constellations">Все созвездия</string>
-    <string name="constellation_name">Название созвездия</string>
-    <string name="constellation_image">Изображение созвездия</string>
-    <string name="toggle_favorite">Добавить в избранное</string>
-    <string name="stars">звёзды</string>
-    <string name="star_count">0 звёзд</string>
-    <string name="star_count_format">%d звёзд</string>
-    <string name="Seen">Найдено</string>
-
     <!-- Image notes -->
     <string name="image_note_created_single">Запись с изображением создана</string>
     <string name="image_note_created_multiple">Запись создана с %d изображениями</string>
@@ -128,7 +122,7 @@
     <string name="confirm_save_message">Вы уверены, что хотите сохранить изменения?</string>
     <string name="confirm_delete">Подтвердить удаление</string>
     <string name="confirm_delete_message">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</string>
-    <string name="confirm_log_out">Вы уверены, что хотите выйти из аккаунта?</string>
+    <string name="confirm_log_out">Вы уверены, что хотите выйти из аккаунта? Убедитесь, что вы синхронизировали данные.</string>
 
     <!-- Shared Labels -->
     <string name="yes">Да</string>
@@ -149,13 +143,14 @@
     <string name="no_matching_notes">Соответствующие записи не найдены</string>
     <string name="error_could_not_open_note">Ошибка: не удалось открыть запись</string>
 
-    <!-- Welcome page and account settings-->
+    <!-- Welcome page and account settings -->
     <string name="welcome_to_sky_diary">Sky Diary</string>
     <string name="sign_up">Регистрация</string>
     <string name="log_in">Войти</string>
     <string name="logging_in">Авторизация…</string>
     <string name="skip_for_now">Пропустить</string>
     <string name="username">Имя пользователя</string>
+    <string name="username_or_email">Имя пользователя или email</string>
     <string name="email">Email (необязательно)</string>
     <string name="password">Пароль</string>
     <string name="account">Аккаунт</string>
@@ -171,61 +166,252 @@
     <string name="log_out">Выйти</string>
     <string name="update_account">Обновить аккаунт</string>
 
-    <!-- Constellation Names -->
-    <string name="constellation_orion">Орион</string>
-    <string name="constellation_ursa_major">Большая Медведица</string>
-    <string name="constellation_cassiopeia">Кассиопея</string>
-    <string name="constellation_leo">Лев</string>
-    <string name="constellation_scorpius">Скорпион</string>
-    <string name="constellation_cygnus">Лебедь</string>
-    <string name="constellation_lyra">Лира</string>
+    <!-- Translated account strings -->
+    <string name="no_email_warning_title">Email не указан</string>
+    <string name="no_email_warning_message">Вы создаёте аккаунт без email. Без email вы не сможете восстановить пароль, если забудете его. Вы уверены, что хотите продолжить?</string>
+    <string name="yes_continue">Да, продолжить</string>
+    <string name="email_already_in_use">Этот email уже используется</string>
+    <string name="verification_email_sent">Письмо с подтверждением отправлено. Пожалуйста, подтвердите свой email перед использованием.</string>
+    <string name="password_reset_email_sent">Письмо для сброса пароля отправлено. Проверьте свою почту.</string>
+    <string name="delete_account_confirmation_message">Вы уверены, что хотите удалить свой аккаунт? Это действие нельзя отменить, и все ваши данные будут безвозвратно удалены.</string>
+    <string name="account_deleted">Аккаунт успешно удалён</string>
+    <string name="reauthenticate_required">Пожалуйста, повторно аутентифицируйтесь для удаления аккаунта</string>
+    <string name="email_not_verified">Email не подтверждён</string>
+    <string name="verify_email_prompt">Ваш email не подтверждён. Пожалуйста, проверьте свою почту и подтвердите его перед входом.</string>
+    <string name="resend_verification">Отправить письмо повторно</string>
+    <string name="username_required">Имя пользователя обязательно</string>
+    <string name="invalid_email">Введённый email некорректен</string>
+    <string name="email_update_failed">Ошибка обновления email</string>
+    <string name="email_check_failed">Ошибка проверки email</string>
+    <string name="password_updated">Ваш пароль обновлён</string>
+    <string name="password_update_failed">Ошибка обновления пароля</string>
+    <string name="reauthentication_failed">Ошибка повторной аутентификации</string>
+    <string name="profile_update_failed">Ошибка обновления профиля</string>
+    <string name="account_updated">Ваш аккаунт обновлён</string>
+    <string name="account_updated_local">Ваш аккаунт обновлён локально</string>
+    <string name="account_deletion_failed">Ошибка удаления аккаунта</string>
+    <string name="username_taken">Имя пользователя уже занято</string>
+    <string name="username_save_failed">Ошибка сохранения имени пользователя</string>
+    <string name="account_created">Аккаунт создан</string>
+    <string name="account_created_sync_failed">Аккаунт создан, но синхронизация не удалась</string>
+    <string name="password_required">Пароль обязателен</string>
+    <string name="password_min_length">Пароль должен содержать не менее 6 символов</string>
+    <string name="registration_failed">Регистрация не удалась</string>
+    <string name="username_or_email_required">Имя пользователя или email обязательны</string>
+    <string name="invalid_username_or_password">Неверное имя пользователя или пароль</string>
+    <string name="username_lookup_failed">Ошибка поиска имени пользователя</string>
+    <string name="enter_valid_email_for_reset">Введите корректный email для сброса</string>
+    <string name="password_reset_failed">Ошибка сброса пароля</string>
+    <string name="login_successful">Вход выполнен успешно</string>
+    <string name="login_success_sync_failed">Вход выполнен, но синхронизация не удалась</string>
+    <string name="login_success_sync_check_failed">Вход выполнен, но проверка синхронизации не удалась</string>
+    <string name="login_failed">Ошибка входа</string>
+    <string name="password_required_for_email_change">Для смены email требуется текущий пароль</string>
+    <string name="username_check_failed">Не удалось проверить доступность имени пользователя</string>
+
+    <!-- Constellations (General) -->
+    <string name="constellations">Созвездия</string>
+    <string name="search_constellations">Искать созвездия…</string>
+    <string name="favorites">Избранное</string>
+    <string name="no_favorites">Избранные созвездия отсутствуют</string>
+    <string name="all_constellations">Все созвездия</string>
+    <string name="constellation_name">Название созвездия</string>
+    <string name="constellation_image">Изображение созвездия</string>
+    <string name="toggle_favorite">Добавить в избранное</string>
+    <string name="stars">звёзды</string>
+    <string name="star_count">0 звёзд</string>
+    <string name="star_count_format">%d звёзд</string>
+    <string name="Seen">Найдено</string>
+
+    <!-- Northern Constellations (Names) -->
     <string name="constellation_andromeda">Андромеда</string>
-    <string name="constellation_ursa_minor">Малая Медведица</string>
-    <string name="constellation_draco">Дракон</string>
-    <string name="constellation_cepheus">Зевс</string>
-    <string name="constellation_perseus">Персей</string>
+    <string name="constellation_aquila">Орёл</string>
+    <string name="constellation_aries">Овен</string>
     <string name="constellation_auriga">Возничий</string>
     <string name="constellation_bootes">Волопас</string>
-    <string name="constellation_corona_borealis">Северная Корона</string>
-    <string name="constellation_hercules">Геркулес</string>
-    <string name="constellation_sagitta">Стрела</string>
-    <string name="constellation_aquila">Орёл</string>
-    <string name="constellation_delphinus">Дельфин</string>
-    <string name="constellation_pegasus">Пегас</string>
-    <string name="constellation_pisces">Рыбы</string>
-    <string name="constellation_aries">Овен</string>
-    <string name="constellation_taurus">Телец</string>
-    <string name="constellation_gemini">Близнецы</string>
+    <string name="constellation_camelopardalis">Жираф</string>
     <string name="constellation_cancer">Рак</string>
+    <string name="constellation_canes_venatici">Гончие Псы</string>
+    <string name="constellation_canis_minor">Малый Пёс</string>
+    <string name="constellation_cassiopeia">Кассиопея</string>
+    <string name="constellation_cepheus">Цефей</string>
+    <string name="constellation_coma_berenices">Волосы Вероники</string>
+    <string name="constellation_corona_borealis">Северная Корона</string>
+    <string name="constellation_cygnus">Лебедь</string>
+    <string name="constellation_delphinus">Дельфин</string>
+    <string name="constellation_draco">Дракон</string>
+    <string name="constellation_equuleus">Малый Конь</string>
+    <string name="constellation_gemini">Близнецы</string>
+    <string name="constellation_hercules">Геркулес</string>
+    <string name="constellation_lacerta">Ящерица</string>
+    <string name="constellation_leo">Лев</string>
+    <string name="constellation_leo_minor">Малый Лев</string>
+    <string name="constellation_lynx">Рысь</string>
+    <string name="constellation_lyra">Лира</string>
+    <string name="constellation_orion">Орион</string>
+    <string name="constellation_pegasus">Пегас</string>
+    <string name="constellation_perseus">Персей</string>
+    <string name="constellation_pisces">Рыбы</string>
+    <string name="constellation_sagitta">Стрела</string>
+    <string name="constellation_scorpius">Скорпион</string>
+    <string name="constellation_taurus">Телец</string>
+    <string name="constellation_triangulum">Треугольник</string>
+    <string name="constellation_ursa_major">Большая Медведица</string>
+    <string name="constellation_ursa_minor">Малая Медведица</string>
     <string name="constellation_virgo">Дева</string>
-    <string name="constellation_libra">Весы</string>
+    <string name="constellation_vulpecula">Лисичка</string>
 
-    <!-- Constellation Descriptions -->
-    <string name="constellation_orion_description">Охотник</string>
-    <string name="constellation_ursa_major_description">Большая Медведица</string>
-    <string name="constellation_cassiopeia_description">Царица на троне</string>
-    <string name="constellation_leo_description">Лев</string>
-    <string name="constellation_scorpius_description">Скорпион</string>
-    <string name="constellation_cygnus_description">Лебедь</string>
-    <string name="constellation_lyra_description">Лира</string>
+    <!-- Northern Constellations (Descriptions) -->
     <string name="constellation_andromeda_description">Прикованная дева</string>
-    <string name="constellation_ursa_minor_description">Малая Медведица</string>
-    <string name="constellation_draco_description">Дракон</string>
-    <string name="constellation_cepheus_description">Царь</string>
-    <string name="constellation_perseus_description">Герой</string>
+    <string name="constellation_aquila_description">Орёл</string>
+    <string name="constellation_aries_description">Овен</string>
     <string name="constellation_auriga_description">Возничий</string>
     <string name="constellation_bootes_description">Пастух</string>
-    <string name="constellation_corona_borealis_description">Северная Корона</string>
-    <string name="constellation_hercules_description">Герой</string>
-    <string name="constellation_sagitta_description">Стрела</string>
-    <string name="constellation_aquila_description">Орёл</string>
-    <string name="constellation_delphinus_description">Дельфин</string>
-    <string name="constellation_pegasus_description">Крылатый конь</string>
-    <string name="constellation_pisces_description">Рыбы</string>
-    <string name="constellation_aries_description">Овен</string>
-    <string name="constellation_taurus_description">Телец</string>
-    <string name="constellation_gemini_description">Близнецы</string>
+    <string name="constellation_camelopardalis_description">Жираф</string>
     <string name="constellation_cancer_description">Рак</string>
+    <string name="constellation_canes_venatici_description">Гончие Псы</string>
+    <string name="constellation_canis_minor_description">Малый Пёс</string>
+    <string name="constellation_cassiopeia_description">Царица на троне</string>
+    <string name="constellation_cepheus_description">Царь</string>
+    <string name="constellation_coma_berenices_description">Волосы Вероники</string>
+    <string name="constellation_corona_borealis_description">Северная Корона</string>
+    <string name="constellation_cygnus_description">Лебедь</string>
+    <string name="constellation_delphinus_description">Дельфин</string>
+    <string name="constellation_draco_description">Дракон</string>
+    <string name="constellation_equuleus_description">Малый Конь</string>
+    <string name="constellation_gemini_description">Близнецы</string>
+    <string name="constellation_hercules_description">Герой</string>
+    <string name="constellation_lacerta_description">Ящерица</string>
+    <string name="constellation_leo_description">Лев</string>
+    <string name="constellation_leo_minor_description">Малый Лев</string>
+    <string name="constellation_lynx_description">Рысь</string>
+    <string name="constellation_lyra_description">Лира</string>
+    <string name="constellation_orion_description">Охотник</string>
+    <string name="constellation_pegasus_description">Крылатый конь</string>
+    <string name="constellation_perseus_description">Герой</string>
+    <string name="constellation_pisces_description">Рыбы</string>
+    <string name="constellation_sagitta_description">Стрела</string>
+    <string name="constellation_scorpius_description">Скорпион</string>
+    <string name="constellation_taurus_description">Телец</string>
+    <string name="constellation_triangulum_description">Треугольник</string>
+    <string name="constellation_ursa_major_description">Большая Медведица</string>
+    <string name="constellation_ursa_minor_description">Малая Медведица</string>
     <string name="constellation_virgo_description">Дева</string>
+    <string name="constellation_vulpecula_description">Лисичка</string>
+
+    <!-- Southern Constellations (Names) - Keyser & de Houtman -->
+    <string name="constellation_apus">Апус</string>
+    <string name="constellation_chamaeleon">Хамелеон</string>
+    <string name="constellation_dorado">Золотая Рыба</string>
+    <string name="constellation_grus">Журавль</string>
+    <string name="constellation_hydrus">Южная Гидра</string>
+    <string name="constellation_indus">Индеец</string>
+    <string name="constellation_musca">Муха</string>
+    <string name="constellation_pavo">Павлин</string>
+    <string name="constellation_phoenix">Феникс</string>
+    <string name="constellation_triangulum_australe">Южный Треугольник</string>
+    <string name="constellation_tucana">Тукан</string>
+    <string name="constellation_volans">Летучая Рыба</string>
+
+    <!-- Southern Constellations (Descriptions) -->
+    <string name="constellation_apus_description">Райская Птица</string>
+    <string name="constellation_chamaeleon_description">Хамелеон</string>
+    <string name="constellation_dorado_description">Золотая Рыба</string>
+    <string name="constellation_grus_description">Журавль</string>
+    <string name="constellation_hydrus_description">Малая Гидра</string>
+    <string name="constellation_indus_description">Индеец</string>
+    <string name="constellation_musca_description">Муха</string>
+    <string name="constellation_pavo_description">Павлин</string>
+    <string name="constellation_phoenix_description">Феникс</string>
+    <string name="constellation_triangulum_australe_description">Южный Треугольник</string>
+    <string name="constellation_tucana_description">Тукан</string>
+    <string name="constellation_volans_description">Летучая Рыба</string>
+
+    <!-- Southern Constellations (Names) - Lacaille -->
+    <string name="constellation_antlia">Насос</string>
+    <string name="constellation_caelum">Резец</string>
+    <string name="constellation_circinus">Циркуль</string>
+    <string name="constellation_fornax">Печь</string>
+    <string name="constellation_horologium">Часы</string>
+    <string name="constellation_mensa">Столовая Гора</string>
+    <string name="constellation_microscopium">Микроскоп</string>
+    <string name="constellation_norma">Наугольник</string>
+    <string name="constellation_octans">Октант</string>
+    <string name="constellation_pictor">Живописец</string>
+    <string name="constellation_pyxis">Компас</string>
+    <string name="constellation_reticulum">Сетка</string>
+    <string name="constellation_sculptor">Скульптор</string>
+    <string name="constellation_telescopium">Телескоп</string>
+
+    <!-- Southern Constellations (Descriptions) - Lacaille -->
+    <string name="constellation_antlia_description">Насос</string>
+    <string name="constellation_caelum_description">Резец</string>
+    <string name="constellation_circinus_description">Циркуль</string>
+    <string name="constellation_fornax_description">Печь</string>
+    <string name="constellation_horologium_description">Часы</string>
+    <string name="constellation_mensa_description">Столовая Гора</string>
+    <string name="constellation_microscopium_description">Микроскоп</string>
+    <string name="constellation_norma_description">Наугольник</string>
+    <string name="constellation_octans_description">Октант</string>
+    <string name="constellation_pictor_description">Живописец</string>
+    <string name="constellation_pyxis_description">Компас</string>
+    <string name="constellation_reticulum_description">Сетка</string>
+    <string name="constellation_sculptor_description">Скульптор</string>
+    <string name="constellation_telescopium_description">Телескоп</string>
+
+    <!-- Other Southern / Equatorial Constellations (Names) -->
+    <string name="constellation_aquarius">Водолей</string>
+    <string name="constellation_ara">Жертвенник</string>
+    <string name="constellation_canis_major">Большой Пёс</string>
+    <string name="constellation_capricornus">Козерог</string>
+    <string name="constellation_carina">Киль</string>
+    <string name="constellation_centaurus">Центавр</string>
+    <string name="constellation_cetus">Кит</string>
+    <string name="constellation_columba">Голубь</string>
+    <string name="constellation_corona_australis">Южная Корона</string>
+    <string name="constellation_corvus">Ворон</string>
+    <string name="constellation_crater">Чаша</string>
+    <string name="constellation_crux">Южный Крест</string>
+    <string name="constellation_eridanus">Эридан</string>
+    <string name="constellation_hydra">Гидра</string>
+    <string name="constellation_lepus">Заяц</string>
+    <string name="constellation_lupus">Волк</string>
+    <string name="constellation_monoceros">Единорог</string>
+    <string name="constellation_ophiuchus">Змееносец</string>
+    <string name="constellation_piscis_austrinus">Южная Рыба</string>
+    <string name="constellation_puppis">Корма</string>
+    <string name="constellation_sagittarius">Стрелец</string>
+    <string name="constellation_scutum">Щит</string>
+    <string name="constellation_serpens">Змея</string>
+    <string name="constellation_sextans">Секстант</string>
+    <string name="constellation_vela">Паруса</string>
+    <string name="constellation_libra">Весы</string>
+
+    <!-- Other Southern / Equatorial Constellations (Descriptions) -->
+    <string name="constellation_aquarius_description">Водолей</string>
+    <string name="constellation_ara_description">Жертвенник</string>
+    <string name="constellation_canis_major_description">Большой Пёс</string>
+    <string name="constellation_capricornus_description">Козерог</string>
+    <string name="constellation_carina_description">Киль</string>
+    <string name="constellation_centaurus_description">Кентавр</string>
+    <string name="constellation_cetus_description">Кит</string>
+    <string name="constellation_columba_description">Голубь</string>
+    <string name="constellation_corona_australis_description">Южная Корона</string>
+    <string name="constellation_corvus_description">Ворон</string>
+    <string name="constellation_crater_description">Чаша</string>
+    <string name="constellation_crux_description">Южный Крест</string>
+    <string name="constellation_eridanus_description">Река Эридан</string>
+    <string name="constellation_hydra_description">Гидра</string>
+    <string name="constellation_lepus_description">Заяц</string>
+    <string name="constellation_lupus_description">Волк</string>
+    <string name="constellation_monoceros_description">Единорог</string>
+    <string name="constellation_ophiuchus_description">Змееносец</string>
+    <string name="constellation_piscis_austrinus_description">Южная Рыба</string>
+    <string name="constellation_puppis_description">Корма</string>
+    <string name="constellation_sagittarius_description">Стрелец</string>
+    <string name="constellation_scutum_description">Щит Собеского</string>
+    <string name="constellation_serpens_description">Змея</string>
+    <string name="constellation_sextans_description">Секстант</string>
+    <string name="constellation_vela_description">Паруса</string>
     <string name="constellation_libra_description">Весы</string>
 </resources>

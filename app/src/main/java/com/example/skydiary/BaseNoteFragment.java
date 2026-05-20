@@ -1,5 +1,7 @@
 package com.example.skydiary;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -7,13 +9,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +37,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -38,6 +45,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +61,8 @@ import java.util.Locale;
 import java.util.Set;
 
 public abstract class BaseNoteFragment extends Fragment {
+
+    private static final String TAG = "BaseNoteFragment";
 
     protected EditText editNoteName;
     protected EditText editNoteLocation;
@@ -70,7 +81,21 @@ public abstract class BaseNoteFragment extends Fragment {
 
     protected Uri currentCameraUri;
     protected File currentCameraFile;
-    private static final int LOCATION_PERMISSION_REQUEST = 2001;
+
+    private FusedLocationProviderClient fusedClient;
+    private Handler locationTimeoutHandler;
+    private android.location.LocationListener networkLocationListener;
+    private static final int LOCATION_TIMEOUT_MS = 30_000;
+    private static final long MAX_LOCATION_AGE_MS = 30 * 60_000;
+
+    private final ActivityResultLauncher<String> locationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    fetchCurrentLocation();
+                } else {
+                    Toast.makeText(requireContext(), R.string.location_permission_denied, Toast.LENGTH_SHORT).show();
+                }
+            });
 
     protected final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -145,9 +170,150 @@ public abstract class BaseNoteFragment extends Fragment {
         refreshAllTagsDisplay();
     }
 
-    /**
-     * Shows all tags from storage, with selected ones highlighted.
-     */
+    private void requestCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            return;
+        }
+
+        LocationManager lm = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+        if (lm == null) {
+            Toast.makeText(requireContext(), R.string.location_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            Toast.makeText(requireContext(), R.string.enable_gps, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        fetchCurrentLocation();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void fetchCurrentLocation() {
+        Toast.makeText(requireContext(), R.string.getting_location, Toast.LENGTH_SHORT).show();
+        if (fusedClient == null) {
+            fusedClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        }
+
+        stopLocationUpdates();
+
+        fusedClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), location -> {
+                    if (location != null) {
+                        onLocationReceived(location);
+                    } else {
+                        LocationManager lm = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+                        Location best = getBestLastKnownLocation(lm);
+                        if (best != null) {
+                            onLocationReceived(best);
+                        } else {
+                            tryFreshLocationRequest(lm);
+                        }
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), R.string.location_error, Toast.LENGTH_SHORT).show());
+    }
+
+    @SuppressLint("MissingPermission")
+    private Location getBestLastKnownLocation(LocationManager lm) {
+        if (lm == null) return null;
+        long now = System.currentTimeMillis();
+        Location gps = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location net = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        Location best = null;
+        if (gps != null && (now - gps.getTime()) <= MAX_LOCATION_AGE_MS) best = gps;
+        if (net != null && (now - net.getTime()) <= MAX_LOCATION_AGE_MS) {
+            if (best == null || net.getTime() > best.getTime()) best = net;
+        }
+        return best;
+    }
+
+    @SuppressLint("MissingPermission")
+    private void tryFreshLocationRequest(LocationManager lm) {
+        if (lm == null) {
+            Toast.makeText(requireContext(), R.string.location_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        boolean gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!networkEnabled && !gpsEnabled) {
+            Toast.makeText(requireContext(), R.string.enable_gps, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // If network is available, use it – fast.
+        if (networkEnabled) {
+            requestNetworkLocation(lm);
+            return;
+        }
+
+        // Only GPS available – may never work indoors.
+        // Show dialog with “Open Settings” or “Cancel”.
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.location_dialog_title)
+                .setMessage(R.string.location_dialog_message)
+                .setPositiveButton(R.string.location_open_settings, (dialog, which) -> {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(intent);
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                    editNoteLocation.setText(""); // clear field
+                })
+                .show();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void requestNetworkLocation(LocationManager lm) {
+        Log.d(TAG, "Requesting network location update");
+        networkLocationListener = new android.location.LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                Log.d(TAG, "Network location received");
+                stopLocationUpdates();
+                onLocationReceived(location);
+            }
+            @Override public void onProviderEnabled(@NonNull String provider) {}
+            @Override public void onProviderDisabled(@NonNull String provider) {}
+        };
+
+        locationTimeoutHandler = new Handler(Looper.getMainLooper());
+        locationTimeoutHandler.postDelayed(() -> {
+            Log.d(TAG, "Network location request timed out");
+            stopLocationUpdates();
+            if (editNoteLocation.getText().toString().trim().isEmpty()) {
+                Toast.makeText(requireContext(), R.string.location_timed_out, Toast.LENGTH_SHORT).show();
+            }
+        }, LOCATION_TIMEOUT_MS);
+
+        lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, networkLocationListener, Looper.getMainLooper());
+    }
+
+    private void onLocationReceived(Location location) {
+        stopLocationUpdates();
+        String coords = LocationHelper.formatCoordinates(location.getLatitude(), location.getLongitude());
+        editNoteLocation.setText(coords);
+        Toast.makeText(requireContext(), R.string.location_retrieved, Toast.LENGTH_SHORT).show();
+    }
+
+    private void stopLocationUpdates() {
+        if (networkLocationListener != null) {
+            LocationManager lm = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+            if (lm != null) lm.removeUpdates(networkLocationListener);
+            networkLocationListener = null;
+        }
+        if (locationTimeoutHandler != null) {
+            locationTimeoutHandler.removeCallbacksAndMessages(null);
+            locationTimeoutHandler = null;
+        }
+    }
+
     protected void refreshAllTagsDisplay() {
         if (tagsContainer == null) return;
         tagsContainer.removeAllViews();
@@ -611,71 +777,6 @@ public abstract class BaseNoteFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(requireContext(), getString(R.string.error_saving_image), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    protected void requestCurrentLocation() {
-        if (!LocationHelper.hasLocationPermission(requireContext())) {
-            LocationHelper.requestLocationPermission(requireActivity(), LOCATION_PERMISSION_REQUEST);
-            Toast.makeText(requireContext(), getString(R.string.location_permission_required), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!LocationHelper.isGpsEnabled(requireContext())) {
-            Toast.makeText(requireContext(), getString(R.string.enable_gps), Toast.LENGTH_LONG).show();
-            return;
-        }
-        getCurrentLocation();
-    }
-
-    protected void getCurrentLocation() {
-        Toast.makeText(requireContext(), getString(R.string.getting_location), Toast.LENGTH_SHORT).show();
-        try {
-            LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-            if (locationManager != null && LocationHelper.hasLocationPermission(requireContext())) {
-                android.location.LocationListener locationListener = new android.location.LocationListener() {
-                    @Override
-                    public void onLocationChanged(@NonNull Location location) {
-                        String formattedLocation = LocationHelper.formatCoordinates(location.getLatitude(), location.getLongitude());
-                        editNoteLocation.setText(formattedLocation);
-                        Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
-                        locationManager.removeUpdates(this);
-                    }
-                    @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-                    @Override public void onProviderEnabled(@NonNull String provider) {}
-                    @Override public void onProviderDisabled(@NonNull String provider) {}
-                };
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, null);
-                } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, null);
-                } else {
-                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (location == null) {
-                        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                    }
-                    if (location != null) {
-                        String formattedLocation = LocationHelper.formatCoordinates(location.getLatitude(), location.getLongitude());
-                        editNoteLocation.setText(formattedLocation);
-                        Toast.makeText(requireContext(), getString(R.string.location_retrieved), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(requireContext(), getString(R.string.location_error), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        } catch (SecurityException e) {
-            Toast.makeText(requireContext(), getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), getString(R.string.location_error), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == LOCATION_PERMISSION_REQUEST) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getCurrentLocation();
-            } else {
-                Toast.makeText(requireContext(), getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show();
-            }
         }
     }
 }

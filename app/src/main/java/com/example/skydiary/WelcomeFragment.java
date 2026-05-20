@@ -2,15 +2,15 @@ package com.example.skydiary;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 
@@ -19,9 +19,7 @@ public class WelcomeFragment extends Fragment {
     private static final String PREFS_NAME = "app_prefs";
     private static final String KEY_FIRST_LAUNCH = "first_launch";
 
-    public WelcomeFragment() {
-    }
-
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -36,15 +34,19 @@ public class WelcomeFragment extends Fragment {
         MaterialButton btnLogIn = view.findViewById(R.id.btn_log_in);
         TextView tvSkip = view.findViewById(R.id.tv_skip);
 
-        btnSignUp.setOnClickListener(v -> showSignUpFragment());
+        btnSignUp.setOnClickListener(v -> {
+            markFirstLaunchCompleted();
+            showSignUpFragment();
+        });
 
-        btnLogIn.setOnClickListener(v -> showLogInFragment());
+        btnLogIn.setOnClickListener(v -> {
+            markFirstLaunchCompleted();
+            showLogInFragment();
+        });
 
         tvSkip.setOnClickListener(v -> {
             markFirstLaunchCompleted();
-
             Log.d("WelcomeFragment", "Continuing offline with existing local data");
-
             showMainFragment();
         });
     }

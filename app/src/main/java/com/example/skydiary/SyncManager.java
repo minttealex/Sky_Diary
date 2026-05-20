@@ -1,6 +1,7 @@
 package com.example.skydiary;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class SyncManager {
+    private static final String TAG = "SyncManager";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
 
@@ -42,6 +44,25 @@ public class SyncManager {
         this.noteStorage = NoteStorage.getInstance(context);
     }
 
+    /**
+     * Forces a fresh Firebase ID token, then runs the given Runnable on the main thread.
+     * Call this once at the start of any public-facing sync operation.
+     */
+    public void waitForFreshToken(Runnable onReady) {
+        FirebaseAuth.getInstance().getCurrentUser()
+                .getIdToken(true)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Token refreshed successfully");
+                    } else {
+                        Log.w(TAG, "Token refresh failed, proceeding anyway");
+                    }
+                    onReady.run();
+                });
+    }
+
+    // ---------- Checks (no token refresh needed) ----------
+
     public void checkUserHasData(String uid, DataCheckCallback callback) {
         db.collection("notes").whereEqualTo("userId", uid).limit(1).get()
                 .addOnCompleteListener(task -> {
@@ -53,6 +74,21 @@ public class SyncManager {
                     }
                 });
     }
+
+    public void checkUserHasConstellations(String uid, DataCheckCallback callback) {
+        Log.d(TAG, "checkUserHasConstellations for uid: " + uid);
+        db.collection("userConstellations").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    Log.d(TAG, "checkUserHasConstellations: document exists? " + documentSnapshot.exists());
+                    callback.onResult(documentSnapshot.exists());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "checkUserHasConstellations failed", e);
+                    callback.onError(e.getMessage());
+                });
+    }
+
+    // ---------- Note sync ----------
 
     public void downloadAndReplace(SyncCallback callback) {
         String uid = getCurrentUid();
@@ -74,6 +110,9 @@ public class SyncManager {
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
 
+    /**
+     * Call this only after waitForFreshToken has already been invoked.
+     */
     public void uploadLocalNotes(String uid, SyncCallback callback) {
         List<Note> localNotes = noteStorage.getAllNotes();
         if (localNotes.isEmpty()) {
@@ -97,33 +136,142 @@ public class SyncManager {
         });
     }
 
-    public void syncAll(SyncCallback callback) {
-        String uid = getCurrentUid();
-        if (uid == null) {
-            callback.onError("Not logged in");
-            return;
+    // ---------- Constellation sync (no internal token refresh) ----------
+
+    /**
+     * Call this only after waitForFreshToken has already been invoked.
+     */
+    public void uploadConstellations(String uid, SyncCallback callback) {
+        ConstellationStorage storage = ConstellationStorage.getInstance(context);
+        List<Constellation> all = storage.getConstellations();
+
+        Map<String, Object> constellationMap = new HashMap<>();
+        for (Constellation c : all) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("seen", c.isSeen());
+            data.put("favorite", c.isFavorite());
+            data.put("updatedAt", new Date());
+            constellationMap.put(c.getKey(), data);
         }
 
-        uploadLocalNotes(uid, new SyncCallback() {
-            @Override
-            public void onSuccess(String message) {
-                downloadAndReplace(new SyncCallback() {
-                    @Override
-                    public void onSuccess(String msg) {
-                        callback.onSuccess("Sync complete");
-                    }
-                    @Override
-                    public void onError(String error) {
-                        callback.onError("Download failed: " + error);
-                    }
+        Map<String, Object> userConstData = new HashMap<>();
+        userConstData.put("constellations", constellationMap);
+
+        Log.d(TAG, "Uploading constellations for user: " + uid);
+        db.collection("userConstellations").document(uid)
+                .set(userConstData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Constellations uploaded successfully");
+                    callback.onSuccess("Constellations uploaded");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Constellations upload failed", e);
+                    callback.onError("Upload constellations failed: " + e.getMessage());
                 });
-            }
-            @Override
-            public void onError(String error) {
-                callback.onError("Upload failed: " + error);
-            }
+    }
+
+    /**
+     * Call this only after waitForFreshToken has already been invoked.
+     */
+    public void downloadConstellations(String uid, SyncCallback callback) {
+        db.collection("userConstellations").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Map<String, Object> data = documentSnapshot.getData();
+                        if (data != null && data.containsKey("constellations")) {
+                            Map<String, Map<String, Object>> constellationsMap = (Map<String, Map<String, Object>>) data.get("constellations");
+                            ConstellationStorage storage = ConstellationStorage.getInstance(context);
+                            List<Constellation> all = storage.getConstellations();
+                            for (Constellation c : all) {
+                                assert constellationsMap != null;
+                                Map<String, Object> remote = constellationsMap.get(c.getKey());
+                                if (remote != null) {
+                                    Boolean seen = (Boolean) remote.get("seen");
+                                    Boolean favorite = (Boolean) remote.get("favorite");
+                                    if (seen != null) c.setSeen(seen);
+                                    if (favorite != null) c.setFavorite(favorite);
+                                    storage.updateConstellation(c);
+                                }
+                            }
+                            callback.onSuccess("Constellations downloaded");
+                        } else {
+                            callback.onSuccess("No constellation data on server");
+                        }
+                    } else {
+                        callback.onSuccess("No constellation document");
+                    }
+                })
+                .addOnFailureListener(e -> callback.onError("Download constellations failed: " + e.getMessage()));
+    }
+
+    public void syncConstellationsOnly(String uid, SyncCallback callback) {
+        // Entry point – refresh token once
+        waitForFreshToken(() -> {
+            uploadConstellations(uid, new SyncCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    downloadConstellations(uid, callback);
+                }
+                @Override
+                public void onError(String error) {
+                    callback.onError("Constellation upload failed: " + error);
+                }
+            });
         });
     }
+
+    /**
+     * Full sync – refreshes token once at the beginning.
+     */
+    public void syncAll(SyncCallback callback) {
+        waitForFreshToken(() -> {
+            String uid = getCurrentUid();
+            if (uid == null) {
+                callback.onError("Not logged in");
+                return;
+            }
+
+            uploadLocalNotes(uid, new SyncCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    downloadAndReplace(new SyncCallback() {
+                        @Override
+                        public void onSuccess(String msg) {
+                            uploadConstellations(uid, new SyncCallback() {
+                                @Override
+                                public void onSuccess(String s) {
+                                    downloadConstellations(uid, new SyncCallback() {
+                                        @Override
+                                        public void onSuccess(String s2) {
+                                            callback.onSuccess("Sync complete");
+                                        }
+                                        @Override
+                                        public void onError(String error) {
+                                            callback.onError("Constellation download failed: " + error);
+                                        }
+                                    });
+                                }
+                                @Override
+                                public void onError(String error) {
+                                    callback.onError("Constellation upload failed: " + error);
+                                }
+                            });
+                        }
+                        @Override
+                        public void onError(String error) {
+                            callback.onError("Download failed: " + error);
+                        }
+                    });
+                }
+                @Override
+                public void onError(String error) {
+                    callback.onError("Upload failed: " + error);
+                }
+            });
+        });
+    }
+
+    // ---------- Data conversion helpers ----------
 
     private Map<String, Object> noteToMap(Note note, String uid) {
         Map<String, Object> map = new HashMap<>();

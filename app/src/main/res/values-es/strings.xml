@@ -17,7 +17,7 @@
     <string name="note_name">Nombre de la nota</string>
     <string name="date">Fecha</string>
     <string name="enter_note_name">Nombre de la nota (opcional)</string>
-    <string name="write_note">Escribe tu nota aquí</string>
+    <string name="write_note">Escriba su nota aquí</string>
     <string name="note_cannot_be_empty">La nota no puede estar vacía</string>
     <string name="note_saved">Nota guardada</string>
     <string name="note_from_format">Nota del %s</string>
@@ -25,6 +25,10 @@
     <string name="note_deleted">Nota eliminada</string>
     <string name="note_with_images">Nota con imágenes</string>
     <string name="search">Buscar notas…</string>
+    <string name="sort_newest_first">Más recientes primero</string>
+    <string name="sort_oldest_first">Más antiguas primero</string>
+    <string name="sort_alphabetical">Alfabético (A–Z)</string>
+    <string name="sort_notes">Ordenar notas</string>
 
     <!-- Pictures -->
     <string name="add_picture">Añadir imagen</string>
@@ -34,7 +38,7 @@
     <string name="choose_multiple_from_gallery">Elegir múltiples de la galería</string>
     <string name="select_picture">Seleccionar imagen</string>
     <string name="remove_image">Eliminar imagen</string>
-    <string name="remove_image_confirmation">¿Estás seguro de que quieres eliminar esta imagen?</string>
+    <string name="remove_image_confirmation">¿Está seguro de que quiere eliminar esta imagen?</string>
     <string name="image_added">Imagen añadida</string>
     <string name="image_removed">Imagen eliminada</string>
     <string name="image_reordered">Imagen reordenada</string>
@@ -48,7 +52,7 @@
     <string name="move_up">Mover arriba</string>
     <string name="move_down">Mover abajo</string>
     <string name="delete_picture">Eliminar imagen</string>
-    <string name="delete_picture_confirmation">¿Estás seguro de que quieres eliminar esta imagen?</string>
+    <string name="delete_picture_confirmation">¿Está seguro de que quiere eliminar esta imagen?</string>
     <string name="save_to_gallery">Guardar en galería</string>
     <string name="image_saved_to_gallery">Imagen guardada en galería</string>
     <string name="image_rotated">Imagen rotada %d°</string>
@@ -69,9 +73,13 @@
     <string name="getting_location">Obteniendo ubicación…</string>
     <string name="location_retrieved">Ubicación obtenida</string>
     <string name="location_error">Error obteniendo ubicación</string>
-    <string name="enable_gps">Por favor activa el GPS</string>
+    <string name="enable_gps">Por favor active el GPS</string>
     <string name="invalid_coordinates">Formato de coordenadas inválido</string>
     <string name="coordinates_format_hint">Formato: 40.7128, -74.0060 o nombre del lugar</string>
+    <string name="location_timed_out">No se pudo obtener la ubicación. Intenta moverte al exterior o escribe un nombre de lugar.</string>
+    <string name="location_dialog_title">Modo de ubicación</string>
+    <string name="location_dialog_message">Su dispositivo está en modo “Solo GPS”, que puede no funcionar en interiores.\n\nPara obtener ubicación rápida incluso dentro de edificios, vaya a Ajustes → Ubicación → Modo y seleccione “Alta precisión”.\n\nTambién puede escribir el nombre de un lugar manualmente.</string>
+    <string name="location_open_settings">Abrir ajustes</string>
 
     <!-- Tags -->
     <string name="add_tag">Añadir etiqueta</string>
@@ -82,7 +90,7 @@
     <string name="enter_new_tag">Ingresar nueva etiqueta</string>
     <string name="rename_tag">Renombrar etiqueta</string>
     <string name="delete_tag">Eliminar etiqueta</string>
-    <string name="delete_tag_confirmation">¿Estás seguro de eliminar esta etiqueta?</string>
+    <string name="delete_tag_confirmation">¿Está seguro de eliminar esta etiqueta?</string>
     <string name="tag_cannot_be_empty">El nombre de la etiqueta no puede estar vacío</string>
     <string name="tag_already_exists">La etiqueta ya existe</string>
     <string name="tags_updated_format">Etiquetas actualizadas: %d seleccionadas</string>
@@ -90,7 +98,7 @@
     <!-- Date and Time -->
     <string name="change_date">Cambiar fecha</string>
     <string name="date_changed">Fecha cambiada</string>
-    <string name="choose_date_to_see_notes">Elige una fecha para ver tus notas</string>
+    <string name="choose_date_to_see_notes">Elija una fecha para ver sus notas</string>
     <string name="no_notes_added_on_day">No hay notas en este día</string>
 
     <!-- Settings -->
@@ -105,20 +113,6 @@
     <string name="russian">Ruso</string>
     <string name="spanish">Español</string>
 
-    <!-- Constellations -->
-    <string name="constellations">Constelaciones</string>
-    <string name="search_constellations">Buscar constelaciones…</string>
-    <string name="favorites">Favoritos</string>
-    <string name="no_favorites">Sin constelaciones favoritas</string>
-    <string name="all_constellations">Todas las constelaciones</string>
-    <string name="constellation_name">Nombre de constelación</string>
-    <string name="constellation_image">Imagen de constelación</string>
-    <string name="toggle_favorite">Alternar favorito</string>
-    <string name="stars">estrellas</string>
-    <string name="star_count">0 estrellas</string>
-    <string name="star_count_format">%d estrellas</string>
-    <string name="Seen">Vistos</string>
-
     <!-- Image notes -->
     <string name="image_note_created_single">Nota con imagen creada</string>
     <string name="image_note_created_multiple">Nota creada con %d imágenes</string>
@@ -126,10 +120,10 @@
 
     <!-- Confirmation dialogs -->
     <string name="confirm_save">Confirmar guardado</string>
-    <string name="confirm_save_message">¿Estás seguro de guardar los cambios?</string>
+    <string name="confirm_save_message">¿Está seguro de guardar los cambios?</string>
     <string name="confirm_delete">Confirmar eliminación</string>
-    <string name="confirm_delete_message">¿Estás seguro de eliminar esta nota? No se puede deshacer.</string>
-    <string name="confirm_log_out">¿Estás seguro que quieres cerrar sesión?</string>
+    <string name="confirm_delete_message">¿Está seguro de eliminar esta nota? Esta acción no se puede deshacer.</string>
+    <string name="confirm_log_out">¿Está seguro que quiere cerrar sesión? Asegure que ha sincronizado los datos.</string>
 
     <!-- Shared Labels -->
     <string name="yes">Sí</string>
@@ -157,6 +151,7 @@
     <string name="logging_in">Iniciando Sesión…</string>
     <string name="skip_for_now">Omitir</string>
     <string name="username">Nombre de usuario</string>
+    <string name="username_or_email">Nombre de usuario o correo</string>
     <string name="email">Correo (opcional)</string>
     <string name="password">Contraseña</string>
     <string name="account">Cuenta</string>
@@ -165,68 +160,259 @@
     <string name="logged_out">Sesión cerrada</string>
     <string name="account_settings">Ajustes de cuenta</string>
     <string name="creating_account">Creando cuenta…</string>
-    <string name="forgot_password">¿Has olvidado tu contraseña?</string>
+    <string name="forgot_password">¿Ha olvidado su contraseña?</string>
     <string name="current_password">Contraseña actual</string>
     <string name="new_password_optional">Nueva contraseña (opcional)</string>
     <string name="delete_account">Eliminar cuenta</string>
     <string name="log_out">Cerrar sesión</string>
-    <string name="update_account">Actualiar cuenta</string>
+    <string name="update_account">Actualizar cuenta</string>
 
-    <!-- Constellation Names -->
-    <string name="constellation_orion">Orión</string>
-    <string name="constellation_ursa_major">Osa Mayor</string>
-    <string name="constellation_cassiopeia">Casiopea</string>
-    <string name="constellation_leo">Leo</string>
-    <string name="constellation_scorpius">Escorpio</string>
-    <string name="constellation_cygnus">Cisne</string>
-    <string name="constellation_lyra">Lira</string>
+    <!-- Translated account strings (formal) -->
+    <string name="no_email_warning_title">Sin correo electrónico</string>
+    <string name="no_email_warning_message">Está creando una cuenta sin correo electrónico. Sin un correo, no podrá restablecer su contraseña si la olvida. ¿Está seguro de que quiere continuar?</string>
+    <string name="yes_continue">Sí, continuar</string>
+    <string name="email_already_in_use">Este correo ya está en uso</string>
+    <string name="verification_email_sent">Correo de verificación enviado. Por favor verifique su correo antes de usarlo.</string>
+    <string name="password_reset_email_sent">Correo de restablecimiento de contraseña enviado. Revise su bandeja de entrada.</string>
+    <string name="delete_account_confirmation_message">¿Está seguro de que quiere eliminar su cuenta? Esta acción no se puede deshacer y todos sus datos serán eliminados permanentemente.</string>
+    <string name="account_deleted">Cuenta eliminada con éxito</string>
+    <string name="reauthenticate_required">Por favor, vuelva a autenticarse para eliminar su cuenta</string>
+    <string name="email_not_verified">Correo no verificado</string>
+    <string name="verify_email_prompt">Su dirección de correo no ha sido verificada. Por favor, revise su bandeja de entrada y verifíquela antes de iniciar sesión.</string>
+    <string name="resend_verification">Reenviar correo de verificación</string>
+    <string name="username_required">Se requiere nombre de usuario</string>
+    <string name="invalid_email">El correo ingresado no es válido</string>
+    <string name="email_update_failed">Error al actualizar el correo</string>
+    <string name="email_check_failed">Error al verificar el correo</string>
+    <string name="password_updated">Su contraseña ha sido actualizada</string>
+    <string name="password_update_failed">Error al actualizar la contraseña</string>
+    <string name="reauthentication_failed">Re-autenticación fallida</string>
+    <string name="profile_update_failed">Error al actualizar el perfil</string>
+    <string name="account_updated">Su cuenta ha sido actualizada</string>
+    <string name="account_updated_local">Su cuenta ha sido actualizada localmente</string>
+    <string name="account_deletion_failed">Error al eliminar la cuenta</string>
+    <string name="username_taken">El nombre de usuario ya está en uso</string>
+    <string name="username_save_failed">Error al guardar el nombre de usuario</string>
+    <string name="account_created">Cuenta creada</string>
+    <string name="account_created_sync_failed">Cuenta creada pero la sincronización falló</string>
+    <string name="password_required">Se requiere contraseña</string>
+    <string name="password_min_length">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="registration_failed">Registro fallido</string>
+    <string name="username_or_email_required">Se requiere nombre de usuario o correo</string>
+    <string name="invalid_username_or_password">Nombre de usuario o contraseña inválidos</string>
+    <string name="username_lookup_failed">Error al buscar el nombre de usuario</string>
+    <string name="enter_valid_email_for_reset">Ingrese un correo válido para restablecer</string>
+    <string name="password_reset_failed">Error al restablecer la contraseña</string>
+    <string name="login_successful">Inicio de sesión exitoso</string>
+    <string name="login_success_sync_failed">Inicio de sesión exitoso pero la sincronización falló</string>
+    <string name="login_success_sync_check_failed">Inicio de sesión exitoso pero la verificación de sincronización falló</string>
+    <string name="login_failed">Inicio de sesión fallido</string>
+    <string name="password_required_for_email_change">Se requiere la contraseña actual para cambiar el correo</string>
+    <string name="username_check_failed">Error al verificar disponibilidad del nombre de usuario</string>
+
+    <!-- Constellations (General) -->
+    <string name="constellations">Constelaciones</string>
+    <string name="search_constellations">Buscar constelaciones…</string>
+    <string name="favorites">Favoritos</string>
+    <string name="no_favorites">Sin constelaciones favoritas</string>
+    <string name="all_constellations">Todas las constelaciones</string>
+    <string name="constellation_name">Nombre de constelación</string>
+    <string name="constellation_image">Imagen de constelación</string>
+    <string name="toggle_favorite">Alternar favorito</string>
+    <string name="stars">estrellas</string>
+    <string name="star_count">0 estrellas</string>
+    <string name="star_count_format">%d estrellas</string>
+    <string name="Seen">Vistos</string>
+
+    <!-- Northern Constellations (Names) -->
     <string name="constellation_andromeda">Andrómeda</string>
-    <string name="constellation_ursa_minor">Osa Menor</string>
-    <string name="constellation_draco">Dragón</string>
-    <string name="constellation_cepheus">Cefeo</string>
-    <string name="constellation_perseus">Perseo</string>
+    <string name="constellation_aquila">Águila</string>
+    <string name="constellation_aries">Aries</string>
     <string name="constellation_auriga">Auriga</string>
     <string name="constellation_bootes">Boyero</string>
-    <string name="constellation_corona_borealis">Corona Boreal</string>
-    <string name="constellation_hercules">Hércules</string>
-    <string name="constellation_sagitta">Flecha</string>
-    <string name="constellation_aquila">Águila</string>
-    <string name="constellation_delphinus">Delfín</string>
-    <string name="constellation_pegasus">Pegaso</string>
-    <string name="constellation_pisces">Piscis</string>
-    <string name="constellation_aries">Aries</string>
-    <string name="constellation_taurus">Tauro</string>
-    <string name="constellation_gemini">Géminis</string>
+    <string name="constellation_camelopardalis">Camelopardalis</string>
     <string name="constellation_cancer">Cáncer</string>
+    <string name="constellation_canes_venatici">Canes Venatici</string>
+    <string name="constellation_canis_minor">Canis Minor</string>
+    <string name="constellation_cassiopeia">Casiopea</string>
+    <string name="constellation_cepheus">Cefeo</string>
+    <string name="constellation_coma_berenices">Coma Berenices</string>
+    <string name="constellation_corona_borealis">Corona Boreal</string>
+    <string name="constellation_cygnus">Cisne</string>
+    <string name="constellation_delphinus">Delfín</string>
+    <string name="constellation_draco">Dragón</string>
+    <string name="constellation_equuleus">Equuleus</string>
+    <string name="constellation_gemini">Géminis</string>
+    <string name="constellation_hercules">Hércules</string>
+    <string name="constellation_lacerta">Lacerta</string>
+    <string name="constellation_leo">Leo</string>
+    <string name="constellation_leo_minor">Leo Minor</string>
+    <string name="constellation_lynx">Lynx</string>
+    <string name="constellation_lyra">Lira</string>
+    <string name="constellation_orion">Orión</string>
+    <string name="constellation_pegasus">Pegaso</string>
+    <string name="constellation_perseus">Perseo</string>
+    <string name="constellation_pisces">Piscis</string>
+    <string name="constellation_sagitta">Flecha</string>
+    <string name="constellation_scorpius">Escorpio</string>
+    <string name="constellation_taurus">Tauro</string>
+    <string name="constellation_triangulum">Triangulum</string>
+    <string name="constellation_ursa_major">Osa Mayor</string>
+    <string name="constellation_ursa_minor">Osa Menor</string>
     <string name="constellation_virgo">Virgo</string>
-    <string name="constellation_libra">Libra</string>
+    <string name="constellation_vulpecula">Vulpecula</string>
 
-    <!-- Constellation Descriptions -->
-    <string name="constellation_orion_description">El Cazador</string>
-    <string name="constellation_ursa_major_description">La Osa Mayor</string>
-    <string name="constellation_cassiopeia_description">La Reina Sentada</string>
-    <string name="constellation_leo_description">El León</string>
-    <string name="constellation_scorpius_description">El Escorpión</string>
-    <string name="constellation_cygnus_description">El Cisne</string>
-    <string name="constellation_lyra_description">La Lira</string>
+    <!-- Northern Constellations (Descriptions) -->
     <string name="constellation_andromeda_description">La Doncella Encadenada</string>
-    <string name="constellation_ursa_minor_description">La Osa Menor</string>
-    <string name="constellation_draco_description">El Dragón</string>
-    <string name="constellation_cepheus_description">El Rey</string>
-    <string name="constellation_perseus_description">El Héroe</string>
+    <string name="constellation_aquila_description">El Águila</string>
+    <string name="constellation_aries_description">El Carnero</string>
     <string name="constellation_auriga_description">El Cochero</string>
     <string name="constellation_bootes_description">El Boyero</string>
-    <string name="constellation_corona_borealis_description">La Corona del Norte</string>
-    <string name="constellation_hercules_description">El Héroe</string>
-    <string name="constellation_sagitta_description">La Flecha</string>
-    <string name="constellation_aquila_description">El Águila</string>
-    <string name="constellation_delphinus_description">El Delfín</string>
-    <string name="constellation_pegasus_description">El Caballo Alado</string>
-    <string name="constellation_pisces_description">Los Peces</string>
-    <string name="constellation_aries_description">El Carnero</string>
-    <string name="constellation_taurus_description">El Toro</string>
-    <string name="constellation_gemini_description">Los Gemelos</string>
+    <string name="constellation_camelopardalis_description">La Jirafa</string>
     <string name="constellation_cancer_description">El Cangrejo</string>
+    <string name="constellation_canes_venatici_description">Los Perros de Caza</string>
+    <string name="constellation_canis_minor_description">El Perro Menor</string>
+    <string name="constellation_cassiopeia_description">La Reina Sentada</string>
+    <string name="constellation_cepheus_description">El Rey</string>
+    <string name="constellation_coma_berenices_description">La Cabellera de Berenice</string>
+    <string name="constellation_corona_borealis_description">La Corona del Norte</string>
+    <string name="constellation_cygnus_description">El Cisne</string>
+    <string name="constellation_delphinus_description">El Delfín</string>
+    <string name="constellation_draco_description">El Dragón</string>
+    <string name="constellation_equuleus_description">El Caballito</string>
+    <string name="constellation_gemini_description">Los Gemelos</string>
+    <string name="constellation_hercules_description">El Héroe</string>
+    <string name="constellation_lacerta_description">El Lagarto</string>
+    <string name="constellation_leo_description">El León</string>
+    <string name="constellation_leo_minor_description">El León Menor</string>
+    <string name="constellation_lynx_description">El Lince</string>
+    <string name="constellation_lyra_description">La Lira</string>
+    <string name="constellation_orion_description">El Cazador</string>
+    <string name="constellation_pegasus_description">El Caballo Alado</string>
+    <string name="constellation_perseus_description">El Héroe</string>
+    <string name="constellation_pisces_description">Los Peces</string>
+    <string name="constellation_sagitta_description">La Flecha</string>
+    <string name="constellation_scorpius_description">El Escorpión</string>
+    <string name="constellation_taurus_description">El Toro</string>
+    <string name="constellation_triangulum_description">El Triángulo</string>
+    <string name="constellation_ursa_major_description">La Osa Mayor</string>
+    <string name="constellation_ursa_minor_description">La Osa Menor</string>
     <string name="constellation_virgo_description">La Virgen</string>
+    <string name="constellation_vulpecula_description">La Zorra</string>
+
+    <!-- Southern Constellations (Names) - Keyser & de Houtman -->
+    <string name="constellation_apus">Apus</string>
+    <string name="constellation_chamaeleon">Chamaeleon</string>
+    <string name="constellation_dorado">Dorado</string>
+    <string name="constellation_grus">Grus</string>
+    <string name="constellation_hydrus">Hydrus</string>
+    <string name="constellation_indus">Indus</string>
+    <string name="constellation_musca">Musca</string>
+    <string name="constellation_pavo">Pavo</string>
+    <string name="constellation_phoenix">Phoenix</string>
+    <string name="constellation_triangulum_australe">Triangulum Australe</string>
+    <string name="constellation_tucana">Tucana</string>
+    <string name="constellation_volans">Volans</string>
+
+    <!-- Southern Constellations (Descriptions) -->
+    <string name="constellation_apus_description">Ave del Paraíso</string>
+    <string name="constellation_chamaeleon_description">Camaleón</string>
+    <string name="constellation_dorado_description">Pez Dorado</string>
+    <string name="constellation_grus_description">Grulla</string>
+    <string name="constellation_hydrus_description">Serpiente de Agua</string>
+    <string name="constellation_indus_description">Indio</string>
+    <string name="constellation_musca_description">Mosca</string>
+    <string name="constellation_pavo_description">Pavo Real</string>
+    <string name="constellation_phoenix_description">Fénix</string>
+    <string name="constellation_triangulum_australe_description">Triángulo Austral</string>
+    <string name="constellation_tucana_description">Tucán</string>
+    <string name="constellation_volans_description">Pez Volador</string>
+
+    <!-- Southern Constellations (Names) - Lacaille -->
+    <string name="constellation_antlia">Antlia</string>
+    <string name="constellation_caelum">Caelum</string>
+    <string name="constellation_circinus">Circinus</string>
+    <string name="constellation_fornax">Fornax</string>
+    <string name="constellation_horologium">Horologium</string>
+    <string name="constellation_mensa">Mensa</string>
+    <string name="constellation_microscopium">Microscopium</string>
+    <string name="constellation_norma">Norma</string>
+    <string name="constellation_octans">Octans</string>
+    <string name="constellation_pictor">Pictor</string>
+    <string name="constellation_pyxis">Pyxis</string>
+    <string name="constellation_reticulum">Reticulum</string>
+    <string name="constellation_sculptor">Sculptor</string>
+    <string name="constellation_telescopium">Telescopium</string>
+
+    <!-- Southern Constellations (Descriptions) - Lacaille -->
+    <string name="constellation_antlia_description">Bomba de Aire</string>
+    <string name="constellation_caelum_description">Cincel</string>
+    <string name="constellation_circinus_description">Compás</string>
+    <string name="constellation_fornax_description">Horno</string>
+    <string name="constellation_horologium_description">Reloj de Péndulo</string>
+    <string name="constellation_mensa_description">Mesa</string>
+    <string name="constellation_microscopium_description">Microscopio</string>
+    <string name="constellation_norma_description">Escuadra</string>
+    <string name="constellation_octans_description">Octante</string>
+    <string name="constellation_pictor_description">Caballete del Pintor</string>
+    <string name="constellation_pyxis_description">Brújula</string>
+    <string name="constellation_reticulum_description">Retículo</string>
+    <string name="constellation_sculptor_description">Escultor</string>
+    <string name="constellation_telescopium_description">Telescopio</string>
+
+    <!-- Other Southern / Equatorial Constellations (Names) -->
+    <string name="constellation_aquarius">Acuario</string>
+    <string name="constellation_ara">Ara</string>
+    <string name="constellation_canis_major">Canis Major</string>
+    <string name="constellation_capricornus">Capricornio</string>
+    <string name="constellation_carina">Carina</string>
+    <string name="constellation_centaurus">Centaurus</string>
+    <string name="constellation_cetus">Cetus</string>
+    <string name="constellation_columba">Columba</string>
+    <string name="constellation_corona_australis">Corona Austral</string>
+    <string name="constellation_corvus">Corvus</string>
+    <string name="constellation_crater">Crater</string>
+    <string name="constellation_crux">Crux</string>
+    <string name="constellation_eridanus">Eridanus</string>
+    <string name="constellation_hydra">Hydra</string>
+    <string name="constellation_lepus">Lepus</string>
+    <string name="constellation_lupus">Lupus</string>
+    <string name="constellation_monoceros">Monoceros</string>
+    <string name="constellation_ophiuchus">Ophiuchus</string>
+    <string name="constellation_piscis_austrinus">Piscis Austrinus</string>
+    <string name="constellation_puppis">Puppis</string>
+    <string name="constellation_sagittarius">Sagitario</string>
+    <string name="constellation_scutum">Scutum</string>
+    <string name="constellation_serpens">Serpens</string>
+    <string name="constellation_sextans">Sextans</string>
+    <string name="constellation_vela">Vela</string>
+    <string name="constellation_libra">Libra</string>
+
+    <!-- Other Southern / Equatorial Constellations (Descriptions) -->
+    <string name="constellation_aquarius_description">El Aguador</string>
+    <string name="constellation_ara_description">El Altar</string>
+    <string name="constellation_canis_major_description">El Perro Mayor</string>
+    <string name="constellation_capricornus_description">La Cabra Marina</string>
+    <string name="constellation_carina_description">La Quilla</string>
+    <string name="constellation_centaurus_description">El Centauro</string>
+    <string name="constellation_cetus_description">El Monstruo Marino</string>
+    <string name="constellation_columba_description">La Paloma</string>
+    <string name="constellation_corona_australis_description">La Corona Austral</string>
+    <string name="constellation_corvus_description">El Cuervo</string>
+    <string name="constellation_crater_description">La Copa</string>
+    <string name="constellation_crux_description">La Cruz del Sur</string>
+    <string name="constellation_eridanus_description">El Río</string>
+    <string name="constellation_hydra_description">La Hidra</string>
+    <string name="constellation_lepus_description">La Liebre</string>
+    <string name="constellation_lupus_description">El Lobo</string>
+    <string name="constellation_monoceros_description">El Unicornio</string>
+    <string name="constellation_ophiuchus_description">El Portador de la Serpiente</string>
+    <string name="constellation_piscis_austrinus_description">El Pez Austral</string>
+    <string name="constellation_puppis_description">La Popa</string>
+    <string name="constellation_sagittarius_description">El Arquero</string>
+    <string name="constellation_scutum_description">El Escudo</string>
+    <string name="constellation_serpens_description">La Serpiente</string>
+    <string name="constellation_sextans_description">El Sextante</string>
+    <string name="constellation_vela_description">Las Velas</string>
     <string name="constellation_libra_description">La Balanza</string>
 </resources>

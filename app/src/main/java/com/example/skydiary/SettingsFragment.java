@@ -1,5 +1,6 @@
 package com.example.skydiary;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,6 +34,7 @@ public class SettingsFragment extends Fragment {
 
     private FirebaseAuth auth;
     private ImageButton btnSync;
+    private MaterialButton buttonLanguageSelector;
 
     @Nullable
     @Override
@@ -77,15 +81,27 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupLanguageSection(View view) {
-        Button buttonEn = view.findViewById(R.id.button_language_en);
-        Button buttonRu = view.findViewById(R.id.button_language_ru);
-        Button buttonEs = view.findViewById(R.id.button_language_es);
+        buttonLanguageSelector = view.findViewById(R.id.button_language_selector);
+        updateLanguageButtonState();
 
-        updateLanguageButtonStates();
-
-        buttonEn.setOnClickListener(v -> changeLanguage("en"));
-        buttonRu.setOnClickListener(v -> changeLanguage("ru"));
-        buttonEs.setOnClickListener(v -> changeLanguage("es"));
+        buttonLanguageSelector.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(requireContext(), v);
+            popup.getMenu().add(0, 0, 0, "English");
+            popup.getMenu().add(0, 1, 1, "Русский");
+            popup.getMenu().add(0, 2, 2, "Español");
+            popup.setOnMenuItemClickListener(item -> {
+                String langCode;
+                switch (item.getItemId()) {
+                    case 0: langCode = "en"; break;
+                    case 1: langCode = "ru"; break;
+                    case 2: langCode = "es"; break;
+                    default: return false;
+                }
+                changeLanguage(langCode);
+                return true;
+            });
+            popup.show();
+        });
     }
 
     private void setupAccountSection(View view) {
@@ -141,22 +157,25 @@ public class SettingsFragment extends Fragment {
 
     private void performSync() {
         if (!isAdded()) return;
-        btnSync.setEnabled(false);
-        Toast.makeText(requireContext(), "Syncing...", Toast.LENGTH_SHORT).show();
+
+        ProgressDialog progress = new ProgressDialog(requireContext());
+        progress.setMessage("Syncing…");
+        progress.setCancelable(false);
+        progress.show();
 
         SyncManager syncManager = new SyncManager(requireContext());
         syncManager.syncAll(new SyncManager.SyncCallback() {
             @Override
             public void onSuccess(String message) {
                 if (!isAdded()) return;
-                btnSync.setEnabled(true);
+                progress.dismiss();
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(String error) {
                 if (!isAdded()) return;
-                btnSync.setEnabled(true);
+                progress.dismiss();
                 Toast.makeText(requireContext(), "Sync failed: " + error, Toast.LENGTH_SHORT).show();
             }
         });
@@ -225,22 +244,17 @@ public class SettingsFragment extends Fragment {
         requireActivity().getSharedPreferences(PREFS_NAME, 0).edit().putString(KEY_THEME, theme).apply();
     }
 
-    private void updateLanguageButtonStates() {
-        View view = getView();
-        if (view == null) return;
-        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, 0);
-        String currentLanguage = prefs.getString(KEY_LANGUAGE, "auto");
-        Button buttonEn = view.findViewById(R.id.button_language_en);
-        Button buttonRu = view.findViewById(R.id.button_language_ru);
-        Button buttonEs = view.findViewById(R.id.button_language_es);
-        buttonEn.setAlpha(0.7f);
-        buttonRu.setAlpha(0.7f);
-        buttonEs.setAlpha(0.7f);
-        switch (currentLanguage) {
-            case "en": buttonEn.setAlpha(1.0f); break;
-            case "ru": buttonRu.setAlpha(1.0f); break;
-            case "es": buttonEs.setAlpha(1.0f); break;
+    private void updateLanguageButtonState() {
+        if (!isAdded() || buttonLanguageSelector == null) return;
+        String currentLang = getSavedLanguage();
+        String displayName;
+        switch (currentLang) {
+            case "en": displayName = "English"; break;
+            case "ru": displayName = "Русский"; break;
+            case "es": displayName = "Español"; break;
+            default: displayName = "Language"; // system default or unknown
         }
+        buttonLanguageSelector.setText(displayName);
     }
 
     private void changeLanguage(String languageCode) {

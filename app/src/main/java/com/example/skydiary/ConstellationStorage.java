@@ -14,7 +14,7 @@ import java.util.List;
 public class ConstellationStorage {
     private static final String PREFS_NAME = "constellations_prefs";
     private static final String CONSTELLATIONS_KEY = "constellations";
-    private static final String MIGRATION_KEY = "migration_v12_done";
+    private static final String MIGRATION_KEY = "migration_v2_done";
 
     private static ConstellationStorage instance;
     private final SharedPreferences prefs;
@@ -54,33 +54,101 @@ public class ConstellationStorage {
     }
 
     private void initializeDefaultConstellations() {
-        constellations.add(new Constellation(ConstellationKeys.ORION, 7));
-        constellations.add(new Constellation(ConstellationKeys.URSA_MAJOR, 7));
-        constellations.add(new Constellation(ConstellationKeys.CASSIOPEIA, 5));
-        constellations.add(new Constellation(ConstellationKeys.LEO, 9));
-        constellations.add(new Constellation(ConstellationKeys.SCORPIUS, 18));
-        constellations.add(new Constellation(ConstellationKeys.CYGNUS, 9));
-        constellations.add(new Constellation(ConstellationKeys.LYRA, 5));
+        // Northern constellations (including zodiac)
         constellations.add(new Constellation(ConstellationKeys.ANDROMEDA, 16));
-        constellations.add(new Constellation(ConstellationKeys.URSA_MINOR, 7));
-        constellations.add(new Constellation(ConstellationKeys.DRACO, 14));
-        constellations.add(new Constellation(ConstellationKeys.CEPHEUS, 7));
-        constellations.add(new Constellation(ConstellationKeys.PERSEUS, 19));
+        constellations.add(new Constellation(ConstellationKeys.AQUILA, 10));
+        constellations.add(new Constellation(ConstellationKeys.ARIES, 6));
         constellations.add(new Constellation(ConstellationKeys.AURIGA, 8));
         constellations.add(new Constellation(ConstellationKeys.BOOTES, 13));
-        constellations.add(new Constellation(ConstellationKeys.CORONA_BOREALIS, 8));
-        constellations.add(new Constellation(ConstellationKeys.HERCULES, 23));
-        constellations.add(new Constellation(ConstellationKeys.SAGITTA, 4));
-        constellations.add(new Constellation(ConstellationKeys.AQUILA, 10));
-        constellations.add(new Constellation(ConstellationKeys.DELPHINUS, 5));
-        constellations.add(new Constellation(ConstellationKeys.PEGASUS, 17));
-        constellations.add(new Constellation(ConstellationKeys.PISCES, 18));
-        constellations.add(new Constellation(ConstellationKeys.ARIES, 6));
-        constellations.add(new Constellation(ConstellationKeys.TAURUS, 19));
-        constellations.add(new Constellation(ConstellationKeys.GEMINI, 8));
+        constellations.add(new Constellation(ConstellationKeys.CAMELOPARDALIS, 8));
         constellations.add(new Constellation(ConstellationKeys.CANCER, 5));
+        constellations.add(new Constellation(ConstellationKeys.CANES_VENATICI, 5));
+        constellations.add(new Constellation(ConstellationKeys.CANIS_MINOR, 2));
+        constellations.add(new Constellation(ConstellationKeys.CASSIOPEIA, 5));
+        constellations.add(new Constellation(ConstellationKeys.CEPHEUS, 7));
+        constellations.add(new Constellation(ConstellationKeys.COMA_BERENICES, 8));
+        constellations.add(new Constellation(ConstellationKeys.CORONA_BOREALIS, 8));
+        constellations.add(new Constellation(ConstellationKeys.CYGNUS, 9));
+        constellations.add(new Constellation(ConstellationKeys.DELPHINUS, 5));
+        constellations.add(new Constellation(ConstellationKeys.DRACO, 14));
+        constellations.add(new Constellation(ConstellationKeys.EQUULEUS, 4));
+        constellations.add(new Constellation(ConstellationKeys.GEMINI, 8));
+        constellations.add(new Constellation(ConstellationKeys.HERCULES, 23));
+        constellations.add(new Constellation(ConstellationKeys.LACERTA, 5));
+        constellations.add(new Constellation(ConstellationKeys.LEO, 9));
+        constellations.add(new Constellation(ConstellationKeys.LEO_MINOR, 4));
+        constellations.add(new Constellation(ConstellationKeys.LYNX, 6));
+        constellations.add(new Constellation(ConstellationKeys.LYRA, 5));
+        constellations.add(new Constellation(ConstellationKeys.ORION, 7));
+        constellations.add(new Constellation(ConstellationKeys.PEGASUS, 17));
+        constellations.add(new Constellation(ConstellationKeys.PERSEUS, 19));
+        constellations.add(new Constellation(ConstellationKeys.PISCES, 18));
+        constellations.add(new Constellation(ConstellationKeys.SAGITTA, 4));
+        constellations.add(new Constellation(ConstellationKeys.SCORPIUS, 18));
+        constellations.add(new Constellation(ConstellationKeys.TAURUS, 19));
+        constellations.add(new Constellation(ConstellationKeys.TRIANGULUM, 5));
+        constellations.add(new Constellation(ConstellationKeys.URSA_MAJOR, 7));
+        constellations.add(new Constellation(ConstellationKeys.URSA_MINOR, 7));
         constellations.add(new Constellation(ConstellationKeys.VIRGO, 15));
+        constellations.add(new Constellation(ConstellationKeys.VULPECULA, 6));
         constellations.add(new Constellation(ConstellationKeys.LIBRA, 8));
+
+        // Southern constellations (Keyser & de Houtman)
+        constellations.add(new Constellation(ConstellationKeys.APUS, 4));
+        constellations.add(new Constellation(ConstellationKeys.CHAMAELEON, 5));
+        constellations.add(new Constellation(ConstellationKeys.DORADO, 4));
+        constellations.add(new Constellation(ConstellationKeys.GRUS, 7));
+        constellations.add(new Constellation(ConstellationKeys.HYDRUS, 5));
+        constellations.add(new Constellation(ConstellationKeys.INDUS, 6));
+        constellations.add(new Constellation(ConstellationKeys.MUSCA, 4));
+        constellations.add(new Constellation(ConstellationKeys.PAVO, 7));
+        constellations.add(new Constellation(ConstellationKeys.PHOENIX, 8));
+        constellations.add(new Constellation(ConstellationKeys.TRIANGULUM_AUSTRALE, 5));
+        constellations.add(new Constellation(ConstellationKeys.TUCANA, 5));
+        constellations.add(new Constellation(ConstellationKeys.VOLANS, 4));
+
+        // Southern constellations (Lacaille)
+        constellations.add(new Constellation(ConstellationKeys.ANTLIA, 4));
+        constellations.add(new Constellation(ConstellationKeys.CAELUM, 4));
+        constellations.add(new Constellation(ConstellationKeys.CIRCINUS, 4));
+        constellations.add(new Constellation(ConstellationKeys.FORNAX, 5));
+        constellations.add(new Constellation(ConstellationKeys.HOROLOGIUM, 5));
+        constellations.add(new Constellation(ConstellationKeys.MENSA, 4));
+        constellations.add(new Constellation(ConstellationKeys.MICROSCOPIUM, 5));
+        constellations.add(new Constellation(ConstellationKeys.NORMA, 4));
+        constellations.add(new Constellation(ConstellationKeys.OCTANS, 6));
+        constellations.add(new Constellation(ConstellationKeys.PICTOR, 4));
+        constellations.add(new Constellation(ConstellationKeys.PYXIS, 5));
+        constellations.add(new Constellation(ConstellationKeys.RETICULUM, 4));
+        constellations.add(new Constellation(ConstellationKeys.SCULPTOR, 5));
+        constellations.add(new Constellation(ConstellationKeys.TELESCOPIUM, 5));
+
+        // Other southern / equatorial (remaining IAU constellations)
+        constellations.add(new Constellation(ConstellationKeys.AQUARIUS, 10));
+        constellations.add(new Constellation(ConstellationKeys.ARA, 7));
+        constellations.add(new Constellation(ConstellationKeys.CANIS_MAJOR, 8));
+        constellations.add(new Constellation(ConstellationKeys.CAPRICORNUS, 9));
+        constellations.add(new Constellation(ConstellationKeys.CARINA, 9));
+        constellations.add(new Constellation(ConstellationKeys.CENTAURUS, 11));
+        constellations.add(new Constellation(ConstellationKeys.CETUS, 15));
+        constellations.add(new Constellation(ConstellationKeys.COLUMBA, 5));
+        constellations.add(new Constellation(ConstellationKeys.CORONA_AUSTRALIS, 6));
+        constellations.add(new Constellation(ConstellationKeys.CORVUS, 4));
+        constellations.add(new Constellation(ConstellationKeys.CRATER, 4));
+        constellations.add(new Constellation(ConstellationKeys.CRUX, 4));
+        constellations.add(new Constellation(ConstellationKeys.ERIDANUS, 24));
+        constellations.add(new Constellation(ConstellationKeys.HYDRA, 17));
+        constellations.add(new Constellation(ConstellationKeys.LEPUS, 8));
+        constellations.add(new Constellation(ConstellationKeys.LUPUS, 9));
+        constellations.add(new Constellation(ConstellationKeys.MONOCEROS, 8));
+        constellations.add(new Constellation(ConstellationKeys.OPHIUCHUS, 10));
+        constellations.add(new Constellation(ConstellationKeys.PISCIS_AUSTRINUS, 7));
+        constellations.add(new Constellation(ConstellationKeys.PUPPIS, 9));
+        constellations.add(new Constellation(ConstellationKeys.SAGITTARIUS, 15));
+        constellations.add(new Constellation(ConstellationKeys.SCUTUM, 4));
+        constellations.add(new Constellation(ConstellationKeys.SERPENS, 11));
+        constellations.add(new Constellation(ConstellationKeys.SEXTANS, 4));
+        constellations.add(new Constellation(ConstellationKeys.VELA, 8));
 
         saveConstellations();
     }
@@ -146,6 +214,7 @@ public class ConstellationStorage {
     }
 
     public void forceRefreshConstellations() {
+        loadConstellations();
     }
 
     public void resetToDefault() {
